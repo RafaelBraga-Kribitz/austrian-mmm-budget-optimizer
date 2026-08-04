@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-04_mmm_model.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-04 — The MMM (raw PyMC): Math, Priors, Sampling, Diagnostics",
+  "summary": "Technical specification of the PyMC marketing mix model: math, transforms, scaling, priors, sampling settings, and diagnostics.",
+  "scope": ["MMM model builder", "adstock/Hill transforms", "scaling", "priors (PriorConfig/YAML)", "NUTS sampling", "posterior_io", "diagnostics", "prior elicitation"],
+  "cross_refs": ["SPEC-01", "SPEC-05", "AGENTS.md", "PROJECT_CHARTER.md", "src/ambo/model/", "src/ambo/validate/crosscheck.py", "config/priors_synthetic.yaml", "config/priors_real.yaml"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-01_ground_truth_simulator.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-01 - Ground-Truth Simulator (Layer P)",
+  "summary": "Defines the exact data-generating process, spend patterns, true media parameters, and output file contracts for the AlpenTrek synthetic ground-truth simulator.",
+  "scope": ["ground-truth simulator", "data-generating process", "adstock", "Hill saturation", "media channels", "scenario configs", "synthetic data outputs", "AlpenTrek GmbH"],
+  "cross_refs": ["AGENTS.md", "config/scenarios/<scenario>.yaml", "src/ambo/simulate/", "data/synthetic/<scenario>/"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

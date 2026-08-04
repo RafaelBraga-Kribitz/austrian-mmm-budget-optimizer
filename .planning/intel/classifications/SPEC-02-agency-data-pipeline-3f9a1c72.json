@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-02_agency_data_pipeline.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-02 — Agency Data Pipeline (Layer R): Permission, Anonymization, Intake",
+  "summary": "Technical spec for turning private agency exports into publishable anonymized weekly series via a two-stage intake and anonymization pipeline.",
+  "scope": ["agency data pipeline", "anonymization", "intake", "private drop", "canonical schema", "leak scan", "data permission", "src/ambo/intake"],
+  "cross_refs": ["docs/DATA_PERMISSION.md", "scripts/leak_scan.py", "PROJECT_CHARTER.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

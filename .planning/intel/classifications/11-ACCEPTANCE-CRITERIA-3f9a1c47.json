@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/11_ACCEPTANCE_CRITERIA.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "11 — ACCEPTANCE CRITERIA, DEFINITION OF READY, DEFINITION OF DONE",
+  "summary": "Defines global Definition of Ready/Done templates and objective verification criteria for deliverables DL-1..10 and milestone acceptance.",
+  "scope": ["Definition of Ready", "Definition of Done", "deliverable acceptance DL-1..10", "milestone acceptance", "validation gates", "CI coverage"],
+  "cross_refs": ["02_WBS.md", "03_MODULES.md", "10_VALIDATION_GATES.md", "09_ANTI_PATTERNS.md", "07_QUALITY_STANDARDS.md", "01_PHASES.md", "06_CHECKLISTS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Acceptance-criteria doc with verifiable thresholds, artifact paths, and gate tables — process/verification contracts the system must honor → SPEC over PRD. No user stories, no decision/consequences sections. PRD signal present (acceptance criteria) but content is objective verification contracts, not product requirements."
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/01_PHASES.md",
+  "type": "DOC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "01 — PHASES (Execution Roadmap)",
+  "summary": "Execution roadmap defining nine phases P0-P8 mapped to Charter milestones M0-M7, each with goals, entry/exit criteria, deliverables, gates, and rollback conditions.",
+  "scope": ["execution roadmap", "phases P0-P8", "Charter milestones M0-M7", "warehouse (DuckDB + dbt)", "ground-truth simulator", "MMM", "recovery suite", "agency intake", "Layer R", "decision layer", "reporting & release", "validation gates"],
+  "cross_refs": ["02_WBS.md", "10_VALIDATION_GATES.md", "06_CHECKLISTS.md", "PROJECT_CHARTER.md", "AGENTS.md", "docs/SPEC-01..09", "docs/BUILD_LOG.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Project-plan/roadmap document. No ADR signals (no Decision/Consequences, no status field), no user stories, no API/schema contracts. Exit criteria read as gating requirements, giving a weak PRD/SPEC signal, but dominant structure is sequencing and process guidance for a build plan -> DOC. References SPEC-01..09 and ADR IDs (AD-020, AD-030) as external authorities rather than defining them."
+}

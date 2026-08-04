@@ -1,0 +1,27 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/09_ANTI_PATTERNS.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "09 — ANTI-PATTERNS (forbidden implementations)",
+  "summary": "Enumerates forbidden implementation patterns (A-1..A-12) with their failure modes and the tests, gates, and review rules that enforce each.",
+  "scope": [
+    "simulator/model separation",
+    "magic numbers",
+    "hardcoded paths",
+    "notebooks",
+    "hidden state and RNG determinism",
+    "data leakage",
+    "silent failures",
+    "copy-paste logic / SSOT",
+    "spec drift",
+    "prior freeze",
+    "uncertainty reporting",
+    "caching of fit results",
+    "gate enforcement tests"
+  ],
+  "cross_refs": ["06_CHECKLISTS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "No frontmatter, no ADR Decision/Consequences, no user stories. Content is a normative constraint list binding implementation (enforcement tests, gate IDs, SSOT rules) rather than explanatory prose, so SPEC outranks DOC. Ambiguity with DOC noted; no API/schema tables present, hence medium confidence."
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-05_validation_recovery.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-05 — Validation & Recovery Testing",
+  "summary": "Validation and recovery-testing spec defining VR-xxx gates, holdout, sensitivity suite, baselines, and MCMC reproducibility requirements.",
+  "scope": ["recovery gates", "ROAS coverage", "response curves", "holdout validation", "sensitivity suite", "OLS baseline", "pymc-marketing cross-check", "MCMC reproducibility", "src/ambo/validate/"],
+  "cross_refs": ["PROJECT_CHARTER.md", "AGENTS.md", "SIM", "MD-070", "reports/recovery/RECOVERY_REPORT.md", "exports/roas_summary.csv", "exports/response_curves.csv"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

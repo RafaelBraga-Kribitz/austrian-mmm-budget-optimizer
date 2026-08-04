@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/05_IMPLEMENTATION_GUIDES.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "05 — IMPLEMENTATION GUIDES (deep dives)",
+  "summary": "Math- and pseudocode-level implementation contracts for simulator scenario generation, season windows, spend patterns, adstock/Hill transforms, and truth derivations.",
+  "scope": ["simulator", "scenario YAML", "season windows", "spend patterns", "adstock", "Hill transform", "truth derivations", "transforms.py", "ROAS", "response curves"],
+  "cross_refs": ["03_MODULES.md", "SPEC-01", "BUILD_LOG"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

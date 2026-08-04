@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/06_CHECKLISTS.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "06 — CHECKLISTS (per milestone)",
+  "summary": "Per-milestone acceptance checklists covering implementation, review, QA, scientific validation, docs, hygiene, and release gates.",
+  "scope": ["milestone checklists", "merge readiness", "CI jobs", "coverage thresholds", "simulator validation", "release gates"],
+  "cross_refs": ["07_QUALITY_STANDARDS.md", "09_ANTI_PATTERNS.md", "docs/BUILD_LOG.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Not an ADR (no Decision/Consequences) and not user-story PRD. Content is verifiable acceptance criteria / gating contracts (coverage >=80%, schema equality, determinism, tolerance 1e-6) that the system must honor -> SPEC. Could be argued DOC as process guide; SPEC chosen because items are enforceable constraints referencing SPEC-01/SPEC-08 and REQ IDs."
+}

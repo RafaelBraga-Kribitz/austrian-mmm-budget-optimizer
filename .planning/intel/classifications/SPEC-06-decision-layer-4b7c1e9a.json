@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-06_decision_layer.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-06 — Decision Layer: Budget Optimizer & Attribution Gap",
+  "summary": "Technical spec for the budget optimizer and attribution-gap modules, defining DC-xxx requirements, solver setup, outputs, and M6 exit gates.",
+  "scope": ["budget optimizer", "attribution gap", "src/ambo/decide/", "optimizer.py", "attribution_gap.py", "scenarios.py", "SLSQP solver", "allocation scenarios", "marginal ROAS ladder", "M6 gates"],
+  "cross_refs": ["MD-051", "MD-081", "SIM-060", "AGENTS.md", "PROJECT_CHARTER.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

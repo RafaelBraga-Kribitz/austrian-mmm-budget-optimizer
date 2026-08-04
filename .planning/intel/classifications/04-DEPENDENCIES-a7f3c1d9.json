@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/04_DEPENDENCIES.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "04 — DEPENDENCY GRAPHS, CRITICAL PATH, PARALLEL WORK",
+  "summary": "Module import graph, milestone graph, and task-level execution dependencies with guard-tested forbidden import edges for the ambo project.",
+  "scope": ["ambo/common", "ambo/simulate", "ambo/intake", "ambo/model", "ambo/validate", "ambo/decide", "ambo/report", "dbt warehouse", "milestones M0-M7", "task dependency graph"],
+  "cross_refs": [],
+  "notes": "Not an ADR/PRD. Contains enforceable architectural constraints (forbidden import edges, guard test T-010, AD-030 mart-only rule) — implementation contracts the system must honor → SPEC. Also carries plan/sequencing content that is DOC-like; ambiguity resolved toward higher-precedence SPEC.",
+  "locked": false,
+  "precedence": null
+}

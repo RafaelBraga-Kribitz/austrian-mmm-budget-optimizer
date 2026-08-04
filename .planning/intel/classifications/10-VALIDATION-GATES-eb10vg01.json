@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/10_VALIDATION_GATES.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "10 — VALIDATION GATES (consolidated catalog)",
+  "summary": "Consolidated catalog of all project validation gates grouped into nine gate classes, with triggers, runners, evidence artifacts, and failure protocols.",
+  "scope": ["validation gates", "CI jobs", "gate classes", "simulator gates", "warehouse/dbt gates", "sampler health", "recovery gates", "governance gates", "milestone exit criteria"],
+  "cross_refs": ["01_PHASES.md", "03_MODULES.md", "AGENTS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Not in an adr/prd/spec directory, but content is a normative contract catalog: numbered gate IDs (SIM-070..075, MD-070..074, AD-040..044, BP-G-xx), thresholds (R-hat < 1.01, cov >= 80%, tol 1e-6), runners and failure protocols. These are enforceable technical constraints -> SPEC over DOC. References ADRs for exceptions but contains no Decision/Consequences structure of its own."
+}

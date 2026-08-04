@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/08_PATTERNS.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "08 — DESIGN PATTERNS (where each belongs)",
+  "summary": "Prescribes which design patterns belong in which modules of the MMM pipeline, plus patterns deliberately excluded.",
+  "scope": ["design patterns", "functional core/imperative shell", "pure functions", "configuration objects", "repository", "factory", "strategy", "builder", "dependency injection", "pipeline", "registry", "atomic write", "retry", "caching", "composition over inheritance"],
+  "cross_refs": ["09_ANTI_PATTERNS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "No frontmatter, no ADR status/decision-consequences structure, no user stories. Normative implementation-contract table binding patterns to code locations and gate IDs (SIM-070, DC-703, EB-040, MD-002) → SPEC over DOC."
+}

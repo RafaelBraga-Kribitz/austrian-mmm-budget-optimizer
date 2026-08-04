@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-03_data_model.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-03 — Data Model (DuckDB + dbt) (AMBO)",
+  "summary": "DuckDB/dbt warehouse data model: staging and mart models, grain keys, dbt tests, and BI export contracts for AMBO.",
+  "scope": ["DuckDB warehouse", "dbt models", "staging models", "marts", "fct_mmm_input", "dim_layer", "fct_platform_reported", "dbt tests", "BI exports", "season_windows.csv"],
+  "cross_refs": ["SPEC-01", "SPEC-04", "SPEC-05", "SPEC-06", "AGENTS", "INTAKE_MANIFEST.yaml"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

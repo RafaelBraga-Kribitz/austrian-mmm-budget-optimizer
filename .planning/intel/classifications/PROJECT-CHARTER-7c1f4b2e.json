@@ -1,0 +1,37 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/PROJECT_CHARTER.md",
+  "type": "PRD",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "PROJECT CHARTER — Austrian MMM & Budget Optimizer (AMBO)",
+  "summary": "Project charter defining business problem, scope, deliverables with acceptance criteria, milestones, risks, and epistemic rules for an Austrian marketing-mix-model and budget optimizer.",
+  "scope": [
+    "Marketing Mix Modeling",
+    "budget optimizer",
+    "attribution-gap analysis",
+    "ground-truth simulator",
+    "agency data anonymization pipeline",
+    "DuckDB + dbt warehouse",
+    "Bayesian PyMC model",
+    "recovery validation suite",
+    "Power BI reporting"
+  ],
+  "cross_refs": [
+    "AGENTS.md",
+    "docs/SPEC-01_ground_truth_simulator.md",
+    "docs/SPEC-02_agency_data_pipeline.md",
+    "docs/SPEC-03_data_model.md",
+    "docs/SPEC-04_mmm_model.md",
+    "docs/SPEC-05_validation_recovery.md",
+    "docs/SPEC-06_decision_layer.md",
+    "docs/SPEC-07_reporting_dashboard.md",
+    "docs/SPEC-08_engineering.md",
+    "docs/SPEC-09_governance_quality.md",
+    "LIMITATIONS.md",
+    "docs/PRIOR_ELICITATION.md",
+    "reports/NUMERIC_SSOT.md"
+  ],
+  "locked": false,
+  "precedence": null,
+  "notes": "Charter format: goals, in/out-of-scope, deliverables with explicit acceptance criteria, milestones, risk register -> dominant PRD signals. Contains binding governance rules (E-1..E-5) and self-declares highest authority ('Charter beats specs; specs beat code; deviations require ADRs'), which is an ADR-like locking claim but not an ADR document (no Context/Decision/Consequences, no status: Accepted). Synthesizer may want to assign elevated precedence per the document's own authority statement."
+}

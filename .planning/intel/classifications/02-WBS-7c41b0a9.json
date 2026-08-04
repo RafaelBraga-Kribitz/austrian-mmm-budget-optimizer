@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/02_WBS.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "02 — WORK BREAKDOWN STRUCTURE",
+  "summary": "Work breakdown of 46 implementation tasks (T-001…T-806) with objectives, inputs, outputs, dependencies, validation commands and acceptance criteria.",
+  "scope": ["work breakdown structure", "task cards", "repository foundation", "Python project scaffold", "pyproject/uv dependency pinning", "repository skeleton", "acceptance criteria", "traceability (REQ IDs, DL deliverables)"],
+  "cross_refs": ["04_DEPENDENCIES.md", "11_ACCEPTANCE_CRITERIA.md", "13_TRACEABILITY_MATRIX.md", "03_MODULES.md", "05_IMPLEMENTATION_GUIDES.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "No frontmatter. Not an ADR (no Decision/Consequences, no status) and not a PRD (no user stories). Content is implementation-level contracts: exact file outputs, tool configs, validation commands, objective acceptance criteria per task -> classified SPEC. Ambiguity: could be read as an execution-plan DOC since it is task sequencing rather than a system contract; SPEC chosen per higher-precedence-signal rule."
+}

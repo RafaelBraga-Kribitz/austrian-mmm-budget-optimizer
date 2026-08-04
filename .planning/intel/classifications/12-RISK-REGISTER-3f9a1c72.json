@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/12_RISK_REGISTER.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "12 — RISK REGISTER (expanded per milestone)",
+  "summary": "Per-milestone risk register with likelihood/impact ratings plus mitigation, fallback, and detection mechanisms for the MMM build.",
+  "scope": ["risk register", "milestones M0-M7", "mitigations", "fallbacks", "detection gates", "CI enforcement", "MCMC determinism", "anonymization", "optimizer", "reporting"],
+  "cross_refs": ["01_PHASES.md", "PROJECT_CHARTER.md", "AGENTS.md", "03", "04", "00"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Not an ADR (no Status/Decision/Consequences) and not a PRD (no user stories/acceptance criteria). Structured tables of IDs with binding mitigation/detection controls tied to named gates and tests → treated as SPEC-level technical constraints rather than prose DOC. Ambiguity between SPEC and DOC resolved toward higher precedence per rule."
+}

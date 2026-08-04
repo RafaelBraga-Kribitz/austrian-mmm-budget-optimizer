@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-07_reporting_dashboard.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-07 — Reporting, Dashboard, README (AMBO)",
+  "summary": "Specifies reporting artifacts, five executive charts, chart data flow, Power BI dashboard pages, and executive summary structure for AMBO.",
+  "scope": ["executive charts", "Power BI dashboard", "reports/EXEC_SUMMARY.md", "NUMERIC_SSOT", "BI exports", "README/LIMITATIONS"],
+  "cross_refs": ["reports/EXEC_SUMMARY.md", "reports/recovery/RECOVERY_REPORT.md", "docs/PRIOR_ELICITATION.md", "reports/NUMERIC_SSOT.md", "scripts/generate_ssot.py", "scripts/export_marts.py", "dashboards/ambo.pbix", "dashboards/README.md", "SPEC-05", "SPEC-09", "allocation_scenarios.csv", "response_curves.csv", "roas_summary.csv", "captions.py"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

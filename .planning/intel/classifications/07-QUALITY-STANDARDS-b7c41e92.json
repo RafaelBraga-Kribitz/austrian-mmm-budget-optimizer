@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/07_QUALITY_STANDARDS.md",
+  "type": "SPEC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "07 — QUALITY STANDARDS & CODING STANDARDS",
+  "summary": "Measurable quality thresholds per deliverable class plus binding coding standards for naming, imports, config, logging, and error handling.",
+  "scope": ["test coverage", "cyclomatic complexity", "typing/mypy", "runtime budgets", "determinism", "sampler health", "PPC", "naming conventions", "folder ownership", "import rules", "configuration pattern", "logging pattern", "error handling", "leak safety"],
+  "cross_refs": ["10_VALIDATION_GATES.md", "03_MODULES.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "No frontmatter and no adr/spec path convention. Content is a table of non-functional requirements with named enforcement points plus binding implementation contracts -> SPEC over DOC. Mentions ADR requirement for new dependencies but records no decision itself."
+}

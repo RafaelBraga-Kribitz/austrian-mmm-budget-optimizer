@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-09_governance_quality.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-09 — Governance & Quality (AMBO, deliberately lightweight)",
+  "summary": "Governance and quality requirements (GB-xxx): epistemic tags, ADR process, NUMERIC_SSOT mechanism, CI gates, layer-order and prior-freeze enforcement, LIMITATIONS contents.",
+  "scope": ["governance", "epistemic tags", "ADR process", "NUMERIC_SSOT", "CI gates", "layer-order check", "prior freeze", "LIMITATIONS.md", "leak scan"],
+  "cross_refs": ["docs/ADR/ADR-NNN_short-title.md", "reports/NUMERIC_SSOT.md", "scripts/generate_ssot.py", "scripts/check_ssot_consistency.py", "scripts/check_layer_order.py", "ambo/report/captions.py", "config/priors_real.yaml", "docs/PRIOR_ELICITATION.md", "reports/recovery/RECOVERY_REPORT.md", "reports/model/diag_R.md", "SPEC-02", "PROJECT_CHARTER.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}

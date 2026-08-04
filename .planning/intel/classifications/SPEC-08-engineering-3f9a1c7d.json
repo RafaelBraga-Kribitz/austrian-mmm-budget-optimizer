@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/SPEC-08_engineering.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "SPEC-08 — Engineering, Tooling, CI (AMBO)",
+  "summary": "Engineering specification defining toolchain, repository layout, pinned dependencies, configuration/secrets rules, and Makefile interface for the AMBO project.",
+  "scope": ["Python 3.12 toolchain", "uv", "ruff", "mypy", "pre-commit", "repository layout", "dependency pinning", "configuration and secrets", "AMBO_PRIVATE_DROP", "Makefile", "CI", "leak scan"],
+  "cross_refs": ["SPEC-01", "PROJECT_CHARTER.md", "AGENTS.md", "LIMITATIONS.md", "docs/ADR/", "config/priors_synthetic.yaml", "config/priors_real.yaml", "scripts/leak_scan.py"],
+  "locked": false,
+  "precedence": null,
+  "notes": "Manifest declared SPEC; content signals (EB-xxx requirement IDs, exact layout, pinned dependency contracts, canonical Makefile targets) agree."
+}

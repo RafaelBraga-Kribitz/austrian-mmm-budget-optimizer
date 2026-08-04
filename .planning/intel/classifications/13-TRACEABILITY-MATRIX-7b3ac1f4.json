@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/13_TRACEABILITY_MATRIX.md",
+  "type": "DOC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "13 — TRACEABILITY MATRIX",
+  "summary": "Forward and reverse traceability tables mapping build tasks to REQ IDs, charter rules, and expected artifacts.",
+  "scope": ["traceability matrix", "task IDs", "REQ IDs", "charter rules", "AGENTS rules", "deliverable artifacts", "milestones"],
+  "cross_refs": ["09_ANTI_PATTERNS.md", "docs/BUILD_LOG.md", "docs/DATA_PERMISSION.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": "No decision/consequences sections, no user stories, no API/schema contracts. It is a cross-reference index over requirements defined elsewhere, so it carries no independent requirements — supporting documentation (DOC)."
+}

@@ -1,0 +1,29 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/00_MASTER_PLAN.md",
+  "type": "DOC",
+  "confidence": "medium",
+  "manifest_override": false,
+  "title": "00 — MASTER PLAN (Execution Blueprint, AMBO)",
+  "summary": "Execution blueprint master plan decomposing AMBO charter and SPEC requirements into phased work, execution protocol, and resolved ambiguity defaults.",
+  "scope": ["AMBO", "execution blueprint", "Bayesian MMM", "PyMC", "Layer P/R/D", "budget optimizer", "WBS", "governance CI", "agency data drop"],
+  "cross_refs": [
+    "PROJECT_CHARTER.md",
+    "AGENTS.md",
+    "docs/SPEC-01..09",
+    "docs/BUILD_LOG.md",
+    "02_WBS.md",
+    "03_MODULES.md",
+    "04_DEPENDENCIES.md",
+    "05_IMPLEMENTATION_GUIDES.md",
+    "06_CHECKLISTS.md",
+    "07_QUALITY_STANDARDS.md",
+    "08_PATTERNS.md",
+    "09_ANTI_PATTERNS.md",
+    "10_VALIDATION_GATES.md",
+    "11_ACCEPTANCE_CRITERIA.md",
+    "12_RISK_REGISTER.md"
+  ],
+  "locked": false,
+  "precedence": null,
+  "notes": "Competing signals: contains a BP-D decision table (ADR-like) and technical defaults (SPEC-like), but the document explicitly states it 'adds no new requirements', is subordinate to PROJECT_CHARTER.md and docs/SPEC-01..09, and its decisions are labeled proposals-with-defaults pending human override or a future ADR. Dominant structure is navigational/process guidance over a work breakdown -> DOC (context only). Not locked; no ADR status field."
+}

@@ -1,0 +1,13 @@
+{
+  "source_path": "c:/Users/Benutzer1/Documents/_DOING/PROJECTS/PORTFOLIO_PROJECTS/IDEAS_YET_NOT_PLANNED/austrian-mmm-budget-optimizer/docs/EXECUTION_BLUEPRINT/03_MODULES.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": false,
+  "title": "03 — MODULE CONTRACTS",
+  "summary": "Binding module, class, and function contracts for ambo packages: public APIs, invariants, failure modes, and testing requirements.",
+  "scope": ["ambo.common.config", "ambo.common.logging", "ambo.common.db", "ambo.simulate", "module contracts", "public API signatures", "DuckDB warehouse", "PyMC sampler settings"],
+  "cross_refs": ["07_QUALITY_STANDARDS.md", "09_ANTI_PATTERNS.md"],
+  "locked": false,
+  "precedence": null,
+  "notes": ""
+}
