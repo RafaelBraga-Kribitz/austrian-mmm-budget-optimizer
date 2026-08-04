@@ -120,19 +120,60 @@ def _decimals(value: str) -> int:
     return len(value.split(".", 1)[1]) if "." in value else 0
 
 
+def _normalize_unit(unit: str) -> str:
+    """Normalize a unit spelling to one canonical form: `x`/`×` both become `×`,
+    everything else is lowercased. Applied identically to the literal's unit and
+    the SSOT row's own unit (WR-01) -- normalizing only one side let a document
+    spelling a multiplier `×` and an SSOT table spelling it `x` (or vice versa)
+    fail to reconcile even though they agree."""
+    return "×" if unit in ("x", "×") else unit.lower()
+
+
+# A trailing comma followed by exactly one or two digits is never a valid
+# thousands-grouping comma under this parser's period-decimal, comma-thousands
+# convention -- a genuine thousands group always ends in exactly three digits
+# (`1,234`). That shape is always a decimal comma instead: either a bare one
+# (`234,56`) or the trailing decimal half of an Austrian period-thousands/
+# comma-decimal literal (`1.234,56`). WR-02: reject it explicitly rather than
+# let `float(value.replace(",", ""))` either raise `ValueError` (silently
+# treated as "no match", the `1.234,56` case -- multiple `.` after stripping the
+# comma) or -- worse -- silently succeed at the wrong magnitude (the `234,56`
+# case -- comma-stripping alone yields `23456`).
+_AMBIGUOUS_DECIMAL_COMMA_RE = re.compile(r",\d{1,2}$")
+
+
+def _reject_if_ambiguous_decimal_comma(value: str) -> None:
+    """Raise `SsotError` if `value` has the shape of a decimal comma (see module-
+    level regex comment) -- this parser's canonical numeric-literal format is
+    period-decimal, and an ambiguous literal is a real error, not a silent
+    non-match."""
+    if _AMBIGUOUS_DECIMAL_COMMA_RE.search(value):
+        raise SsotError(
+            f"{value!r}: ends in a comma followed by one or two digits, which is "
+            "never a valid thousands-grouping comma (a thousands group is always "
+            "exactly three digits) and is always the shape of a decimal comma -- "
+            "this parser's canonical numeric-literal format is period-decimal "
+            "(e.g. '1234.56' or '1,234.56'), not comma-decimal; rewrite the "
+            "literal (or the SSOT row) to match, or document it in "
+            "config/ssot_whitelist.yaml"
+        )
+
+
 def _matches_any_row(value: str, unit: str, rows: dict[str, dict[str, str]]) -> bool:
     """True if `value` (with adjacent `unit`) equals some SSOT row's own value,
     rounded to that row's own printed decimal precision (round-half-even, GB-303),
     and the row's unit is compatible with the literal's unit."""
+    _reject_if_ambiguous_decimal_comma(value)
     try:
         parsed = float(value.replace(",", ""))
     except ValueError:
         return False
-    unit_norm = "×" if unit in ("x", "×") else unit.lower()
+    unit_norm = _normalize_unit(unit)
     for row in rows.values():
-        row_unit = row["unit"].lower()
+        row_unit = _normalize_unit(row["unit"])
         if unit_norm not in row_unit and row_unit not in unit_norm:
             continue
+        _reject_if_ambiguous_decimal_comma(row["value"])
         try:
             row_value = float(row["value"].replace(",", ""))
         except ValueError:

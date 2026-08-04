@@ -231,3 +231,97 @@ def test_ssot_malformed_table_missing_column_exits_non_zero(
 
     assert exit_code == 1
     assert captured.err  # an error was printed, not silence
+
+
+# ---------------------------------------------------------------------------
+# check_ssot_consistency.py -- _matches_any_row unit-normalization symmetry
+# (WR-01) and ambiguous decimal-comma rejection (WR-02)
+# ---------------------------------------------------------------------------
+
+
+def test_matches_any_row_reconciles_multiplier_symbol_across_x_and_times() -> None:
+    """WR-01: a literal spelled `×` must still reconcile against an SSOT row
+    spelled `x` (and vice versa) -- normalizing only the literal's unit and never
+    the row's meant a value that should reconcile was reported as unmatched."""
+    rows = {
+        "k": {
+            "key": "k",
+            "value": "8",
+            "unit": "x",
+            "tag": "T",
+            "produced_by": "p",
+            "updated_at": "d",
+        }
+    }
+
+    assert check_ssot_consistency._matches_any_row("8", "×", rows) is True
+
+
+def test_matches_any_row_reconciles_multiplier_symbol_the_other_direction() -> None:
+    rows = {
+        "k": {
+            "key": "k",
+            "value": "8",
+            "unit": "×",
+            "tag": "T",
+            "produced_by": "p",
+            "updated_at": "d",
+        }
+    }
+
+    assert check_ssot_consistency._matches_any_row("8", "x", rows) is True
+
+
+def test_matches_any_row_rejects_a_bare_decimal_comma_literal() -> None:
+    """WR-02: `234,56` comma-stripped is `23456` -- a silent wrong-magnitude
+    misparse, not a raised error, under the old code. It must now be rejected
+    explicitly."""
+    rows: dict[str, dict[str, str]] = {}
+
+    with pytest.raises(check_ssot_consistency.SsotError, match="decimal comma"):
+        check_ssot_consistency._matches_any_row("234,56", "%", rows)
+
+
+def test_matches_any_row_rejects_an_austrian_formatted_literal() -> None:
+    """WR-02: `1.234,56` comma-stripped is `1.234.56` -- `float()` raises
+    `ValueError`, which the old code silently treated as "no match". It must now
+    be rejected explicitly instead."""
+    rows: dict[str, dict[str, str]] = {}
+
+    with pytest.raises(check_ssot_consistency.SsotError, match="decimal comma"):
+        check_ssot_consistency._matches_any_row("1.234,56", "%", rows)
+
+
+def test_matches_any_row_rejects_an_austrian_formatted_ssot_row_value() -> None:
+    """WR-02 applies symmetrically to the SSOT row's own value, not just the
+    document literal -- an Austrian-formatted row value is just as ambiguous."""
+    rows = {
+        "k": {
+            "key": "k",
+            "value": "1.234,56",
+            "unit": "%",
+            "tag": "T",
+            "produced_by": "p",
+            "updated_at": "d",
+        }
+    }
+
+    with pytest.raises(check_ssot_consistency.SsotError, match="decimal comma"):
+        check_ssot_consistency._matches_any_row("1234.56", "%", rows)
+
+
+def test_matches_any_row_accepts_well_formed_thousands_comma() -> None:
+    """A genuine thousands-grouping comma (always followed by exactly three
+    digits) is not ambiguous and must still reconcile as before."""
+    rows = {
+        "k": {
+            "key": "k",
+            "value": "1,234.56",
+            "unit": "%",
+            "tag": "T",
+            "produced_by": "p",
+            "updated_at": "d",
+        }
+    }
+
+    assert check_ssot_consistency._matches_any_row("1,234.56", "%", rows) is True
