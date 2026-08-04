@@ -1,0 +1,75 @@
+[project]
+name = "ambo"
+version = "0.1.0"
+description = "Austrian MMM & Budget Optimizer"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pandas>=2.2,<3",
+    "numpy>=1.26,<3",
+    "pymc>=5.15,<6",
+    "arviz>=0.18",
+    "pymc-marketing>=0.8",
+    "scipy>=1.13",
+    "duckdb>=1.0",
+    "dbt-core>=1.8,<2",
+    "dbt-duckdb>=1.8,<2",
+    "holidays>=0.50",
+    "matplotlib>=3.8",
+    "pydantic>=2.7",
+    "PyYAML>=6",
+    "python-dotenv>=1",
+]
+# pytensor is intentionally not pinned here — pymc controls its version (SPEC-08 §3).
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "nbstripout",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ambo"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.format]
+
+[tool.mypy]
+strict = true
+files = ["src/ambo"]
+
+# ignore_missing_imports is scoped to the untyped third-party packages named in
+# 02_WBS.md T-002, not applied globally — the rest of src/ambo stays fully strict.
+[[tool.mypy.overrides]]
+module = ["pymc.*", "arviz.*", "pytensor.*", "pymc_marketing.*", "duckdb.*", "holidays.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --cov=src/ambo --cov-report=term-missing"
+# --cov-fail-under=80 is intentionally commented out per D-15
+# (.planning/phases/01-repository-foundation/01-CONTEXT.md): the coverage gate is present
+# but non-blocking in Phase 1. It flips from non-blocking to blocking at M0 exit, once
+# common/config.py and common/logging.py (T-004/T-005 — the only modules in the
+# --cov=src/ambo scope right now) have their own test suites. Uncomment the line below
+# into addopts at that point; do not change the threshold value.
+# --cov-fail-under=80
+testpaths = ["tests"]
+markers = [
+    "smoke: CI-only smoke-fit test (short sampling run); skipped locally unless SMOKE=1",
+    "fit: full-budget sampling test; never run in CI, only via explicit make targets",
+]
+
+[tool.coverage.report]
+fail_under = 80
