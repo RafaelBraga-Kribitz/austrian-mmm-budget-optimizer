@@ -117,7 +117,7 @@ The summaries below are abridged; the intel file wins on any difference.
       Bayesian MMM, validation, decision layer, reporting, engineering + light governance),
       each tracing to its owning SPEC and to at least one WBS task. *(§2.1)*
 
-- [ ] **REQ-scope-out**: O-1…O-8 excluded. Forbidden-deps test enforces O-3 at dependency
+- [x] **REQ-scope-out**: O-1…O-8 excluded. Forbidden-deps test enforces O-3 at dependency
       level; single CI workflow with no cron enforces O-7; scope walls otherwise. *(§2.2)*
 
 - [ ] **REQ-grain-and-windows**: ISO weeks (Mon–Sun, Europe/Vienna) everywhere. Layer P per
@@ -192,7 +192,7 @@ This mapping is the roadmap-level view; the task-level view lives in
 | REQ-e4-numeric-ssot | Phase 5 | Phases 7, 9 | Pending |
 | REQ-e5-anonymized-euro-caption | Phase 9 | Phase 8 (DC-302 caption) | Pending |
 | REQ-scope-in | Phase 1 | standing | Pending |
-| REQ-scope-out | Phase 1 | standing | Pending |
+| REQ-scope-out | Phase 1 | standing | Complete |
 | REQ-grain-and-windows | Phase 6 | Phases 2, 3 (Layer P grain) | Pending |
 | REQ-milestones | Phase 1 | standing (all phases) | Complete |
 | REQ-degradation-path | Phase 6 | Phase 9 (alternate framing) | Pending |

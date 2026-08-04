@@ -63,7 +63,7 @@ SPEC-08 §2 *repository* layout (a file tree), not a UI layout.
   4. `dbt/seeds/season_windows.csv` is committed with passing unit tests, so the simulator and dbt read one calendar (AD-020).
   5. The two architectural guard tests exist and fail loudly when violated: forbidden dependencies (robyn, lightweight_mmm, prophet, sklearn) and simulate↔model import independence.
 
-**Plans**: 1/9 plans executed
+**Plans**: 2/9 plans executed
 Plans:
 **Wave 1**
 
@@ -71,7 +71,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
+- [x] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
 - [ ] 01-03-PLAN.md — `MODULE_CONTRACTS.md`, `RISK_REGISTER.md`, ADR-006, PR template (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -398,7 +398,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Repository Foundation | M0 | 1/9 | In Progress|  |
+| 1. Repository Foundation | M0 | 2/9 | In Progress|  |
 | 2. Ground-Truth Simulator | M1 | 0/TBD | Not started | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: repository-foundation
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-08-04T18:21:44.708Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-08-04T18:35:56.321Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 01 (repository-foundation) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [█░░░░░░░░░] 11%
+Progress: [██░░░░░░░░] 22%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [█░░░░░░░░░] 11%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 20min | 3 tasks | 4 files |
+| Phase 01 P02 | 8min | 3 tasks | 30 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [2026-08-04, ADR-000 D-1]: Precedence is scoped, not ranked — Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. The Charter's own passages were corrected where they restated SPEC values wrongly.
 - [Phase ?]: 01-01: Audited T-001/T-003/T-012 against running probes rather than trusting the D-29 known-state table; all verdicts confirmed, with the exports/foo.csv untracked-not-ignored result clarified as correct per W5
 - [Phase ?]: 01-01: git add --renormalize . implies -u; left .planning/STATE.md's pre-existing out-of-scope content edit out of the .gitattributes commit
+- [Phase ?]: Charter O-3 is import-scoped, not tree-scoped: scikit-learn transitive via pymc-marketing does not violate O-3 (binding, from human checkpoint approval on 01-02)
+- [Phase ?]: 134-package uv.lock count accepted as correct — RESEARCH.md's 112 baseline omitted the dev dependency group
 
 ### Pending Todos
 
@@ -125,8 +128,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:21:44.698Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-08-04T18:35:56.304Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
