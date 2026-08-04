@@ -49,6 +49,8 @@ governance mechanisms all exist and are enforced before a single line of science
 **Milestone**: M0
 **Effort budget**: 0.5 d (>2× ⇒ stop + ADR)
 **Drop-blocked**: No
+**UI hint**: no — this phase ships no frontend surface. The word "layout" below refers to the
+SPEC-08 §2 *repository* layout (a file tree), not a UI layout.
 **Depends on**: Nothing (first phase)
 **Requirements**: REQ-dl8-quality, REQ-scope-in, REQ-scope-out, REQ-milestones, REQ-risk-register
 **Success Criteria** (what must be TRUE):
@@ -57,7 +59,17 @@ governance mechanisms all exist and are enforced before a single line of science
   3. Git history begins with a documentation-only baseline commit (charter + specs + blueprint, zero code) that every later commit descends from.
   4. `dbt/seeds/season_windows.csv` is committed with passing unit tests, so the simulator and dbt read one calendar (AD-020).
   5. The two architectural guard tests exist and fail loudly when violated: forbidden dependencies (robyn, lightweight_mmm, prophet, sklearn) and simulate↔model import independence.
-**Plans**: TBD
+**Plans**: 9 plans across 5 waves
+Plans:
+- [ ] 01-01-PLAN.md — D-29 audit, `.gitattributes` LF pin, `m0-bootstrap` branch, ADR template + index (wave 1)
+- [ ] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
+- [ ] 01-03-PLAN.md — `MODULE_CONTRACTS.md`, `RISK_REGISTER.md`, ADR-006, PR template (wave 2)
+- [ ] 01-04-PLAN.md — `config/settings.yaml` whole, `common/config.py`, `common/logging.py` + tests (wave 3)
+- [ ] 01-05-PLAN.md — the 18-target Makefile with loud stubs, scaffold README (wave 3)
+- [ ] 01-06-PLAN.md — season-windows generator, committed seed, rule tests (wave 3)
+- [ ] 01-07-PLAN.md — test scaffold + the four architectural guards, line-ending and ignore tests (wave 4)
+- [ ] 01-08-PLAN.md — `leak_scan.py` three modes + tests, seven pinned pre-commit hooks (wave 4)
+- [ ] 01-09-PLAN.md — the two vacuously-correct governance checks, six-job `ci.yml`, M0 close (wave 5)
 **WBS tasks**: T-001…T-012
 **Quality gates**: G-ENG, G-GOV (subset)
 **Rollback**: None meaningful — no downstream consumers. If toolchain choices fail on Windows, fix inside this phase; do not defer.
