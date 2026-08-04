@@ -9,6 +9,7 @@ import re
 import sys
 import uuid
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 
@@ -69,6 +70,61 @@ def test_redaction_in_args(
     captured = capsys.readouterr()
     assert REDACTION_TOKEN in captured.err
     assert FAKE_PRIVATE_DROP.lower() not in captured.err.lower()
+
+
+def test_redaction_in_exception_traceback(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """CR-02: `logger.exception(...)`'s rendered traceback naturally embeds a
+    `FileNotFoundError`/`PermissionError` message raised while touching a file
+    under the private drop -- that text must be redacted too, not just
+    `record.msg`/`record.args`."""
+    monkeypatch.setenv("AMBO_PRIVATE_DROP", FAKE_PRIVATE_DROP)
+    load_settings.cache_clear()
+
+    logger = get_logger(_unique_logger_name())
+    try:
+        raise OSError(f"could not open {FAKE_PRIVATE_DROP}/staged/file.csv")
+    except OSError:
+        logger.exception("failed while reading the staged file")
+
+    captured = capsys.readouterr()
+    assert REDACTION_TOKEN in captured.err
+    assert FAKE_PRIVATE_DROP.lower() not in captured.err.lower()
+
+
+def test_redaction_of_non_str_msg(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """CR-02: a `Path` (or any non-`str`) passed directly as `msg` bypasses the
+    old `isinstance(value, str)` guard entirely -- it must be stringified and
+    redacted, not returned unchanged."""
+    monkeypatch.setenv("AMBO_PRIVATE_DROP", FAKE_PRIVATE_DROP)
+    load_settings.cache_clear()
+
+    logger = get_logger(_unique_logger_name())
+    logger.warning(Path(f"{FAKE_PRIVATE_DROP}/staged/file.csv"))
+
+    captured = capsys.readouterr()
+    assert REDACTION_TOKEN in captured.err
+    assert FAKE_PRIVATE_DROP.lower() not in captured.err.lower()
+
+
+def test_non_str_arg_without_the_private_path_is_not_corrupted(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A non-`str` arg that never embeds the private path (e.g. a plain int used
+    with a `%d` conversion) must still format correctly -- the CR-02 fallback to
+    `str(value)` must not corrupt unrelated non-str args."""
+    monkeypatch.setenv("AMBO_PRIVATE_DROP", FAKE_PRIVATE_DROP)
+    load_settings.cache_clear()
+
+    logger = get_logger(_unique_logger_name())
+    logger.warning("processed %d row(s)", 5)
+
+    captured = capsys.readouterr()
+    assert "processed 5 row(s)" in captured.err
+    assert REDACTION_TOKEN not in captured.err
 
 
 def test_filter_is_noop_when_unset(

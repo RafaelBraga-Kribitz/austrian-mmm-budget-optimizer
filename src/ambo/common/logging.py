@@ -59,8 +59,15 @@ class PrivatePathFilter(logging.Filter):
     `private_drop` is `None` the filter is a pass-through no-op. When it is set, every
     occurrence of the resolved path is replaced by `<PRIVATE_DROP>` in `record.msg`
     and every element of `record.args`, matched case-insensitively and with both
-    Windows and POSIX separator forms normalized. This is redact-and-emit, not
-    drop-and-raise: the record is still emitted, with the path removed.
+    Windows and POSIX separator forms normalized -- including when `msg` or an arg is
+    not itself a `str` (e.g. a `Path` or an exception instance passed directly),
+    which is stringified before matching (CR-02 fix-forward, 01-10). The rendered
+    exception traceback (`record.exc_text`/`record.exc_info`) is redacted too and
+    cached onto `record.exc_text`, so `logger.exception(...)` -- whose traceback
+    naturally embeds the real path when the exception itself was raised while
+    touching a file under the drop -- cannot bypass this filter either. This is
+    redact-and-emit, not drop-and-raise: the record is still emitted, with the path
+    removed.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
@@ -72,11 +79,15 @@ class PrivatePathFilter(logging.Filter):
         needles = {raw, raw.replace("\\", "/"), raw.replace("/", "\\")}
 
         def _redact(value: object) -> object:
-            if not isinstance(value, str):
-                return value
-            redacted = value
+            text = value if isinstance(value, str) else str(value)
+            redacted = text
             for needle in needles:
                 redacted = _redact_case_insensitive(redacted, needle, REDACTION_TOKEN)
+            if redacted == text:
+                # No needle matched -- return the original value unchanged, so a
+                # non-str arg used with a non-%s conversion (e.g. %d on an int)
+                # still formats correctly downstream.
+                return value
             return redacted
 
         record.msg = _redact(record.msg)
@@ -85,6 +96,13 @@ class PrivatePathFilter(logging.Filter):
                 record.args = {key: _redact(val) for key, val in record.args.items()}
             else:
                 record.args = tuple(_redact(arg) for arg in record.args)
+
+        if record.exc_info:
+            exc_text = record.exc_text or logging.Formatter().formatException(record.exc_info)
+            # exc_text is always a str here, so _redact always returns a str back;
+            # the cast documents that for readers, it performs no conversion.
+            record.exc_text = str(_redact(exc_text))
+
         return True
 
 
