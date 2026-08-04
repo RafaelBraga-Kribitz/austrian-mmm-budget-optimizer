@@ -8,6 +8,7 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 .env
+.coverage
 
 # --- Generated data (regenerable; see committed-by-design list below) ---
 # EB-081 names these `data/warehouse/` and `data/cache/`; the `/*` form below is

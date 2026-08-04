@@ -56,6 +56,15 @@ files = ["src/ambo"]
 module = ["pymc.*", "arviz.*", "pytensor.*", "pymc_marketing.*", "duckdb.*", "holidays.*"]
 ignore_missing_imports = true
 
+# `yaml` (PyYAML) ships no py.typed marker and no bundled stubs; it is a pinned
+# SPEC-08 §3 runtime dependency (not a new one), so the fix is a one-line override
+# here rather than adding the separate `types-PyYAML` package, which EB-030 would
+# otherwise treat as a new dependency requiring an ADR. Added in Phase 1 plan 01-04,
+# the first module (`common/config.py`) to import it.
+[[tool.mypy.overrides]]
+module = ["yaml.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --cov=src/ambo --cov-report=term-missing"
 # --cov-fail-under=80 is intentionally commented out per D-15
