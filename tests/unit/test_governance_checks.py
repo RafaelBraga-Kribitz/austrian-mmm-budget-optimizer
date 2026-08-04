@@ -177,6 +177,27 @@ def test_first_commit_adding_returns_the_initial_add_commit(tmp_repo: Path) -> N
     assert check_layer_order.first_commit_adding("docs/notes.md", tmp_repo) == first
 
 
+def test_diff_is_append_only_handles_the_repository_root_commit(tmp_repo: Path) -> None:
+    """WR-03: `commit^` does not resolve when `commit` is the repository's very
+    first commit -- the old code let `subprocess.CalledProcessError` propagate
+    uncaught out of `_git`'s `check=True`, breaking the documented exit-code
+    contract. A root commit's own diff must be treated as a full (trivially
+    append-only) addition instead of crashing."""
+    root_commit = _commit(
+        tmp_repo,
+        "docs/PRIOR_ELICITATION.md",
+        "# Prior elicitation\n\n## Amendment 2026-08-05\nline one\n",
+        "docs: initial prior elicitation",
+    )
+
+    append_only, hunk_starts = check_layer_order._diff_is_append_only(
+        tmp_repo, root_commit, "docs/PRIOR_ELICITATION.md"
+    )
+
+    assert append_only is True
+    assert hunk_starts  # the whole file was added, so at least one hunk start
+
+
 # ---------------------------------------------------------------------------
 # check_ssot_consistency.py -- GB-301 / GB-302 / GB-303
 # ---------------------------------------------------------------------------

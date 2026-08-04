@@ -55,6 +55,13 @@ FREEZE_TAG = "prior-freeze-v1"
 _AMENDMENT_HEADING_PREFIX = "## Amendment"
 _HUNK_HEADER_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 
+# Git's well-known empty-tree object -- an ancestor of every commit, including the
+# root commit, which has no parent for `<commit>^` to resolve. Diffing against this
+# object when `<commit>^` does not exist treats the whole of `commit`'s version of
+# `path` as newly added (WR-03 fix-forward, 01-10): trivially append-only, since
+# there is nothing to remove from.
+_EMPTY_TREE_SHA = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
 
 def _git(root: Path, *args: str) -> str:
     result = subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True)
@@ -121,8 +128,23 @@ def _diff_is_append_only(root: Path, commit: str, path: str) -> tuple[bool, list
     """Return `(append_only, new_file_hunk_start_lines)` for `commit`'s own change to
     `path` (a single-commit diff against its parent, not a cumulative range diff).
     `append_only` is `False` the moment the commit's diff to `path` removes any line.
+
+    `commit^` does not resolve when `commit` is the repository's root commit (WR-03
+    fix-forward, 01-10): `git rev-parse --verify` is used to check for a parent
+    first, rather than letting `commit^` fail inside `_git`'s `check=True` and
+    propagate an uncaught `CalledProcessError` out of `main()`, breaking the
+    module's documented exit-code contract. A parentless commit diffs against git's
+    empty-tree object instead, so its own version of `path` is treated as a full
+    addition -- trivially append-only, since there is nothing to remove from.
     """
-    diff = _git(root, "diff", "--unified=0", f"{commit}^", commit, "--", path)
+    parent_check = subprocess.run(
+        ["git", "rev-parse", "--verify", "-q", f"{commit}^"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    base = f"{commit}^" if parent_check.returncode == 0 else _EMPTY_TREE_SHA
+    diff = _git(root, "diff", "--unified=0", base, commit, "--", path)
     removed = [
         line for line in diff.splitlines() if line.startswith("-") and not line.startswith("---")
     ]
