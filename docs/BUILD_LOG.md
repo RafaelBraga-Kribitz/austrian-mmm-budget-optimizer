@@ -209,10 +209,40 @@ exactly 4 flagged weeks total, ending at the Dec-24 week inclusive; schulbeginn
 `ubuntu-latest`/`windows-latest` (D-21) and so produces two check runs while
 remaining one of the six.
 
-**CI run evidence (appended at the plan 01-09 Task 3 checkpoint):** *pending —
-the draft milestone pull request has not yet been opened as of this entry's initial
-commit. Task 3 appends the run URL and the Windows-leg `make --version` string here
-once a human has confirmed all six checks green with none skipped.*
+**CI run evidence (appended at the plan 01-09 Task 3 checkpoint).** Draft pull
+request #1 (`m0-bootstrap` -> `main`, still in draft per D-11) exercised the
+workflow across three pushes. The first run
+(<https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/runs/30948579395>)
+failed on two independent bugs surfaced by CI's Linux leg and self-scan, neither
+caught by local (Windows-only) verification: (1) `scripts/leak_scan.py`'s own
+`PRIVATE_DROP_PATTERNS` doc-comment examples matched the pattern they were
+documenting, so the `leak` job flagged its own source; (2)
+`Path(private_drop_raw).resolve()` in `config.py` made the `D:/...`-literal test
+fixtures in `test_logging.py`/`test_leak_scan.py` absolute on Windows but
+cwd-relative on Linux, failing four `test (ubuntu-latest)` cases. A second run
+(<https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/runs/30951320145>)
+fixed both but surfaced a third, previously-masked bug in the same code path:
+`_resolve_private_drop_needles()` built three separator-form needles without
+deduplicating, and on Linux two of the three were identical strings that both
+matched the same line, double-counting one real match as two `Finding`s in
+`test_private_drop_literal_path_found_when_resolved_via_environment` and
+`test_env_example_carve_out_does_not_suppress_the_literal_check`. The third run
+(<https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/runs/30951615385>)
+is green: all six EB-060 jobs — `lint`, `test` (both `ubuntu-latest` and
+`windows-latest` legs), `dbt`, `ssot`, `layer-order`, `leak` — report SUCCESS, none
+skipped. The Windows leg's `make --version` output reads `GNU Make 4.4.1 / Built
+for x86_64-w64-mingw32`, matching the development machine's verified 4.4.1 exactly
+— the closing evidence for R-13, struck through on `docs/RISK_REGISTER.md` against
+this entry. The `layer-order` and `ssot` jobs each printed their nothing-to-check
+notice (`check_layer_order: no Layer R artifact matching ... and no
+'prior-freeze-v1' tag found -- nothing to check yet`; `check_ssot_consistency: no
+reports/NUMERIC_SSOT.md found ... -- nothing to reconcile`), and the `lint` job's
+season-windows seed regeneration produced no diff. Three follow-up fix commits
+(`2bb8b7c`, `a05d4ee`, `60c3f04`) landed 01-08/01-09 bug corrections — none of them
+weakened a check, exempted a file from a scan, or skipped/xfailed a test; see
+`01-09-SUMMARY.md` Deviations for the full account, including the correction to
+01-08's SUMMARY claim that the scanner "exits 0 on the clean repository," which was
+not accurate as originally written.
 
 **Elapsed effort against the 0.5 d Charter section 5 budget.** Summing each plan's
 measured duration from `.planning/STATE.md`'s Performance Metrics table (an 8-hour
