@@ -1,0 +1,70 @@
+# AMBO — the single configuration home (EB-040).
+#
+# Every non-secret constant the project knows about lives here, and nowhere else in
+# src/ (09_ANTI_PATTERNS §A-2 — magic numbers are a defect). `Settings` in
+# `src/ambo/common/config.py` parses this file with `extra='forbid'`, so an unknown
+# key here is a load-time failure, not a silently ignored setting. Exactly five
+# top-level blocks are declared below; do not add a sixth without a matching field on
+# `Settings`.
+#
+# Two values that belong in this file eventually are deliberately absent, per D-04:
+#   - The normative per-fit ceiling (07_QUALITY_STANDARDS Part A, <= 35 min/fit at
+#     MD-050 on 4 cores) moves here in Phase 4.
+#   - `config/priors_synthetic.yaml` and `config/priors_real.yaml` are authored by
+#     Phases 4 and 6 respectively; their contents never belong in this file.
+
+# The fixed seven-channel taxonomy (SPEC-02 section 5.2). Order matters: dbt pivots
+# over this list, so a reordering silently changes every downstream mart column
+# order. `other` must stay under 10% of total spend (AG-062) or the taxonomy itself
+# is revisited via ADR.
+channels:
+  - search_brand
+  - search_generic
+  - meta
+  - display_video
+  - print_regional
+  - radio
+  - other
+
+# L, the adstock length in weeks (SPEC-04).
+adstock_length: 8
+
+# Repository-relative paths, resolved against repo_root() by load_settings() so they
+# are independent of the caller's working directory (SPEC-08 section 2).
+paths:
+  data_synthetic: data/synthetic
+  data_real_anon: data/real_anon
+  posteriors: data/posteriors
+  # warehouse is the DuckDB FILE path, not the directory: dbt's profile resolves a
+  # file, and data/warehouse/ itself is gitignored generated content (EB-081).
+  warehouse: data/warehouse/ambo.duckdb
+  exports: exports
+  reports: reports
+
+# MD-050, verbatim (SPEC-04 section 5). Fixed sampling settings for every reported
+# fit — full budget, not a value to tune per run. The separate CI smoke-fit profile
+# (chains=1, tune=200, draws=200, first 60 weeks of S-A) is test-only, lives in
+# tests/, and is never reported; it does not belong here.
+sampler:
+  chains: 4
+  tune: 1000
+  draws: 1000
+  target_accept: 0.9
+  random_seed: 42
+  init: jitter+adapt_diag
+
+# The scenario registry (SPEC-01). Each entry names a scenario id and points at the
+# repository-relative scenario YAML Phase 2 authors under config/scenarios/. No
+# SPEC-01 section 4 parameter value is duplicated here: the scenario YAMLs are the
+# authoritative parameter source per the Phase 2 exit criteria, and copying a value
+# into this registry would create the second home EB-040 forbids.
+scenarios:
+  s_a:
+    label: "Scenario A"
+    config: config/scenarios/s_a.yaml
+  s_b:
+    label: "Scenario B"
+    config: config/scenarios/s_b.yaml
+  s_c:
+    label: "Scenario C"
+    config: config/scenarios/s_c.yaml
