@@ -163,11 +163,32 @@ def test_private_drop_literal_path_found_when_resolved_via_environment(
 def test_env_example_carve_out_does_not_suppress_the_literal_check(
     tmp_repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """`.env.example` is excluded from the generic assignment-shape check (it is
-    the one sanctioned home for a fictional `AMBO_PRIVATE_DROP=<path>` line), but
-    the literal resolved-value check still covers it -- a real value pasted there
-    by mistake is still a leak."""
+    """`.env.example` is no longer exempt from the generic assignment-shape check
+    either (CR-01 fix-forward, 01-10): a value pasted there that is not the exact
+    documented placeholder is caught by both the literal resolved-value check and
+    the generic-shape check, giving two independent findings for one planted
+    value."""
     monkeypatch.setenv("AMBO_PRIVATE_DROP", FICTIONAL_DROP_PATH)
+    load_settings.cache_clear()
+
+    _git_stage_only(tmp_repo, ".env.example", f"AMBO_PRIVATE_DROP={FICTIONAL_DROP_PATH}\n")
+
+    findings = leak_scan.scan_tree(tmp_repo)
+
+    assert len(findings) == 2
+    assert all(finding.pattern_class == "private_drop" for finding in findings)
+    assert all(finding.path == ".env.example" for finding in findings)
+
+
+def test_env_example_real_path_caught_by_shape_check_even_when_env_var_unset(
+    tmp_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """CR-01: the actual CI condition is `AMBO_PRIVATE_DROP` unset -- the literal
+    check then has nothing to compare against (`_resolve_private_drop_needles()`
+    returns `[]`). The generic-shape check alone must still catch a non-placeholder
+    value pasted into `.env.example`, since that file is no longer exempted from
+    it."""
+    monkeypatch.delenv("AMBO_PRIVATE_DROP", raising=False)
     load_settings.cache_clear()
 
     _git_stage_only(tmp_repo, ".env.example", f"AMBO_PRIVATE_DROP={FICTIONAL_DROP_PATH}\n")
@@ -177,6 +198,23 @@ def test_env_example_carve_out_does_not_suppress_the_literal_check(
     assert len(findings) == 1
     assert findings[0].pattern_class == "private_drop"
     assert findings[0].path == ".env.example"
+
+
+def test_env_example_documented_placeholder_is_not_flagged(tmp_repo: Path) -> None:
+    """The one fictional value `.env.example` is sanctioned to carry (the same
+    source of truth `leak_scan._is_env_example_placeholder` compares against) is
+    not itself a false positive, with `AMBO_PRIVATE_DROP` unset -- the actual CI
+    condition. Referencing the module constant, rather than inlining the literal
+    value here, keeps this test from self-matching the scanner it exercises."""
+    _git_stage_only(
+        tmp_repo,
+        ".env.example",
+        f"AMBO_PRIVATE_DROP={leak_scan._ENV_EXAMPLE_PLACEHOLDER_VALUE}\n",
+    )
+
+    findings = leak_scan.scan_tree(tmp_repo)
+
+    assert findings == []
 
 
 # ---------------------------------------------------------------------------

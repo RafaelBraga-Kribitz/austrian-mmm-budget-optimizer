@@ -18,9 +18,13 @@ decision, not an omission:
    Windows or POSIX absolute path immediately adjacent to the `AMBO_PRIVATE_DROP`
    name itself (the constant below), which catches a path pasted into a committed
    file even on a machine where the variable is unset. Scans every tracked text
-   file, whole tree — except `.env.example`, the one sanctioned location for a
-   fictional `AMBO_PRIVATE_DROP=<path>` line (01-02-PLAN.md); the *literal* check
-   still covers that file, only the generic *shape* check exempts it.
+   file, whole tree, including `.env.example` — the one sanctioned location for the
+   fictional `AMBO_PRIVATE_DROP=` example line (01-02-PLAN.md). Rather than exempting
+   that file from the generic-shape check outright (which would let a contributor's
+   real path hide behind the carve-out, undetected in CI), the generic-shape check
+   validates that anything it matches in `.env.example` is *exactly* the documented
+   fictional value (`_ENV_EXAMPLE_PLACEHOLDER_VALUE`); any other absolute-path-shaped
+   value assigned there is flagged like any other file (CR-01 fix-forward, 01-10).
 2. `CONTACT_PATTERNS` — email, URL and Austrian phone shapes. Scoped to
    `CONTACT_SCAN_ROOTS` (`data/real_anon/`, `reports/ingestion/`) only.
 3. `CURRENCY_LITERAL_PATTERN` — a currency-formatted literal. Scoped to notebook
@@ -67,8 +71,11 @@ from ambo.common.config import load_settings, repo_root
 # Pattern classes (compiled once at import, per the < 10 s whole-tree budget).
 # ---------------------------------------------------------------------------
 
-# The one file where a fictional `AMBO_PRIVATE_DROP=<path>` line is expected by
-# design (01-02-PLAN.md) — excluded from the generic-shape check only.
+# The one file where the fictional `AMBO_PRIVATE_DROP=` example line is expected by
+# design (01-02-PLAN.md). Not excluded from the generic-shape check (CR-01
+# fix-forward, 01-10) -- see `_is_env_example_placeholder` and
+# `_ENV_EXAMPLE_PLACEHOLDER_VALUE` below for how the exact fictional value is
+# distinguished from a real path pasted there by mistake.
 _ENV_EXAMPLE_PATH = ".env.example"
 
 _PRIVATE_DROP_ENV_VAR = "AMBO_PRIVATE_DROP"
@@ -81,18 +88,30 @@ _PRIVATE_DROP_ENV_VAR = "AMBO_PRIVATE_DROP"
 # The two examples above are deliberately written with a `<abs-path>` placeholder
 # rather than a literal path -- the pattern's own path character class excludes
 # `<`/`>`, so a literal example here would self-match this file when the scanner
-# runs over its own source (this repository's `leak` CI job does exactly that;
-# see 01-09's fix-forward). Requiring an
-# assignment operator (rather than bare adjacency) is deliberate: prose that merely
-# *mentions* the variable name (e.g. "the `AMBO_PRIVATE_DROP` env var") does not
-# match, and neither does the project's own shell-interpolation documentation style
-# (`$AMBO_PRIVATE_DROP/staged/`, a relative continuation, not an assigned value).
+# runs over its own source (this repository's `leak` CI job does exactly that; see
+# 01-09's fix-forward). The assigned value is captured as a named group (`value`)
+# so `_is_env_example_placeholder` can compare it against the one fictional value
+# `.env.example` is sanctioned to carry, rather than exempting that file outright.
+# Requiring an assignment operator (rather than bare adjacency) is deliberate:
+# prose that merely *mentions* the variable name (e.g. "the `AMBO_PRIVATE_DROP`
+# env var") does not match, and neither does the project's own shell-interpolation
+# documentation style (`$AMBO_PRIVATE_DROP/staged/`, a relative continuation, not
+# an assigned value).
 PRIVATE_DROP_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
-        rf"{_PRIVATE_DROP_ENV_VAR}\s{{0,1}}[:=]\s{{0,1}}(?:[A-Za-z]:[\\/][^\s\"'<>]+|/[^\s\"'<>]+)",
+        rf"{_PRIVATE_DROP_ENV_VAR}\s{{0,1}}[:=]\s{{0,1}}"
+        rf"(?P<value>[A-Za-z]:[\\/][^\s\"'<>]+|/[^\s\"'<>]+)",
         re.IGNORECASE,
     ),
 )
+
+# The one exact fictional value `.env.example` is sanctioned to carry for
+# `AMBO_PRIVATE_DROP` (see that file's own comment; 01-02-PLAN.md). Compared
+# case-insensitively against the generic-shape match's captured value: anything
+# else assigned there -- in particular, a real absolute path a contributor pastes
+# by mistake, replacing this exact fictional example -- is flagged like any other
+# file (CR-01 fix-forward, 01-10).
+_ENV_EXAMPLE_PLACEHOLDER_VALUE = r"c:\users\example\documents\ambo-private-drop"
 
 # Path prefixes CONTACT_PATTERNS applies to; everything else is out of scope.
 CONTACT_SCAN_ROOTS: tuple[str, ...] = ("data/real_anon/", "reports/ingestion/")
@@ -114,10 +133,9 @@ CURRENCY_LITERAL_PATTERN: re.Pattern[str] = re.compile(
 )
 
 
-def _not_env_example(rel_posix: str) -> bool:
-    """Scope predicate for the private-drop generic-shape class: every file except
-    `.env.example` (see module docstring)."""
-    return rel_posix != _ENV_EXAMPLE_PATH
+def _always_in_scope(rel_posix: str) -> bool:  # noqa: ARG001 -- uniform predicate signature
+    """Scope predicate for a pattern class that applies to every file, whole tree."""
+    return True
 
 
 def _under_contact_scan_roots(rel_posix: str) -> bool:
@@ -128,12 +146,23 @@ def _is_notebook(rel_posix: str) -> bool:
     return rel_posix.endswith(".ipynb")
 
 
+def _is_env_example_placeholder(rel_posix: str, match: re.Match[str]) -> bool:
+    """True if `match` (a `PRIVATE_DROP_PATTERNS` hit) is `.env.example`'s exact
+    documented fictional value -- the one case that file is sanctioned to carry
+    (see `_ENV_EXAMPLE_PLACEHOLDER_VALUE`). Anything else, in any other file,
+    is a real finding, not a carve-out (CR-01 fix-forward, 01-10)."""
+    if rel_posix != _ENV_EXAMPLE_PATH:
+        return False
+    value = match.group("value")
+    return value is not None and value.strip().lower() == _ENV_EXAMPLE_PLACEHOLDER_VALUE
+
+
 # (pattern class name, compiled patterns, scope predicate over a repo-relative
 # posix-style path). Order matches the module docstring's IN SCOPE list.
 _STATIC_PATTERN_CLASSES: tuple[
     tuple[str, tuple[re.Pattern[str], ...], Callable[[str], bool]], ...
 ] = (
-    ("private_drop", PRIVATE_DROP_PATTERNS, _not_env_example),
+    ("private_drop", PRIVATE_DROP_PATTERNS, _always_in_scope),
     ("contact", CONTACT_PATTERNS, _under_contact_scan_roots),
     ("currency_literal", (CURRENCY_LITERAL_PATTERN,), _is_notebook),
 )
@@ -159,10 +188,11 @@ def _hash_prefix(matched_text: str) -> str:
     return hashlib.sha256(matched_text.encode("utf-8")).hexdigest()[:_HASH_PREFIX_LENGTH]
 
 
-def _iter_matches_for_line(line: str, patterns: Iterable[re.Pattern[str]]) -> Iterator[str]:
+def _iter_matches_for_line(
+    line: str, patterns: Iterable[re.Pattern[str]]
+) -> Iterator[re.Match[str]]:
     for pattern in patterns:
-        for match in pattern.finditer(line):
-            yield match.group(0)
+        yield from pattern.finditer(line)
 
 
 def _find_needle_case_insensitive(line: str, needle: str) -> str | None:
@@ -189,8 +219,10 @@ def _scan_single_line(
     for class_name, patterns, scope in _STATIC_PATTERN_CLASSES:
         if not scope(rel_posix):
             continue
-        for matched_text in _iter_matches_for_line(line, patterns):
-            findings.append(Finding(rel_posix, line_no, class_name, _hash_prefix(matched_text)))
+        for match in _iter_matches_for_line(line, patterns):
+            if class_name == "private_drop" and _is_env_example_placeholder(rel_posix, match):
+                continue
+            findings.append(Finding(rel_posix, line_no, class_name, _hash_prefix(match.group(0))))
 
     for needle in needles:
         matched_text = _find_needle_case_insensitive(line, needle)
