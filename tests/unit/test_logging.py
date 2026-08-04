@@ -6,6 +6,7 @@ Implements: EB-041
 from __future__ import annotations
 
 import re
+import sys
 import uuid
 from collections.abc import Iterator
 
@@ -15,8 +16,17 @@ from ambo.common.config import load_settings, repo_root
 from ambo.common.logging import REDACTION_TOKEN, get_logger
 
 # Fictional path — never a real developer value, per EB-041's own rule, honored even
-# inside a test that exists to prove redaction.
-FAKE_PRIVATE_DROP = "D:/private/ambo_drop_fake"
+# inside a test that exists to prove redaction. `config.py`'s `load_settings()`
+# calls `Path(...).resolve()` on the raw env value, which is a no-op on an already-
+# absolute path but prefixes the cwd onto a relative one. A drive-letter path
+# (`D:/...`) is absolute on Windows but merely relative-looking on POSIX, so a
+# fixed `D:/...` literal passed redaction on the Windows CI leg while silently
+# failing it on the Linux leg (01-09 fix-forward). Branching on `sys.platform`
+# keeps the fixture absolute -- and therefore the redaction path genuinely
+# exercised -- on both.
+FAKE_PRIVATE_DROP = (
+    "D:/private/ambo_drop_fake" if sys.platform == "win32" else "/private/ambo_drop_fake"
+)
 
 
 @pytest.fixture(autouse=True)

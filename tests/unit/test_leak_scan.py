@@ -35,7 +35,18 @@ import leak_scan  # noqa: E402
 # Fictional fixture values -- invented for this module, never real (AG-032/EB-071).
 FICTIONAL_EMAIL = "kontakt@beispiel-marketingagentur.invalid"
 FICTIONAL_CURRENCY = "€ 12.345,67"
-FICTIONAL_DROP_PATH = "D:/fictional/never-real/ambo_drop_fixture"
+# `config.py`'s `load_settings()` resolves this raw value via `Path(...).resolve()`,
+# a no-op on an already-absolute path but cwd-prefixing on a relative one. A fixed
+# `D:/...` literal is absolute on Windows only -- on Linux CI it resolved to a path
+# that never matched the literal check below, silently failing two of these tests
+# on that leg only (01-09 fix-forward). Branching on `sys.platform` keeps the
+# fixture genuinely absolute, and therefore the resolved-value check genuinely
+# exercised, on both operating systems.
+FICTIONAL_DROP_PATH = (
+    "D:/fictional/never-real/ambo_drop_fixture"
+    if sys.platform == "win32"
+    else "/fictional/never-real/ambo_drop_fixture"
+)
 FICTIONAL_BLOCKLIST_VALUE = "FICTIONAL-BLOCKLIST-TOKEN-Q7X9"
 
 
