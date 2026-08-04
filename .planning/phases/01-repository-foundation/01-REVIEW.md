@@ -130,6 +130,7 @@ requiring CI to carry a private value:
 ```python
 _PLACEHOLDER_RE = re.compile(r"^<[^<>]+>$")
 
+
 def _not_env_example_or_is_real_value(rel_posix: str, candidate: str) -> bool:
     if rel_posix != _ENV_EXAMPLE_PATH:
         return True
@@ -173,6 +174,7 @@ def _redact(value: object) -> object:
         redacted = _redact_case_insensitive(redacted, needle, REDACTION_TOKEN)
     return redacted if isinstance(value, str) else redacted
 
+
 # and, in filter():
 if record.exc_info:
     record.exc_text = _redact(record.getMessage())  # placeholder; use
@@ -198,6 +200,7 @@ symbol-form drift between the two authors of those files.
 ```python
 def _normalize_unit(unit: str) -> str:
     return "×" if unit in ("x", "×") else unit.lower()
+
 
 unit_norm = _normalize_unit(unit)
 ...
@@ -248,7 +251,9 @@ addition (trivially append-only, since there is nothing to remove from):
 def _diff_is_append_only(root: Path, commit: str, path: str) -> tuple[bool, list[int]]:
     parent_check = subprocess.run(
         ["git", "rev-parse", "--verify", "-q", f"{commit}^"],
-        cwd=root, capture_output=True, text=True,
+        cwd=root,
+        capture_output=True,
+        text=True,
     )
     base = f"{commit}^" if parent_check.returncode == 0 else _EMPTY_TREE_SHA
     diff = _git(root, "diff", "--unified=0", base, commit, "--", path)
