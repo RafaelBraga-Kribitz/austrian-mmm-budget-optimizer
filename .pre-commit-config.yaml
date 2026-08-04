@@ -1,0 +1,46 @@
+# AMBO — pre-commit toolchain (SPEC-08 section 1, EB-002).
+#
+# Exactly the seven EB-002 hooks: ruff, ruff-format, end-of-file-fixer, check-yaml,
+# detect-private-key, nbstripout, and the local leak-scan hook. Every non-local
+# `repo` entry is pinned to an explicit released tag rather than a moving branch
+# (T-01-34) -- a revision bump is a reviewable diff to this file, never a silent
+# change in what a commit executes.
+#
+# mypy is deliberately NOT a hook here: `make lint` runs it and CI job 1 runs
+# `make lint`. Adding it to pre-commit would make every commit pay a full
+# type-check, and EB-002 names seven hooks, not eight.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.1 # matches the pinned `ruff` dev dependency (pyproject.toml)
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        # No args here -- ruff reads [tool.ruff] from pyproject.toml on its own.
+        # One config home applies to the hook too.
+      - id: ruff-format
+        name: ruff format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: detect-private-key
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.1 # matches the pinned `nbstripout` dev dependency (pyproject.toml)
+    hooks:
+      - id: nbstripout # types: [jupyter] by default -- notebook files only
+
+  - repo: local
+    hooks:
+      - id: leak-scan
+        name: leak scan (staged)
+        description: >-
+          AG-045 leak scanner in staged mode -- the same script CI job 6 runs
+          in pattern-subset mode against the whole tree.
+        entry: uv run python scripts/leak_scan.py --staged
+        language: system
+        pass_filenames: false
+        always_run: true
