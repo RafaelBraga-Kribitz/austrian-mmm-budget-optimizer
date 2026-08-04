@@ -142,3 +142,89 @@ survived on disk from an earlier write until a *fresh* checkout (delete, then
 was needed — the object database was already correct, only the working-tree bytes
 changed, and `git status --porcelain` was empty for all twelve paths both before and
 after.
+
+### 2026-08-04 — M0 close: consolidated evidence (plan 01-09)
+
+Phase 1 (P0/M0) closes with `.github/workflows/ci.yml` (the single six-job workflow)
+and the two governance checks (`scripts/check_layer_order.py`,
+`scripts/check_ssot_consistency.py`) landed. This entry consolidates what the eight
+prior plans handed off, per T-009's own acceptance criteria and Phase 1 Success
+Criterion 4. The CI-run line below is intentionally left as a pending placeholder —
+plan 01-09 Task 3 is a `checkpoint:human-verify` gate that appends the real run URL
+and the Windows-leg `make --version` string here once a human has observed the run,
+which is when that evidence first exists. Nothing above this entry, and no other part
+of this entry, is edited by that append (additions only).
+
+**Audit verdicts (plan 01-01) and which task closed each failure.** The D-29 audit
+entry above (2026-08-04) checked eight WBS acceptance criteria by running the named
+probe; five passed outright and three failed. Each FAIL was closed by a specific
+downstream task, not silently absorbed:
+
+| WBS AC | Verdict | Closed by |
+| --- | --- | --- |
+| T-001 AC-1 | PASS | — |
+| T-001 AC-2 (`.gitattributes` / LF pin) | FAIL | 01-01 Task 2 (committed `.gitattributes`, D-22) |
+| T-001 AC-3 | PASS | — |
+| T-003 AC-1 | PASS | — |
+| T-003 AC-2 (ignore-rule probe) | PASS | — |
+| T-003 AC-3 (LICENSE) | PASS (not yet due) | 01-02 Task 3 |
+| T-012 AC-1 (ADR template) | FAIL | 01-01 Task 3 (`docs/ADR/TEMPLATE.md`) |
+| T-012 AC-2 (reserved ADR slots listed) | FAIL | 01-01 Task 3 (`docs/ADR/README.md`) |
+| T-012 AC-3 (BUILD_LOG append-only header) | FAIL | 01-01 Task 1 (this file) |
+
+**Four planted-violation guard proofs (plan 01-07).** Already recorded in full,
+including exact failing node ids and assertion messages, in the "T-010 AC-1:
+planted-violation proof for all four architectural guards" entry above (2026-08-04).
+Summarized here for the consolidated record: `test_import_independence.py::test_simulate_and_model_do_not_import_each_other`,
+`test_forbidden_deps.py::test_no_forbidden_framework_is_imported_anywhere`,
+`test_repo_layout.py::test_top_level_entries_are_all_in_the_canonical_layout`,
+`test_line_endings.py::test_no_tracked_text_file_contains_a_carriage_return` — each
+proven red on a planted violation, on a scratch branch with zero commits ever made on
+it, then proven green again after the violation was reverted.
+
+**Fake-key probe result (plan 01-08).** On scratch branch
+`scratch-01-08-fake-key-probe`, a staged synthetic (never-real) PEM-style RSA
+private-key block was blocked by the `detect-private-key` pre-commit hook before any
+commit object existed: `git commit` exited 1 with `Private key found:
+docs/_scratch_fake_key_probe.pem`; `git log --oneline -1` showed the same commit
+(`0d12366`) before and after the attempt. The probe file was unstaged and deleted, and
+the scratch branch was deleted with a non-force `git branch -d` (zero unique commits,
+so the delete was a fast-forward no-op on history) — `git branch --list` afterward
+showed only `m0-bootstrap` and `main`.
+
+**Two season-window interpretations (plan 01-06).** Already recorded in full, with
+citations to SPEC-01 section 2.1 and Guide section 1.2, in the "D-07: T-011
+season-window spec interpretations" entry above (2026-08-04): advent is read as
+exactly 4 flagged weeks total, ending at the Dec-24 week inclusive; schulbeginn
+(Styrian school start) is read as the second Monday of September, since the
+`holidays` package carries no AT-6 school-holiday subdivision.
+
+**The eighteen Makefile target names** (SPEC-08 section 5, plan 01-05): `setup`,
+`simulate`, `validate-sim`, `intake`, `anonymize`, `validate-intake`, `transform`,
+`fit-synthetic`, `fit-real`, `recover`, `sensitivity`, `decide`, `ssot`, `export`,
+`report`, `test`, `lint`, `all`.
+
+**The six CI job names** (EB-060, `.github/workflows/ci.yml`, this plan): `lint`,
+`test`, `dbt`, `ssot`, `layer-order`, `leak`. `test` is matrixed over
+`ubuntu-latest`/`windows-latest` (D-21) and so produces two check runs while
+remaining one of the six.
+
+**CI run evidence (appended at the plan 01-09 Task 3 checkpoint):** *pending —
+the draft milestone pull request has not yet been opened as of this entry's initial
+commit. Task 3 appends the run URL and the Windows-leg `make --version` string here
+once a human has confirmed all six checks green with none skipped.*
+
+**Elapsed effort against the 0.5 d Charter section 5 budget.** Summing each plan's
+measured duration from `.planning/STATE.md`'s Performance Metrics table (an 8-hour
+working day is the interpretation used throughout this project for the `d` unit,
+consistent with how every prior plan's duration was recorded in minutes): P01 (20 min)
+plus P02 (8 min) plus P03 (13 min) plus P04 (12 min) plus P05 (8 min) plus P06
+(~15 min) plus P07 (24 min) plus P08 (~30 min) totals 130 min for plans 01-01..01-08,
+plus plan 01-09's own measured duration
+(recorded in `01-09-SUMMARY.md`, since this entry is written before that plan
+finishes). Even before adding plan 01-09's time, 130 min (~2.17 h, ~0.27 d) is well
+under the 240 min (0.5 d) budget and nowhere near the 480 min (1.0 d) strictly-greater
+tripwire threshold from this file's own header rule. **Verdict: the tripwire is not
+tripped** — Phase 1's total measured effort, once 01-09 is added, remains far below
+2x its budget; no ADR is triggered. The exact combined total is restated in
+`01-09-SUMMARY.md`'s Performance section for the permanent record.

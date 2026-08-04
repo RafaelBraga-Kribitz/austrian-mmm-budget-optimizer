@@ -1,0 +1,167 @@
+# AMBO CI (EB-060/061, SPEC-08 section 6) -- the only workflow in this repository.
+#
+# Six required jobs, all of them run to completion on every trigger and report a
+# real pass or fail: lint, test, dbt, ssot, layer-order, leak. No job carries an
+# `if:` key (D-16) -- a skipped job cannot satisfy a required-status check once
+# branch protection turns on at M3 (D-10), and Success Criterion 2 forbids passing
+# by absence. No schedule trigger of any kind (Charter O-7).
+#
+# Triggers: push to main, and pull_request against main (D-19). The milestone pull
+# request is opened as a draft at milestone start, so `pull_request` fires on every
+# subsequent push to the branch -- continuous CI with no duplicate runs.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Groups runs by workflow+ref: a push to main always completes (never cancelled),
+# while superseded pull_request runs on the same branch are cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. lint -- ruff check, ruff format --check, mypy (make lint), plus the D-20
+  #    season-windows seed diff-check folded into this job so EB-060's six jobs
+  #    stay six rather than growing a seventh.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - name: make lint
+        run: make lint
+      # D-20: regenerate the seed and fail on any diff, so the single shared
+      # calendar across the W-2 simulator<->model firewall cannot silently diverge.
+      # Deliberately inside job 1, not a new job -- EB-060 stays six.
+      - name: Regenerate season-windows seed
+        run: uv run python scripts/generate_season_windows.py
+      - name: Fail on season-windows seed drift
+        run: git diff --exit-code dbt/seeds/season_windows.csv
+
+  # ---------------------------------------------------------------------------
+  # 2. test -- pytest incl. the CI-only smoke fit, matrixed ubuntu/windows (D-21).
+  #    The job NAME stays `test`, so this produces two check runs while remaining
+  #    one of EB-060's six jobs -- a matrix leg is not a seventh job.
+  # ---------------------------------------------------------------------------
+  test:
+    name: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      # Step-level OS conditional selecting which setup step runs -- not a D-16
+      # job-level skip-guard. The job still runs to completion and reports a real
+      # result on both legs (RESEARCH.md Pitfall 1). windows-latest does not ship
+      # GNU Make (RESEARCH.md Pattern 2); the community `make` Chocolatey package
+      # is the same ezwinports lineage as the dev machine's verified GNU Make 4.4.1.
+      - name: Install make (Windows only)
+        if: runner.os == 'Windows'
+        run: |
+          choco install make -y
+          make --version
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      # pytensor compiles C/JAX-backed functions on demand; caching its compile
+      # directory avoids paying that cost on every run once model code exists.
+      - name: Cache pytensor compile dir
+        uses: actions/cache@v4
+        with:
+          path: ~/.pytensor
+          key: pytensor-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+      - run: uv sync
+      - name: Run tests
+        run: make test
+      # EB-060: the smoke fit (@pytest.mark.smoke) always runs in CI, even though
+      # `make test` skips it locally unless SMOKE=1 -- a second, explicit run here
+      # rather than making the default `make test` recipe CI-aware.
+      - name: Run tests including the smoke fit
+        run: make test
+        env:
+          SMOKE: "1"
+
+  # ---------------------------------------------------------------------------
+  # 3. dbt -- make transform. D-17 vacuously-correct real check (the actual
+  #    dbt-project-exists predicate), not a stub -- green today, real work once
+  #    Phase 3 lands a dbt project.
+  # ---------------------------------------------------------------------------
+  dbt:
+    name: dbt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - run: make transform
+
+  # ---------------------------------------------------------------------------
+  # 4. ssot -- scripts/check_ssot_consistency.py. D-17 vacuously-correct real
+  #    check -- green today with an explicit nothing-to-reconcile notice.
+  # ---------------------------------------------------------------------------
+  ssot:
+    name: ssot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - run: uv run python scripts/check_ssot_consistency.py
+
+  # ---------------------------------------------------------------------------
+  # 5. layer-order -- scripts/check_layer_order.py. GB-501/GB-502 are git-ancestry
+  #    claims, so this job checks out full history (BP-D-13). D-17 vacuously-correct
+  #    real check -- green today with an explicit nothing-to-check notice.
+  # ---------------------------------------------------------------------------
+  layer-order:
+    name: layer-order
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - run: uv run python scripts/check_layer_order.py
+
+  # ---------------------------------------------------------------------------
+  # 6. leak -- scripts/leak_scan.py pattern subset (no --staged, no --full). Full
+  #   history checked out (BP-D-13) so a whole-tree scan has every commit's tree.
+  # ---------------------------------------------------------------------------
+  leak:
+    name: leak
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - run: uv sync
+      - run: uv run python scripts/leak_scan.py
