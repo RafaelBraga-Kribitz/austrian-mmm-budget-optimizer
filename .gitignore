@@ -1,0 +1,33 @@
+# AMBO — .gitignore
+# Runtime entries are specified by SPEC-08 EB-081. T-004 verifies this file rather
+# than authoring it from scratch.
+
+# --- Environment / tooling ---
+.venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+.env
+
+# --- Generated data (regenerable; see committed-by-design list below) ---
+data/warehouse/
+data/cache/
+*.nc
+
+# --- dbt ---
+dbt/target/
+dbt/logs/
+
+# --- Internal build scaffolding (not part of the published deliverable) ---
+# The execution blueprint is process documentation for the build itself. It serves
+# neither audience in Charter §1.2 and is kept local. The published specification is
+# PROJECT_CHARTER.md + AGENTS.md + docs/ADR/ + docs/SPEC-01..09.
+docs/EXECUTION_BLUEPRINT/
+
+# ---------------------------------------------------------------------------
+# COMMITTED BY DESIGN — never add these (EB-081):
+#   data/synthetic/           Layer P datasets + truth.json (the proof layer)
+#   data/real_anon/           anonymized agency data (a€)
+#   data/posteriors/*.parquet thinned posteriors, for report regeneration w/o sampling
+#   exports/*.csv             DL-1 compares regenerated exports against these
+# ---------------------------------------------------------------------------

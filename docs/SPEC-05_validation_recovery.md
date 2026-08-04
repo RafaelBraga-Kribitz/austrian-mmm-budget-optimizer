@@ -22,7 +22,7 @@ quantities (ROAS, curves, shares) — NOT on raw K/s parameters (AGENTS T-5).
 |------|-------------|-----------------|----------------|
 | VR-301 ROAS coverage: true average ROAS inside 90% HDI | ≥ 5 of 6 channels | ≥ 4 of 6 | ≥ 4 of 6 (incl. the zero channel, see VR-304) |
 | VR-302 ROAS ranking: Spearman(posterior-median ROAS, true ROAS) | ≥ 0.83 | ≥ 0.7 | not gated (5 effective channels) |
-| VR-303 Response-curve shape: mean absolute error between posterior-mean curve and true curve over the observed-spend grid, as % of true curve max | ≤ 15% per channel, ≤ 10% median | ≤ 25% / ≤ 15% | reported, not gated |
+| VR-303 Response-curve shape: mean absolute error between posterior-mean curve and true curve **on the MD-082 grid** (21 points, 0…1.5× max observed weekly spend; truth evaluated closed-form at those same points per SPEC-01 §8), as % of true curve max | ≤ 15% per channel, ≤ 10% median | ≤ 25% / ≤ 15% | reported, not gated |
 | VR-304 False-positive control (S-C only): `display_video` | — | — | posterior P(average ROAS < 0.2) ≥ 0.7 AND its median contribution share ≤ 3% |
 | VR-305 Half-life direction: posterior median half-lives rank print/radio above search channels | required | required | required |
 | VR-306 Contribution decomposition: total media share of revenue within ±10 pp of truth | required | required | required |

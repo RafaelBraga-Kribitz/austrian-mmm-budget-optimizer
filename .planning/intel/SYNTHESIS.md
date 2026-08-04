@@ -33,7 +33,7 @@ the Charter's own claim to the contrary. See conflicts WARNING 1.
 ## Requirements
 
 - Source: `PROJECT_CHARTER.md` only (the sole PRD)
-- Entries written to `requirements.md`: 24
+- Entries written to `requirements.md`: 25
   - `REQ-q1-truth-recovery`, `REQ-q2-real-incremental-roas`, `REQ-q3-optimal-allocation`, `REQ-q4-attribution-gap`
   - `REQ-dl1-reproducible-pipeline` … `REQ-dl10-readme` (10 deliverables, each with the Charter acceptance criterion plus its SPEC-tier expansion where one exists)
   - `REQ-e1-tagged-headline-numbers`, `REQ-e2-layer-order`, `REQ-e3-prior-freeze`, `REQ-e4-numeric-ssot`, `REQ-e5-anonymized-euro-caption`
@@ -75,10 +75,16 @@ Warning headlines:
 6. Full-fit runtime ceiling stated as ~35 min, ~30 min, and 15-35 min in three SPEC-tier documents.
 7. Twenty DOC-tier BP-D defaults are already treated as binding by SPEC-tier documents — a precedence inversion; none is ratified and several name ADRs that do not exist.
 
-Two contradictions were auto-resolved under precedence and are recorded as INFO:
+Two contradictions were auto-resolved under precedence and were recorded as INFO:
 S-B scenario length (SPEC-01 §5's 104 weeks beats the Charter §2.3 implication of 156)
 and the DL-1 reproduction command set (SPEC-08 §5 plus 11 §4 beat the Charter's
-`make setup && make all`). Both flip if WARNING 1 is resolved in the Charter's favour.
+`make setup && make all`).
+
+**Status 2026-08-04: both closed, and neither can flip.** ADR-000 D-1 ratified precedence
+as *scoped* rather than ranked — the Charter governs goals/scope/acceptance, the SPECs
+govern operative detail — and both Charter passages were corrected at source, so the
+contradictions no longer exist in the corpus. All seven WARNINGs are likewise resolved;
+see `.planning/INGEST-CONFLICTS.md` resolution log.
 
 **Notable deviation from the standard synthesis rules:** cross-reference cycle
 detection found two strongly connected components covering 22 of 24 documents. These
@@ -91,7 +97,7 @@ structurally healthy corpus.
 ## Files produced
 
 - `.planning/intel/decisions.md` — 28 entries, 0 locked, 0 ADRs
-- `.planning/intel/requirements.md` — 24 `REQ-*` entries from the Charter
+- `.planning/intel/requirements.md` — 25 `REQ-*` entries from the Charter
 - `.planning/intel/constraints.md` — 76 entries across 20 SPEC sources
 - `.planning/intel/context.md` — 10 DOC-tier topics
 - `.planning/INGEST-CONFLICTS.md` — full conflict report, three buckets

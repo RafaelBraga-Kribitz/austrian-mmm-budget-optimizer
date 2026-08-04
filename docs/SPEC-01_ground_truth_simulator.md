@@ -125,3 +125,22 @@ Per channel: true total contribution (a€ and share), **true average ROAS** =
 (analytic derivative of β·Hill at mean adstock), response-curve sample (contribution
 at 21 spend grid points 0…2×max weekly spend, at steady-state adstock), platform
 ROAS (from §6). Plus scenario metadata (seed, weeks, flags).
+
+**Grid note (resolves INGEST-CONFLICTS WARNING 4).** The 0…2× array above is a
+*diagnostic* sample, kept in `truth.json` only: it shows where the model would be
+extrapolating and is useful for the "why the guard exists" chart. It is NOT the grid
+used for comparison. The true response curve is closed-form (β·Hill at steady-state
+adstock), so it can be evaluated exactly at any spend without interpolation error.
+Therefore:
+
+- `exports/response_curves.csv` (AD-050) carries **one grid only** — the MD-082 grid,
+  21 points over 0…1.5× max observed weekly spend — and the truth column for Layer P
+  is the closed-form curve evaluated at those same 21 points.
+- VR-303 differences the posterior-mean curve against the truth curve on that grid.
+- The simulator exposes the curve as a function of a caller-supplied grid; the 0…2×
+  array is one call with the diagnostic grid, the export is another with MD-082's.
+
+The three horizons are deliberately ordered and should be presented as such:
+**1.3× optimizer bound (DC-203b) < 1.5× reporting horizon (MD-082) < 2.0× truth
+diagnostic** — recommendations stay strictly inside what is reported, and what is
+reported stays strictly inside what is known.

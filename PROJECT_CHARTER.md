@@ -4,8 +4,12 @@
 **Python package name:** `ambo`
 **Author:** Rafael Braga-Kribitz, Seiersberg-Pirka, Austria
 **Status:** Charter v1.0 — 2026-07-18
-**Authority:** Single Source of Truth for goals, scope, acceptance. Charter beats specs;
-specs beat code; deviations require ADRs (`docs/SPEC-09_governance_quality.md`).
+**Authority:** Single Source of Truth for **goals, scope, and acceptance** — a SPEC may not
+silently widen or narrow them. For **operative detail** (numeric thresholds, grids, schemas,
+file layout, command sequences) the relevant SPEC governs, and any figure restated here is a
+summary of it; where the two differ, the SPEC is correct and this document is fixed. ADRs
+outrank both. Specs beat code; deviations require ADRs
+(`docs/SPEC-09_governance_quality.md`). Ratified in `docs/ADR/ADR-000`.
 
 ---
 
@@ -99,7 +103,8 @@ model itself.
 ### 2.3 Grain and windows
 
 - Grain: **ISO weeks** (Mon–Sun, Europe/Vienna civil dates). Everything weekly.
-- Layer P: 156 weeks per scenario (S-C: 78) — synthetic dates 2022-W01 … 2024-W52.
+- Layer P: per-scenario window set by SPEC-01 §5 — S-A 156 weeks, S-B 104, S-C 78;
+  synthetic dates within 2022-W01 … 2024-W52.
 - Layer R: whatever the agency data covers (expected 52–104 weeks) — exact window
   documented at intake (SPEC-02 §5) and reported with every Layer R result.
 
@@ -117,8 +122,8 @@ model itself.
 Rules:
 
 - E-1: Every headline number carries its tag in README/exec summary.
-- E-2: Layer R results are published ONLY if Layer P gates passed (SPEC-05 §2) — this
-  ordering is a CI-checked fact, not a promise (SPEC-09 §5).
+- E-2: Layer R results are published ONLY if Layer P gates passed (SPEC-05 §3 gate table) —
+  this ordering is a CI-checked fact, not a promise (SPEC-09 §5).
 - E-3: **Prior freeze:** `config/priors_real.yaml` (Layer R priors + rationales) is
   committed BEFORE any Layer R fit artifact exists; enforced by git-ancestry check
   (SPEC-09 §5). Priors are marketing judgments — they must demonstrably precede results.
@@ -135,10 +140,10 @@ Rules:
 
 | # | Deliverable | Acceptance criterion |
 |---|-------------|----------------------|
-| DL-1 | Reproducible pipeline | Fresh clone + `make setup && make all` reproduces every Layer P artifact bit-for-bit-in-tolerance (MCMC tolerance doctrine, SPEC-05 §7) without any private inputs; Layer R artifacts reproduce given the private data drop (SPEC-02 §3) |
+| DL-1 | Reproducible pipeline | Fresh clone reproduces every Layer P artifact bit-for-bit-in-tolerance (MCMC tolerance doctrine, SPEC-05 §7) without any private inputs, via the probe protocol in 11_ACCEPTANCE_CRITERIA §4 (`make all` alone is insufficient — by SPEC-08 §5 it contains no `simulate` or fit target); Layer R artifacts reproduce given the private data drop (SPEC-02 §3) |
 | DL-2 | Answer to Q1 | `reports/recovery/RECOVERY_REPORT.md` with all SPEC-05 §3 gates green, incl. the zero-effect channel test |
 | DL-3 | Answer to Q2 | Layer R posterior report: ROAS table with 90% HDIs, response curves, contribution decomposition (SPEC-04 §8) |
-| DL-4 | Answer to Q3 | Optimizer output: optimal vs. historical allocation, expected gain in a€ and %, extrapolation guards visibly active (SPEC-06 §3) |
+| DL-4 | Answer to Q3 | Optimizer output: optimal vs. historical allocation, expected gain in a€ and %, extrapolation guards visibly active (SPEC-06 §2 DC-203(b), §3) |
 | DL-5 | Answer to Q4 | Attribution-gap table + chart: platform ROAS vs MMM ROAS per channel (SPEC-06 §5) |
 | DL-6 | Priors as deliverable | `docs/PRIOR_ELICITATION.md` — every prior with a ≥100-character marketing rationale (SPEC-04 §6), frozen pre-fit |
 | DL-7 | Dashboard | Power BI `dashboards/ambo.pbix` per SPEC-07 §4 + screenshots |
@@ -177,7 +182,7 @@ project's argument.
 | R-1 | Client permission falls through | Medium | Layer R dies | Charter §7 degradation path: project ships as Layers P+D on synthetic with full recovery story; README framing pre-written for both cases (SPEC-07 §6.1) |
 | R-2 | Adstock/saturation weakly identified on 52–104 real weeks | High | Wide posteriors | That IS the finding: informative-priors-vs-flat comparison (SPEC-05 §5) becomes the centerpiece; never hidden |
 | R-3 | Collinearity: spend planned on the demand calendar | Certain | Confounded estimates | S-B scenario tests exactly this; seasonality controls; honesty in LIMITATIONS |
-| R-4 | Brand-search endogeneity (brand search is partly an outcome of other media) | High | Over-credited brand search | `search_brand` is modeled but EXCLUDED from optimizer reallocation advice (SPEC-06 §3.6); trap documented |
+| R-4 | Brand-search endogeneity (brand search is partly an outcome of other media) | High | Over-credited brand search | `search_brand` is modeled but EXCLUDED from optimizer reallocation advice (SPEC-06 §2, DC-203(c)); the same exclusion applies to `other` when present (ADR-000 D-2 / BP-D-04); trap documented |
 | R-5 | MCMC non-reproducibility across platforms | Certain | Golden tests break | Tolerance-band doctrine (SPEC-05 §7), committed thinned posteriors for report regeneration |
 | R-6 | Anonymization leak (secret factors, client identity, absolute €) | Low | Serious | SPEC-02 §4 secrets protocol + CI leak-scan (SPEC-09 §5); factors never touch the repo or git history |
 | R-7 | Divergences / sampler pathologies | Medium | Blocked fits | SPEC-04 §7 reparameterization ladder, prescribed in order |
@@ -198,6 +203,7 @@ its alternate framing (SPEC-07 §6.1). Decide via ADR by end of M4, not later.
 
 | Order | File | Contents |
 |-------|------|----------|
+| 0 | `docs/ADR/` | Ratified decisions — outrank every document below. Start at ADR-000 (precedence, blueprint defaults) |
 | 1 | `PROJECT_CHARTER.md` | This file |
 | 2 | `AGENTS.md` | Agent rules, build order, traps |
 | 3 | `docs/SPEC-01_ground_truth_simulator.md` | Exact DGP, parameters, scenarios, truth files |
@@ -230,3 +236,4 @@ its alternate framing (SPEC-07 §6.1). Decide via ADR by end of M4, not later.
 | Date | Version | Change |
 |------|---------|--------|
 | 2026-07-18 | 1.0 | Initial charter |
+| 2026-08-04 | 1.1 | Authority scoped to goals/scope/acceptance with SPEC governing operative detail (ADR-000 D-1); §2.3 corrected to SPEC-01 §5 per-scenario windows (S-B = 104, not 156); DL-1 pointed at the 11_ACCEPTANCE_CRITERIA §4 probe instead of `make all`; dangling refs fixed in E-2, DL-4, R-4 |

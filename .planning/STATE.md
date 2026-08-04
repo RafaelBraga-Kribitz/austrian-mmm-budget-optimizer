@@ -48,14 +48,15 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
-Full log in PROJECT.md. **Zero decisions are ratified** — `docs/ADR/` does not exist and is
-scheduled for creation by T-012 in Phase 1. The eight Group A design commitments are the
-operative stance but are formally UNRATIFIED; the twenty BP-D blueprint defaults are
-proposals-with-defaults and were **not** promoted to constraints.
+Full log in PROJECT.md. `docs/ADR/` now exists and **ADR-000 is ratified**, covering document
+precedence, the twenty BP-D blueprint defaults (accepted wholesale), and the ingest cycle
+deviation. The eight Group A design commitments asserted by SPEC text remain formally
+unratified and are candidates for ADR-001+ as they are exercised.
 
 - [Ingest]: Roadmap mirrors blueprint P0–P8 1:1 as Phases 1–9 — re-deriving would orphan the T-001…T-806 WBS and the traceability matrix.
 - [Ingest]: All 25 REQ IDs carried verbatim; no new IDs invented for Phases 2–4.
-- [Ingest]: 4 SPEC-vs-SPEC contradictions preserved unresolved in their phases rather than silently decided (user approved).
+- [2026-08-04]: All 7 ingest warnings resolved at source rather than deferred into phases — the source SPECs were contradictory independently of the ingest, so fixing the documents (not annotating the plan) was the only resolution that survives into implementation. See ADR-000 and the INGEST-CONFLICTS resolution log.
+- [2026-08-04, ADR-000 D-1]: Precedence is scoped, not ranked — Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. The Charter's own passages were corrected where they restated SPEC values wrongly.
 
 ### Pending Todos
 
@@ -63,44 +64,32 @@ None yet.
 
 ### Blockers/Concerns
 
-1. **[Phase 1] Repo baseline does not match T-001's assumption.** The working tree is a git
-   repo on branch **`master` with zero commits**; `AGENTS.md`, `PROJECT_CHARTER.md`, `docs/`,
-   and `.planning/` are all **untracked**. T-001 assumes git-init-and-baseline-commit is the
-   very first action, and the blueprint, EB-080 branch protection, and standing rule 2 all
-   assume branch **`main`**. Phase 1 must start from this actual state: decide the branch name
-   before the baseline commit, and make that commit documentation-only with zero code so the
-   layer-order argument starts clean.
+**Closed 2026-08-04 — all seven ingest warnings resolved at source.** W1–W7 were fixed by
+editing the source documents (see `.planning/INGEST-CONFLICTS.md` resolution log and
+`docs/ADR/ADR-000`). None is carried into any phase. The intel count discrepancy is also
+corrected. What remains:
 
-2. **[Phase 1, blocks Phase 2 onward] WARNING 3 — SPEC-08 §2 layout omits four contract
-   modules.** `model/fit.py`, `model/priors.py`, `simulate/config.py`, `simulate/__main__.py`
-   are defined as binding contracts by 03_MODULES and required by the T-010 guard test, but are
-   absent from the "exact" SPEC-08 §2 layout that the [STD] checklist enforces on every
-   milestone PR. As written, the PR adding `model/fit.py` fails the checklist on the same PR.
-   Must be settled in Phase 1.
+1. **[Phase 1] Branch name.** Repository is on **`master`**; the blueprint, EB-080 branch
+   protection, `check_layer_order.py`, and CI config all assume **`main`**, and each gets
+   written against it once. Renamed to `main` on 2026-08-04 — no remote exists, so the rename
+   was local and lossless. Verify before the first push that any forge default branch matches.
+   *(The rest of the original blocker is stale: the baseline commit already exists — `1851f39`,
+   documentation-only, zero code — so the layer-order argument does start clean.)*
 
-3. **[Phases 2 and 5] WARNING 4 — response-curve grid mismatch.** Truth is 0…2×max (SPEC-01
-   §8), model is 0…1.5×max (MD-082); both feed one export and the VR-303 M3 exit gate with no
-   regridding rule. Can decide whether the project's central credibility gate passes.
-
-4. **[Phase 8] WARNING 2 — optimizer fixed-channel set.** `search_brand` only (SPEC-06 DC-203c)
-   vs `search_brand` + `other` (03_MODULES §6.1). Materially different DL-4 headline gain.
-
-5. **[Phase 9] WARNING 5 — DL-1 vs gitignored exports.** DL-1 requires comparing exports to
-   committed versions; `exports/*.csv` is gitignored. DL-1 is the first row of the G-REL gate.
-
-6. **[Project-wide] WARNING 1 and WARNING 7 — unratified precedence.** The Charter claims
-   "Charter beats specs"; the configured precedence (ADR > SPEC > PRD > DOC) inverts it, and
-   two contradictions were auto-resolved on that basis. Separately, twenty DOC-tier BP-D
-   defaults are already treated as binding by SPEC-tier documents. Both are candidates for
-   ADR-000. See `.planning/INGEST-CONFLICTS.md`.
-
-7. **[Phase 6] External dependency.** The private agency drop plus written permission is the
+2. **[Phase 6] External dependency.** The private agency drop plus written permission is the
    only external blocker. Phases 1–5 are fully drop-independent; fill any wait window with the
    intake codebase (T-501…T-506), the decision layer against Layer P (T-701…T-704), and
    reporting infrastructure (T-801, T-802).
 
-8. **[Intel] Count discrepancy.** `.planning/intel/SYNTHESIS.md` reports 24 `REQ-*` entries;
-   `requirements.md` contains 25. All 25 are carried and mapped.
+3. **[Before first public push] Documentation-to-code ratio.** The repository currently holds
+   ~39,000 words of planning documentation and zero lines of code. `docs/EXECUTION_BLUEPRINT/`
+   (14 files, ~28k words, `02_WBS.md` alone ~9.2k) is internal build scaffolding: it serves no
+   reader in either Charter §1.2 audience, and as the first thing a reviewer meets it invites
+   the wrong hypothesis. **Action before the repo goes public:** `git rm -r --cached
+   docs/EXECUTION_BLUEPRINT` and gitignore it, or move it to a private branch. Deferred rather
+   than done now because 20 cross-references in the freshly generated planning docs point at
+   those paths and there is no remote yet, so the move buys nothing today. Keep `PROJECT_CHARTER.md`,
+   `AGENTS.md`, `docs/ADR/` and `SPEC-01..09` public — spec-before-code is the project's argument.
 
 ## Deferred Items
 
@@ -114,4 +103,6 @@ Last session: 2026-08-04
 Stopped at: Roadmap and state initialized from doc ingest. Nothing built; repository contains documentation only.
 Resume file: None
 
-Next: `/gsd-plan-phase 1` — but settle blockers 1 and 2 first, since both shape what Phase 1 commits.
+Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
+`main` and WARNING 3 is fixed in SPEC-08 §2 plus the [STD] checklist — so Phase 1 can plan
+against a consistent spec set. The next artifact this repository needs is code.

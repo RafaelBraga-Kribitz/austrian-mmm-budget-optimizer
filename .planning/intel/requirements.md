@@ -38,8 +38,8 @@ Charter itself claims the opposite ("Charter beats specs") — see
 
 ## REQ-dl1-reproducible-pipeline
 - source: PROJECT_CHARTER.md §4 (DL-1)
-- description: A reproducible pipeline: fresh clone plus `make setup && make all` reproduces every Layer P artifact bit-for-bit-in-tolerance without any private inputs; Layer R artifacts reproduce given the private data drop.
-- acceptance: MCMC tolerance doctrine per SPEC-05 §7 applies; private drop per SPEC-02 §3. (Expanded and partially superseded by SPEC-tier 11_ACCEPTANCE_CRITERIA §4 DL-1 probe protocol — see conflicts INFO 2 and WARNING 5.)
+- description: A reproducible pipeline: a fresh clone reproduces every Layer P artifact bit-for-bit-in-tolerance without any private inputs, via the 11_ACCEPTANCE_CRITERIA §4 probe protocol; Layer R artifacts reproduce given the private data drop.
+- acceptance: MCMC tolerance doctrine per SPEC-05 §7 applies; private drop per SPEC-02 §3. Probe is the explicit target sequence in 11_ACCEPTANCE_CRITERIA §4 — `make all` alone is insufficient by SPEC-08 §5's own definition. RESOLVED 2026-08-04: Charter DL-1 corrected to match (INFO 2 closed); `exports/*.csv` is committed-by-design per EB-081 so the export half of the probe is executable (WARNING 5 closed).
 - scope: reproducibility, release gate
 
 ## REQ-dl2-recovery-report
@@ -140,8 +140,8 @@ Charter itself claims the opposite ("Charter beats specs") — see
 
 ## REQ-grain-and-windows
 - source: PROJECT_CHARTER.md §2.3
-- description: Grain is ISO weeks (Mon-Sun, Europe/Vienna civil dates); everything weekly. Layer P is 156 weeks per scenario with S-C at 78, synthetic dates 2022-W01 to 2024-W52. Layer R is whatever the agency data covers, expected 52-104 weeks, with the exact window documented at intake and reported with every Layer R result.
-- acceptance: AG-050 weekly aggregation with partial edge weeks dropped; AG-060 window length >= 52 weeks; `layer_r_weeks` in SSOT. NOTE: the Layer P sentence conflicts with SPEC-01 §5, which sets S-B to 104 weeks — SPEC wins (see conflicts INFO 1).
+- description: Grain is ISO weeks (Mon-Sun, Europe/Vienna civil dates); everything weekly. Layer P windows are set per scenario by SPEC-01 §5 — S-A 156 weeks, S-B 104, S-C 78 — within synthetic dates 2022-W01 to 2024-W52. Layer R is whatever the agency data covers, expected 52-104 weeks, with the exact window documented at intake and reported with every Layer R result.
+- acceptance: AG-050 weekly aggregation with partial edge weeks dropped; AG-060 window length >= 52 weeks; `layer_r_weeks` in SSOT. RESOLVED 2026-08-04: Charter §2.3 corrected to cite SPEC-01 §5 per-scenario windows; S-B is 104 weeks (INFO 1 closed).
 - scope: temporal grain, dataset sizing
 
 ## REQ-milestones

@@ -42,9 +42,10 @@ The summaries below are abridged; the intel file wins on any difference.
 
 - [ ] **REQ-dl1-reproducible-pipeline**: A fresh clone reproduces every Layer P artifact
       bit-for-bit-in-tolerance without any private inputs; Layer R artifacts reproduce given
-      the private drop. *(DL-1; operative probe is 11_ACCEPTANCE_CRITERIA §4, not the Charter's
-      `make setup && make all` — see INGEST-CONFLICTS INFO 2, and WARNING 5 for the exports
-      half.)*
+      the private drop. *(DL-1; operative probe is 11_ACCEPTANCE_CRITERIA §4. RESOLVED
+      2026-08-04 — Charter DL-1 corrected to point at that probe, and `exports/*.csv` is now
+      committed-by-design per EB-081, so the export comparison is executable. INFO 2 and
+      WARNING 5 closed.)*
 - [ ] **REQ-dl2-recovery-report**: `reports/recovery/RECOVERY_REPORT.md` — generated, not
       hand-edited, gate table all-green, VR-304 verdict section present, SSOT `recovery_pass_*`
       true. *(DL-2, answers Q1)*

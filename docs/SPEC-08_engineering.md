@@ -13,7 +13,14 @@ MMM-specific additions are the sampling-compute strategy (§6) and the leak scan
   detect-private-key, `scripts/leak_scan.py --staged` (AG-045), nbstripout (notebook
   outputs never committed — leak surface).
 
-## 2. Repository layout (exact; empty dirs get `.gitkeep`)
+## 2. Repository layout (canonical; empty dirs get `.gitkeep`)
+
+This is the canonical set of packages and directories. **No new top-level directory or
+`src/ambo/` subpackage may be added without an ADR.** New *modules inside* a listed
+package are permitted and expected, on one condition: the module has a public contract
+entry in the module-contract document (`03_MODULES`, internal execution blueprint)
+merged in the same PR (contract-first). The per-package file lists below are the
+contracts known at authoring time, not a closed set.
 
 ```
 austrian-mmm-budget-optimizer/
@@ -28,9 +35,11 @@ austrian-mmm-budget-optimizer/
 │   ├── priors_synthetic.yaml   # MD-040
 │   └── priors_real.yaml        # MD-041, frozen M4
 ├── src/ambo/
-│   ├── simulate/    (dgp.py, spend_patterns.py, platform_bias.py, truth.py)
+│   ├── simulate/    (config.py, dgp.py, spend_patterns.py, platform_bias.py,
+│   │                 truth.py, __main__.py)
 │   ├── intake/      (standardize.py, anonymize.py, validate.py)
-│   ├── model/       (mmm.py, transforms.py, elicit.py, diagnostics.py, posterior_io.py)
+│   ├── model/       (mmm.py, priors.py, fit.py, transforms.py, elicit.py,
+│   │                 diagnostics.py, posterior_io.py)
 │   ├── validate/    (recovery.py, holdout.py, sensitivity.py, baseline_ols.py,
 │   │                 crosscheck.py, report.py)
 │   ├── decide/      (optimizer.py, attribution_gap.py, scenarios.py)
@@ -42,7 +51,7 @@ austrian-mmm-budget-optimizer/
 ├── data/            (synthetic/ COMMITTED, real_anon/ COMMITTED,
 │                     posteriors/ COMMITTED (thinned parquet only),
 │                     warehouse/ + cache/ + local netCDF gitignored)
-├── exports/         (gitignored except .gitkeep)
+├── exports/         (*.csv COMMITTED — DL-1 compares against them; EB-081)
 ├── reports/         (committed: NUMERIC_SSOT.md, EXEC_SUMMARY.md, recovery/, model/,
 │                     decide/, executive_charts/, ingestion/)
 ├── dashboards/      (ambo.pbix, README.md)
@@ -89,8 +98,10 @@ report           executive charts (from committed posteriors — no sampling)
 test             pytest -q (coverage ≥ 80% src/)
 lint             ruff + mypy
 all              transform→recover→sensitivity→decide→ssot→export→report
-                 (assumes fits exist; fits are explicit targets because they cost
-                  30–90 min total)
+                 (assumes fits exist; fits are explicit targets because of their cost
+                  — see 07_QUALITY_STANDARDS Part A for the normative per-fit ceiling.
+                  `make all` therefore does NOT reproduce data/synthetic/ or any
+                  posterior; the DL-1 probe is 11_ACCEPTANCE_CRITERIA §4, not this)
 ```
 
 - EB-050: Sampling targets print expected runtime up front and write posteriors
@@ -122,10 +133,15 @@ all              transform→recover→sensitivity→decide→ssot→export→re
 
 - EB-080: Conventional commits + REQ IDs; one milestone = one PR; `main` protected by
   all six CI jobs.
-- EB-081: `.gitignore`: `.venv/`, `data/warehouse/`, `data/cache/`, `*.nc`,
-  `exports/*.csv`, `.env`, `__pycache__/`, `.pytest_cache/`, `dbt/target/`,
-  `dbt/logs/`, `.ipynb_checkpoints/`. NOTE committed-by-design: `data/synthetic/`,
-  `data/real_anon/`, `data/posteriors/*.parquet`.
+- EB-081: `.gitignore`: `.venv/`, `data/warehouse/`, `data/cache/`, `*.nc`, `.env`,
+  `__pycache__/`, `.pytest_cache/`, `dbt/target/`, `dbt/logs/`, `.ipynb_checkpoints/`.
+  NOTE committed-by-design: `data/synthetic/`, `data/real_anon/`,
+  `data/posteriors/*.parquet`, **`exports/*.csv`**. The exports are committed for two
+  reasons: DL-1's release probe compares regenerated exports against committed versions
+  and has nothing to compare against otherwise (and RB-301 recomputes RB-201 bars from
+  `allocation_scenarios.csv`), and a reader can inspect the project's headline numbers
+  on the forge without cloning or installing anything. They are small, text, and
+  diffable — a changed export shows up in review, which is the point.
 - EB-082: History is append-only: no force-push, no history rewriting, ever — the
   layer-order argument (Charter §5) depends on trustworthy history. If something
   private lands in a commit: the remedy is credential/data rotation + repo surgery

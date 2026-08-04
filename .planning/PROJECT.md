@@ -173,20 +173,21 @@ already hard-code them as contracts — a precedence inversion (INGEST-CONFLICTS
 accept-or-override the BP-D items it exercises, explicitly and on the record — never silently
 re-decide them. Full text: `.planning/intel/decisions.md` Group B.
 
-### Open contradictions carried into execution
+### Ingest contradictions — all seven RESOLVED at source (2026-08-04)
 
-Seven warnings were surfaced at ingest and the user approved proceeding with all of them
-preserved and unresolved. Full report: `.planning/INGEST-CONFLICTS.md`.
+Seven warnings were surfaced at ingest. All seven have since been resolved by editing the
+source documents, so none is carried into execution. Full report and resolution log:
+`.planning/INGEST-CONFLICTS.md`. Governance decisions: `docs/ADR/ADR-000`.
 
-| # | Contradiction | Lands in |
-|---|---------------|----------|
-| W1 | Charter declares "Charter beats specs"; configured precedence is ADR > SPEC > PRD > DOC, which inverts it. Nothing ratifies either ordering. Two contradictions were auto-resolved against the Charter under the configured ordering (INFO 1, INFO 2) and would flip if reversed. | Project-wide — settle via ADR-000 |
-| W2 | Optimizer fixed-channel set: SPEC-06 DC-203c fixes `search_brand` only; 03_MODULES §6.1 adds `other`. Equal precedence, materially different DL-4 output. | Phase 8 |
-| W3 | SPEC-08 §2's "exact" layout omits `model/fit.py`, `model/priors.py`, `simulate/config.py`, `simulate/__main__.py`, which 03_MODULES defines as contracts and a guard test requires. | Phase 1 (blocks clean PRs from Phase 2 on) |
-| W4 | Response-curve grid: truth 0…2×max (SPEC-01 §8) vs model 0…1.5×max (MD-082), feeding one export and the VR-303 M3 exit gate with no regridding rule. | Phases 2 and 5 |
-| W5 | DL-1 requires comparing exports against committed versions, but `exports/*.csv` is gitignored (EB-081). | Phase 9 |
-| W6 | Full-fit runtime ceiling stated as ~35 min, ~30 min, and 15–35 min in three SPEC-tier documents. | Phase 4 (feeds the effort tripwire) |
-| W7 | Twenty DOC-tier BP-D defaults are treated as binding by SPEC-tier documents. | Project-wide — see above |
+| # | Contradiction | Resolution |
+|---|---------------|------------|
+| W1 | Charter declared "Charter beats specs"; configured precedence inverts it. Nothing ratified either. | **ADR-000 D-1** — precedence is *scoped*, not ranked: Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. Charter §7 rewritten; §2.3 and DL-1 corrected at source, closing INFO 1 and INFO 2 permanently. |
+| W2 | Optimizer fixed set: `search_brand` only (DC-203c) vs `search_brand` + `other` (03_MODULES §6.1). | **BP-D-04 adopted.** DC-203(c) now defines a fixed *set* resolved against channels present; `other` is Layer-R-only, so Layer P and DC-401 are untouched. DC-704 asserts over the resolved set, not a hard-coded name. |
+| W3 | SPEC-08 §2's "exact" layout omitted four contract modules a guard test requires. | **Both halves fixed.** The four modules added; "exact" → "canonical" with new packages needing an ADR but new modules allowed given a same-PR 03_MODULES contract entry; the 06 [STD] checklist item reworded to match. |
+| W4 | Truth grid 0…2×max vs model grid 0…1.5×max feeding one export and the VR-303 gate. | **One grid: MD-082's.** The true curve is closed-form, so it is evaluated exactly at the model's 21 points — no interpolation. The 0…2× array stays in `truth.json` as a diagnostic. Guard ladder stated explicitly: 1.3× optimizer < 1.5× reporting < 2.0× diagnostic. |
+| W5 | DL-1 compares exports against committed versions; `exports/*.csv` was gitignored. | **Exports committed by design** (EB-081). Makes the DL-1 probe and RB-301 executable, and lets a reader inspect headline numbers on the forge without cloning. |
+| W6 | Three different full-fit ceilings across three documents. | **Single normative home**: 07_QUALITY_STANDARDS Part A, ≤ 35 min/fit at MD-050 on 4 cores. 03_MODULES §4, 04 §7 and SPEC-08 §5 now cite it. |
+| W7 | Twenty DOC-tier BP-D defaults treated as binding by SPEC-tier documents. | **ADR-000 D-2** ratifies BP-D-01…20 wholesale. The DoR's per-item accept/override is satisfied for all twenty; ADR slots retained only to record what intake actually observes. |
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|

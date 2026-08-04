@@ -1,5 +1,26 @@
 ## Conflict Detection Report
 
+> ## RESOLUTION LOG — 2026-08-04: all 7 WARNINGs closed
+>
+> Every warning below has been resolved by editing the **source documents**, not by
+> annotating this report. The report text is preserved unchanged as the record of what was
+> found; the table states where each was fixed. Nothing from this report is carried into
+> execution as an open item.
+>
+> | # | Closed by | Files changed |
+> |---|-----------|---------------|
+> | W1 | ADR-000 D-1 — precedence is scoped (Charter: goals/scope/acceptance; SPEC: operative detail; ADR outranks both). Both auto-resolved passages corrected at source, so INFO 1 and INFO 2 can no longer flip. | `docs/ADR/ADR-000`, `PROJECT_CHARTER.md` (§7 authority, §2.3, DL-1, DL-4, R-4, E-2, doc map, change log) |
+> | W2 | BP-D-04 adopted. DC-203(c) is now a fixed *set* resolved against channels present; `other` is Layer-R-only so DC-401 and all Layer P gates are unaffected. DC-704 asserts over the resolved set. | `docs/SPEC-06_decision_layer.md`, `03_MODULES.md` §6.1 |
+> | W3 | Four contract modules added to the layout; "exact" → "canonical" (new packages need an ADR, new modules need a same-PR 03_MODULES contract entry); [STD] checklist item reworded so it no longer fires on the PR that adds `model/fit.py`. | `docs/SPEC-08_engineering.md` §2, `06_CHECKLISTS.md` |
+> | W4 | One grid — MD-082's 21 points over 0…1.5× max observed. The true curve is closed-form and is evaluated exactly at those points, so there is no regridding error. The 0…2× array stays in `truth.json` as a diagnostic. Guard ladder made explicit: 1.3× < 1.5× < 2.0×. | `SPEC-01` §8, `SPEC-04` MD-082, `SPEC-05` VR-303, `02_WBS.md` T-107 |
+> | W5 | `exports/*.csv` moved to committed-by-design. Makes the DL-1 probe and RB-301 executable, and lets a reader inspect headline numbers without cloning. | `SPEC-08` §2 + EB-081, `02_WBS.md` T-004, `06_CHECKLISTS.md` M7 |
+> | W6 | Single normative home: 07_QUALITY_STANDARDS Part A, ≤ 35 min/fit at MD-050 on 4 cores. The other three restatements now cite it. | `07_QUALITY_STANDARDS.md`, `03_MODULES.md` §4, `04_DEPENDENCIES.md` §7, `SPEC-08` §5 |
+> | W7 | ADR-000 D-2 ratifies BP-D-01…20 wholesale; the DoR's per-item accept/override is satisfied for all twenty. | `docs/ADR/ADR-000` |
+>
+> **INFO 3 (cycle deviation) is ratified** in ADR-000 D-3 rather than merely disclosed.
+> **INFO 6** (dangling section refs) fixed in the Charter. The `SYNTHESIS.md` requirement
+> count was corrected from 24 to 25.
+
 Operation: ingest (mode: new). Corpus: 24 documents — 1 PRD, 20 SPEC, 3 DOC, 0 ADR.
 Precedence applied: ADR > SPEC > PRD > DOC. No per-doc precedence override was set on
 any classification. No document carries `locked: true`, so no LOCKED-vs-LOCKED

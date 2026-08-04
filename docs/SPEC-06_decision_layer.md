@@ -27,8 +27,15 @@ answer inside what the data can support.
   (a) Σ_c x_c = B (equality);
   (b) 0 ≤ x_c ≤ 1.3 × max observed weekly spend of channel c (extrapolation guard —
   hard bound, visible in every output);
-  (c) `search_brand` FIXED at its historical mean (Charter R-4 / AGENTS T-7: modeled
-  but not reallocatable);
+  (c) The FIXED SET is held at its historical mean — modeled, but not reallocatable.
+  It contains `search_brand` always (Charter R-4 / AGENTS T-7: brand search is partly
+  an outcome of other media, so reallocating into it would recommend spending on an
+  effect the model attributes elsewhere), and `other` whenever that channel is present
+  in the layer's mix (ADR-000 D-2 ratifying BP-D-04: `other` is an intake residual
+  bucket with no single media meaning — an undefined bucket cannot be a
+  recommendation). Layer P has no `other` channel, so on Layer P the set is
+  `{search_brand}` and DC-401 is unaffected. The resolved set is carried on
+  `AllocationConstraints.fixed` and printed in every optimizer artifact;
   (d) offline channels (print_regional, radio) reallocate in weekly-equivalent terms
   with a caption noting real-world flighting granularity.
 - DC-204: Solver: `scipy.optimize.minimize(method='SLSQP')`, 20 restarts from seeded
@@ -87,7 +94,9 @@ answer inside what the data can support.
 - DC-702: DC-502 ordering gate green.
 - DC-703: Determinism: two runs → identical CSVs (seeded restarts, fixed draw
   subset).
-- DC-704: Constraint audit test: optimal allocations respect bounds exactly;
-  search_brand unchanged; Σ = B to 1e-6.
+- DC-704: Constraint audit test: optimal allocations respect bounds exactly; every
+  channel in the DC-203(c) fixed set is unchanged from its historical mean (assert
+  over the resolved set, not a hard-coded channel name — on Layer R with `other`
+  present that is two channels, on Layer P one); Σ = B to 1e-6.
 - DC-705: Every § artifact exists and regenerates via `make decide` from committed
   posteriors (no sampling).

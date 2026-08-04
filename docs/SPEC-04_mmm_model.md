@@ -127,5 +127,8 @@ Normal(0, 0.15); `δ_promo ~ Normal(0.1, 0.05)`; `δ_advent ~ Normal(0.3, 0.15)`
 - MD-081: ROAS table: total-window average ROAS per channel (draws of Σm_c/Σx_c) —
   mean, 5%, 50%, 95%, P(ROAS < 1).
 - MD-082: Response curves: contribution at 21 grid points (0…1.5× max observed weekly
-  spend — NOT 2×; extrapolation guard starts here) per channel, mean + 90% HDI.
+  spend — NOT 2×; extrapolation guard starts here) per channel, mean + 90% HDI. **This
+  is the canonical grid** for `exports/response_curves.csv` and for the VR-303 gate;
+  where Layer P truth is joined in, the closed-form true curve is evaluated at these
+  same 21 points (SPEC-01 §8 grid note). One grid in the file, never two.
 - MD-083: Marginal ROAS at current mean spend per channel (the "next €1000" table).
