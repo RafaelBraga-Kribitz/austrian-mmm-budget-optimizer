@@ -10,13 +10,27 @@ __pycache__/
 .env
 
 # --- Generated data (regenerable; see committed-by-design list below) ---
-data/warehouse/
-data/cache/
+# EB-081 names these `data/warehouse/` and `data/cache/`; the `/*` form below is
+# required so the directory itself is not excluded from git's tree walk, which is
+# what lets the .gitkeep negation below actually track a placeholder inside it
+# (a bare `dir/` pattern makes git skip the directory entirely — negating a path
+# inside a fully-ignored directory is a no-op per gitignore(5)). Ignore coverage
+# of the real generated contents is unchanged.
+data/warehouse/*
+data/cache/*
 *.nc
 
 # --- dbt ---
-dbt/target/
+dbt/target/*
 dbt/logs/
+
+# --- Placeholders tracked inside otherwise-ignored directories (01-02 Task 3) ---
+# These directories are ignored for their generated contents, but the directory itself
+# must exist on a clean checkout for path-globbing scripts. Only the .gitkeep is exempt;
+# the directories and their real contents remain ignored.
+!data/warehouse/.gitkeep
+!data/cache/.gitkeep
+!dbt/target/.gitkeep
 
 # --- Internal build scaffolding (not part of the published deliverable) ---
 # The execution blueprint is process documentation for the build itself. It serves
