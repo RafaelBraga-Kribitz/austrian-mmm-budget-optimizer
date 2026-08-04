@@ -6,6 +6,7 @@ Implements: EB-040, EB-041, AG-020, MD-050
 from __future__ import annotations
 
 import re
+import sys
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -29,6 +30,19 @@ SPEC_02_CHANNELS = [
     "radio",
     "other",
 ]
+
+# Fictional path — never a real developer value, per EB-041's own rule, honored
+# even inside a test (as `test_leak_scan.py`/`test_logging.py` do). `config.py`'s
+# `load_settings()` calls `Path(...).resolve()` on the raw env value, which is a
+# no-op on an already-absolute path but prefixes the cwd onto a relative one. A
+# drive-letter path (`D:/...`) is absolute on Windows but merely relative-looking
+# on POSIX, so a fixed `D:/...` literal would resolve against `cwd` (not as the
+# absolute path this test's name claims to exercise) on the Linux CI leg only
+# (01-09/WR-04 fix-forward, 01-10). Branching on `sys.platform` keeps the fixture
+# genuinely absolute on both.
+FAKE_PRIVATE_DROP = (
+    "D:/private/ambo_drop_fake" if sys.platform == "win32" else "/private/ambo_drop_fake"
+)
 
 
 @pytest.fixture(autouse=True)
@@ -87,11 +101,10 @@ def test_unset_private_drop_is_none(_unset_private_drop: None) -> None:
 def test_set_private_drop_resolves_to_a_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # Fictional path — never a real developer value, per the project's own privacy
-    # rule (EB-041), even inside a test.
-    monkeypatch.setenv("AMBO_PRIVATE_DROP", "D:/private/ambo_drop_fake")
+    monkeypatch.setenv("AMBO_PRIVATE_DROP", FAKE_PRIVATE_DROP)
     settings = load_settings()
-    assert settings.private_drop == Path("D:/private/ambo_drop_fake").resolve()
+    assert settings.private_drop == Path(FAKE_PRIVATE_DROP).resolve()
+    assert settings.private_drop.is_absolute()
 
 
 def test_unknown_key_raises_config_error_naming_the_key(
