@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Iterator
+from collections.abc import Iterator
 
 import pytest
 
@@ -88,9 +88,7 @@ def test_fixed_format_is_applied(
     captured = capsys.readouterr()
     # LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s %(message)s"
     pattern = (
-        r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} WARNING "
-        + re.escape(name)
-        + r" format check$"
+        r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} WARNING " + re.escape(name) + r" format check$"
     )
     assert re.match(pattern, captured.err.strip())
 

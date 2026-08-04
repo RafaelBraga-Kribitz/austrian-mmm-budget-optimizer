@@ -6,8 +6,8 @@ Implements: EB-040, EB-041, AG-020, MD-050
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 import yaml
@@ -104,9 +104,7 @@ def test_unknown_key_raises_config_error_naming_the_key(
     (tmp_path / "pyproject.toml").write_text("", encoding="utf-8")
     fake_config_dir = tmp_path / "config"
     fake_config_dir.mkdir()
-    (fake_config_dir / "settings.yaml").write_text(
-        yaml.safe_dump(data), encoding="utf-8"
-    )
+    (fake_config_dir / "settings.yaml").write_text(yaml.safe_dump(data), encoding="utf-8")
 
     monkeypatch.setattr("ambo.common.config.repo_root", lambda: tmp_path)
     monkeypatch.delenv("AMBO_PRIVATE_DROP", raising=False)
@@ -145,6 +143,6 @@ def test_sampler_keys_appear_nowhere_else_in_src_ambo() -> None:
             if re.search(rf"\b{re.escape(key)}\b", text):
                 offenders.append(f"{py_file}: {key}")
 
-    assert not offenders, (
-        "MD-050 sampler key(s) found outside common/config.py: " + ", ".join(offenders)
+    assert not offenders, "MD-050 sampler key(s) found outside common/config.py: " + ", ".join(
+        offenders
     )

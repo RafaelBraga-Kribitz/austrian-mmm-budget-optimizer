@@ -52,10 +52,7 @@ def repo_root() -> Path:
     for candidate in (current, *current.parents):
         if (candidate / "pyproject.toml").is_file():
             return candidate
-    raise ConfigError(
-        "repo_root(): no pyproject.toml found in any parent directory of "
-        f"{current}"
-    )
+    raise ConfigError(f"repo_root(): no pyproject.toml found in any parent directory of {current}")
 
 
 class PathsConfig(BaseModel):
@@ -113,8 +110,7 @@ class Settings(BaseModel):
         value = tuple(value)
         if value != SPEC_CHANNEL_ORDER:
             raise ValueError(
-                f"channels must equal {SPEC_CHANNEL_ORDER!r} in that exact order, "
-                f"got {value!r}"
+                f"channels must equal {SPEC_CHANNEL_ORDER!r} in that exact order, got {value!r}"
             )
         return value
 
@@ -150,17 +146,14 @@ def load_settings() -> Settings:
     settings_path = root / SETTINGS_RELATIVE_PATH
     if not settings_path.is_file():
         raise ConfigError(
-            f"load_settings(): expected configuration file at {settings_path}, "
-            "not found"
+            f"load_settings(): expected configuration file at {settings_path}, not found"
         )
 
     with settings_path.open("r", encoding="utf-8") as handle:
         raw = yaml.safe_load(handle)
 
     if not isinstance(raw, dict):
-        raise ConfigError(
-            f"load_settings(): {settings_path} did not parse to a mapping"
-        )
+        raise ConfigError(f"load_settings(): {settings_path} did not parse to a mapping")
 
     data: dict[str, Any] = dict(raw)
     data["paths"] = _resolve_paths_block(data.get("paths"), root)
