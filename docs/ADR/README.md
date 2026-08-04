@@ -23,11 +23,7 @@ marked **Superseded** by a new ADR that references it, never edited or deleted i
 | ADR | Title | Status | Decisions |
 |-----|-------|--------|-----------|
 | [ADR-000](ADR-000_document-precedence-and-blueprint-defaults.md) | Document precedence, blueprint defaults, and the ingest cycle deviation | **Ratified** | D-1: precedence is scoped, not ranked — Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. D-2: the twenty DOC-tier BP-D-01…BP-D-20 blueprint defaults are accepted wholesale rather than re-litigated item by item. |
-
-**ADR-006** (module contracts repoint, SPEC-08 §2 layout additions, the D-04 standing
-rule and its two deferred items, the D-18 commit-history note) is being authored in plan
-01-03 of this phase and is in flight — its number is reserved so it is not reused by
-anything else landing before it merges. It will move into the table above once ratified.
+| [ADR-006](ADR-006_module-contracts-layout-and-citation-policy.md) | Module contracts, layout, and citation policy | **Ratified** | SPEC-08 §2's contract-first citation repoints at `docs/MODULE_CONTRACTS.md`; the canonical layout gains `.github/`, `.planning/`, `uv.lock`, `.gitattributes`; the standing no-unpublished-citation rule with its two deferred violations (Phase 4, Phase 9); commit-history conformance begins at the first `m0-bootstrap` commit. |
 
 ## Reserved slots (GB-202)
 
