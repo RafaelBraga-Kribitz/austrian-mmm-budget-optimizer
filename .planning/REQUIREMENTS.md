@@ -30,11 +30,14 @@ The summaries below are abridged; the intel file wins on any difference.
       saturation, optimal allocation — within stated tolerances, including a zero-effect
       channel it must NOT hallucinate. *(Q1; accepted when all SPEC-05 §3 gates are green per
       scenario at their scenario-specific thresholds.)*
+
 - [ ] **REQ-q2-real-incremental-roas**: Determine what drives the real client's revenue —
       incremental ROAS and response curves per channel, with credible intervals. *(Q2)*
+
 - [ ] **REQ-q3-optimal-allocation**: At the same total budget, determine the optimal allocation
       and the expected contribution gain versus the historical allocation. *(Q3; extrapolation
       guards visibly active.)*
+
 - [ ] **REQ-q4-attribution-gap**: Quantify the gap between platform-reported ROAS and MMM
       incremental ROAS, per channel. *(Q4)*
 
@@ -46,32 +49,41 @@ The summaries below are abridged; the intel file wins on any difference.
       2026-08-04 — Charter DL-1 corrected to point at that probe, and `exports/*.csv` is now
       committed-by-design per EB-081, so the export comparison is executable. INFO 2 and
       WARNING 5 closed.)*
+
 - [ ] **REQ-dl2-recovery-report**: `reports/recovery/RECOVERY_REPORT.md` — generated, not
       hand-edited, gate table all-green, VR-304 verdict section present, SSOT `recovery_pass_*`
       true. *(DL-2, answers Q1)*
+
 - [ ] **REQ-dl3-layer-r-posterior-report**: Layer R posterior report — ROAS table with 90%
       HDIs, response curves, contribution decomposition; MD-080 additivity test green; every
       ROAS row has HDI columns populated. *(DL-3, answers Q2)*
+
 - [ ] **REQ-dl4-optimizer-output**: `allocation_scenarios.csv` with 3 budget rows × channels
       and a binding-flags column; SSOT `expected_gain_pct(_lo/_hi)` and
       `expected_gain_aeur_annual`; DC-302 caption on every gain artifact; bounds column shows
       1.3× guard values. *(DL-4, answers Q3)*
+
 - [ ] **REQ-dl5-attribution-gap-artifact**: `attribution_gap.csv` + `dc_attribution_gap.png` +
       RB-203; DC-502 ordering gate green on S-B; per-channel P(platform > MMM) column present.
       *(DL-5, answers Q4)*
+
 - [ ] **REQ-dl6-priors-as-deliverable**: `docs/PRIOR_ELICITATION.md` as a first-class
       deliverable — every prior with a ≥100-character marketing rationale, frozen pre-fit;
       MD-061 doc-lint green; MD-062 freeze statement with commit hash; GB-502 ancestry check
       green. *(DL-6)*
+
 - [ ] **REQ-dl7-dashboard**: Power BI `dashboards/ambo.pbix` per SPEC-07 §4 plus
       `docs/assets/dashboard_p1..p4.png`; pages match RB-401…404 content lists; rebuild
       instructions verified. *(DL-7, human-executed)*
-- [ ] **REQ-dl8-quality**: `make test` green; ruff + mypy clean; CI green including smoke-fit;
+
+- [x] **REQ-dl8-quality**: `make test` green; ruff + mypy clean; CI green including smoke-fit;
       coverage ≥ 80% of `src/`. Release-commit CI run shows all six jobs green with coverage
       report linked. *(DL-8)*
+
 - [ ] **REQ-dl9-honesty**: `LIMITATIONS.md` covering at least the SPEC-09 §6 nine-item list
       (9/9 mapping table); anonymization protocol published without secrets; no absolute real €
       anywhere; leak scan full-mode green log. *(DL-9)*
+
 - [ ] **REQ-dl10-readme**: README leads with the recovery result and the Layer R answer;
       structure test green; RB-201 then RB-202 embedded in that order. *(DL-10)*
 
@@ -80,17 +92,21 @@ The summaries below are abridged; the intel file wins on any difference.
 - [ ] **REQ-e1-tagged-headline-numbers**: Every headline number carries its epistemic tag
       (GROUND-TRUTH / REAL-ANON / MODELED / CALIBRATED) in README and exec summary; SSOT rows
       carry a `tag` column. *(E-1)*
+
 - [ ] **REQ-e2-layer-order**: Layer R results are published ONLY if Layer P gates passed — a
       CI-checked fact. The commit adding `RECOVERY_REPORT.md` with all M3 gates green is a git
       ancestor of any commit adding `data/posteriors/R*.parquet` or `reports/model/diag_R.md`.
       *(E-2, GB-501)*
+
 - [ ] **REQ-e3-prior-freeze**: `config/priors_real.yaml` is committed BEFORE any Layer R fit
       artifact exists, with no post-freeze modification; freeze commit hash in SSOT
       `prior_freeze_commit`. *(E-3, GB-502)*
+
 - [ ] **REQ-e4-numeric-ssot**: `reports/NUMERIC_SSOT.md` is generated only by
       `scripts/generate_ssot.py` and is the sole source for numbers in README and exec summary;
       CI-gated by `scripts/check_ssot_consistency.py`; whitelist entries carry per-entry
       justification comments. *(E-4, GB-303, RB-601)*
+
 - [ ] **REQ-e5-anonymized-euro-caption**: Anonymized euros are always written a€ and every
       Layer R artifact carries the fixed caption; single caption source in
       `ambo/report/captions.py`, grep-test enforces single occurrence in `src/`. *(E-5, GB-102)*
@@ -100,22 +116,27 @@ The summaries below are abridged; the intel file wins on any difference.
 - [ ] **REQ-scope-in**: Eight in-scope workstreams (simulator, agency pipeline, warehouse,
       Bayesian MMM, validation, decision layer, reporting, engineering + light governance),
       each tracing to its owning SPEC and to at least one WBS task. *(§2.1)*
+
 - [ ] **REQ-scope-out**: O-1…O-8 excluded. Forbidden-deps test enforces O-3 at dependency
       level; single CI workflow with no cron enforces O-7; scope walls otherwise. *(§2.2)*
+
 - [ ] **REQ-grain-and-windows**: ISO weeks (Mon–Sun, Europe/Vienna) everywhere. Layer P per
       SPEC-01 §5 (S-A 156, S-B 104, S-C 78 weeks). Layer R is whatever the agency data covers,
       expected 52–104 weeks, exact window documented at intake and reported with every Layer R
       result; AG-050 drops partial edge weeks; AG-060 requires ≥ 52 weeks; `layer_r_weeks` in
       SSOT. *(§2.3; note the Charter's "156 per scenario" is superseded by SPEC-01 §5 — see
       INGEST-CONFLICTS INFO 1.)*
-- [ ] **REQ-milestones**: Eight milestones M0–M7, each exiting only on its named gate. Effort
+
+- [x] **REQ-milestones**: Eight milestones M0–M7, each exiting only on its named gate. Effort
       budget M0 0.5d, M1 1.5d, M2 2d, M3 2.5d, M4 1.5d, M5 2d, M6 2d, M7 2d. Any milestone
       exceeding 2× its budget triggers a stop plus an ADR. *(§5)*
+
 - [ ] **REQ-degradation-path**: If permission falls through, the repo remains shippable as
       Layers P+D on scenario S-B, the attribution-gap module runs on simulated platform bias
       (SIM-060), and the README uses its alternate framing. Decided by ADR **by end of M4, not
       later**; no gray-zone processing while waiting; RB §6.1 alternate framing pre-drafted.
       *(§7, AG-002, risk R-1)*
+
 - [ ] **REQ-risk-register**: Nine charter-level risks R-1…R-9 remain authoritative, each with a
       named mitigation binding to a SPEC mechanism, expanded per milestone in
       12_RISK_REGISTER.md with mitigation/fallback/detection triads, reviewed at each phase
@@ -162,7 +183,7 @@ This mapping is the roadmap-level view; the task-level view lives in
 | REQ-dl5-attribution-gap-artifact | Phase 8 | — | Pending |
 | REQ-dl6-priors-as-deliverable | Phase 6 | Phase 4 (elicit.py, T-308) | Pending |
 | REQ-dl7-dashboard | Phase 9 | — | Pending |
-| REQ-dl8-quality | Phase 1 | Phase 9 (release-commit audit) | Pending |
+| REQ-dl8-quality | Phase 1 | Phase 9 (release-commit audit) | Complete |
 | REQ-dl9-honesty | Phase 9 | Phase 6 (permission, leak scan) | Pending |
 | REQ-dl10-readme | Phase 9 | — | Pending |
 | REQ-e1-tagged-headline-numbers | Phase 9 | Phase 5 (SSOT `tag` column) | Pending |
@@ -173,11 +194,12 @@ This mapping is the roadmap-level view; the task-level view lives in
 | REQ-scope-in | Phase 1 | standing | Pending |
 | REQ-scope-out | Phase 1 | standing | Pending |
 | REQ-grain-and-windows | Phase 6 | Phases 2, 3 (Layer P grain) | Pending |
-| REQ-milestones | Phase 1 | standing (all phases) | Pending |
+| REQ-milestones | Phase 1 | standing (all phases) | Complete |
 | REQ-degradation-path | Phase 6 | Phase 9 (alternate framing) | Pending |
 | REQ-risk-register | Phase 1 | standing (reviewed at each phase entry) | Pending |
 
 **Coverage:**
+
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0 ✓

@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: Repository Foundation
+current_phase: 01
+current_phase_name: repository-foundation
 status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-08-04T18:05:55.617Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-08-04T18:21:44.708Z"
 last_activity: 2026-08-04
-last_activity_desc: Doc ingest of 24-document corpus; PROJECT.md, REQUIREMENTS.md, ROADMAP.md created
+last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 9
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 1 — Repository Foundation (P0 / M0)
+**Current focus:** Phase 01 — repository-foundation
 
 ## Current Position
 
-Phase: 1 of 9 (Repository Foundation)
-Plan: 0 of TBD in current phase
+Phase: 01 (repository-foundation) — EXECUTING
+Plan: 2 of 9
 Status: Ready to execute
-Last activity: 2026-08-04 — Doc ingest of 24-document corpus; PROJECT.md, REQUIREMENTS.md, ROADMAP.md created
+Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 11%
 
 ## Performance Metrics
 
@@ -51,6 +51,11 @@ Progress: [░░░░░░░░░░] 0%
 **Recent Trend:** No data yet.
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 01 P01 | 20min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -65,6 +70,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Ingest]: All 25 REQ IDs carried verbatim; no new IDs invented for Phases 2–4.
 - [2026-08-04]: All 7 ingest warnings resolved at source rather than deferred into phases — the source SPECs were contradictory independently of the ingest, so fixing the documents (not annotating the plan) was the only resolution that survives into implementation. See ADR-000 and the INGEST-CONFLICTS resolution log.
 - [2026-08-04, ADR-000 D-1]: Precedence is scoped, not ranked — Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. The Charter's own passages were corrected where they restated SPEC values wrongly.
+- [Phase ?]: 01-01: Audited T-001/T-003/T-012 against running probes rather than trusting the D-29 known-state table; all verdicts confirmed, with the exports/foo.csv untracked-not-ignored result clarified as correct per W5
+- [Phase ?]: 01-01: git add --renormalize . implies -u; left .planning/STATE.md's pre-existing out-of-scope content edit out of the .gitattributes commit
 
 ### Pending Todos
 
@@ -118,9 +125,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T16:16:05.978Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-repository-foundation/01-CONTEXT.md
+Last session: 2026-08-04T18:21:44.698Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
 `main` and WARNING 3 is fixed in SPEC-08 §2 plus the [STD] checklist — so Phase 1 can plan
