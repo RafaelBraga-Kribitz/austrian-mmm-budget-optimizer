@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: repository-foundation
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-08-04T19:17:20.744Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-08-04T19:27:04.927Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 01 (repository-foundation) — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [██████░░░░] 56%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [██████░░░░] 56%
 | Phase 01 P03 | 13min | 3 tasks | 5 files |
 | Phase 01 P04 | 12min | 3 tasks | 9 files |
 | Phase 01 P05 | 8min | 2 tasks | 2 files |
+| Phase 01 P06 | ~15min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: [Phase 1] 01-04: Added a mypy override for yaml.* instead of the types-PyYAML dev dependency -- PyYAML is already a pinned SPEC-08 3 runtime dependency, so extending the existing ignore_missing_imports pattern needs no new package and triggers no ADR
 - [Phase ?]: Sampling-target EB-050 runtime strings scoped to fit-synthetic/fit-real/sensitivity (the targets that write posteriors), not the read-only downstream targets
 - [Phase ?]: Implemented 13 stub Makefile targets per the plan's own explicit phase-mapping list, correcting the plan prose's miscounted 'twelve' (Rule 1)
+- [Phase ?]: 01-06: Advent read as exactly 4 flagged weeks total ending at the Dec-24 week inclusive, per Guide section 1.2 (D-07)
+- [Phase ?]: 01-06: Schulbeginn read as the second Monday of September (holidays package has no AT-6 school subdivision), per Guide section 1.2 (D-07)
+- [Phase ?]: 01-06: No holidays import in generate_season_windows.py -- none of the five window rules needs a holiday lookup; Phase 2 simulator is the actual future consumer
 
 ### Pending Todos
 
@@ -137,8 +141,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T19:17:20.733Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-08-04T19:27:04.918Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
