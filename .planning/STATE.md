@@ -81,15 +81,25 @@ corrected. What remains:
    intake codebase (T-501…T-506), the decision layer against Layer P (T-701…T-704), and
    reporting infrastructure (T-801, T-802).
 
-3. **[Before first public push] Documentation-to-code ratio.** The repository currently holds
-   ~39,000 words of planning documentation and zero lines of code. `docs/EXECUTION_BLUEPRINT/`
-   (14 files, ~28k words, `02_WBS.md` alone ~9.2k) is internal build scaffolding: it serves no
-   reader in either Charter §1.2 audience, and as the first thing a reviewer meets it invites
-   the wrong hypothesis. **Action before the repo goes public:** `git rm -r --cached
-   docs/EXECUTION_BLUEPRINT` and gitignore it, or move it to a private branch. Deferred rather
-   than done now because 20 cross-references in the freshly generated planning docs point at
-   those paths and there is no remote yet, so the move buys nothing today. Keep `PROJECT_CHARTER.md`,
-   `AGENTS.md`, `docs/ADR/` and `SPEC-01..09` public — spec-before-code is the project's argument.
+3. **[M3 exit — ACTION REQUIRED, no natural trigger] Repository is PRIVATE; make it public
+   when the recovery report exists.** The repo was public from 2026-08-04 13:53 until 16:0x
+   with 39k words of specs, zero code and no README. Set private on 2026-08-04 by decision:
+   go public at **M3**, when `reports/recovery/RECOVERY_REPORT.md` proves the model recovers
+   known truth. That is the moment the project's central claim stops being a promise. Git
+   history is untouched, so the layer-order argument (Charter §5) still verifies on release.
+
+   **Before flipping back to public, do all of:**
+   - [ ] `RECOVERY_REPORT.md` exists with SPEC-05 §3 gates green
+   - [ ] `README.md` exists per SPEC-07 §6 (DL-10: leads with the recovery result)
+   - [ ] `LICENSE` (MIT, per SPEC-08 §2) present
+   - [ ] `gh repo edit --visibility public`
+
+   *Done 2026-08-04:* `docs/EXECUTION_BLUEPRINT/` untracked and gitignored as internal build
+   scaffolding (files remain on disk, and remain in history from commit `1851f39` — EB-082
+   forbids rewriting, which is accepted). Published tree is now `PROJECT_CHARTER.md`,
+   `AGENTS.md`, `docs/ADR/`, `docs/SPEC-01..09`, `.planning/`. `.planning/` was kept tracked
+   deliberately: it is version-controlled backup for ROADMAP/STATE, and INGEST-CONFLICTS.md
+   with its resolution log is a defensible artifact rather than noise.
 
 ## Deferred Items
 
