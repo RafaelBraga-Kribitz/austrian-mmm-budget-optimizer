@@ -29,19 +29,30 @@ Source intel (verbatim, with Charter refs preserved): `.planning/intel/requireme
 
 ### Validated
 
-None yet — nothing has been built. The repository contains documentation only.
+Validated in Phase 1: Repository Foundation — five delivery-discipline requirements, each
+proven by an executable mechanism rather than by review:
+
+- [x] **REQ-dl8-quality** — the six-job CI workflow, the `ruff`/`mypy` lint chain, and the
+      pre-commit toolchain, all green on Ubuntu and Windows.
+- [x] **REQ-scope-in** — `docs/MODULE_CONTRACTS.md` is the contract of record; the repo-layout
+      and import-independence guards enforce it.
+- [x] **REQ-scope-out** — the forbidden-deps and no-requests guards, plus `scripts/leak_scan.py`.
+- [x] **REQ-milestones** — the milestone-branch topology (D-11) and the PR template's six
+      judgment checkboxes.
+- [x] **REQ-risk-register** — `docs/RISK_REGISTER.md`, seeded with R-1…R-9 verbatim from the
+      Charter plus R-10…R-13 from build findings.
 
 ### Active
 
-All 25 v1 requirements are active. Grouped by Charter origin:
+Twenty of the 25 v1 requirements remain active. Grouped by Charter origin:
 
 - [ ] **Q1–Q4** — the four analytical questions (truth recovery, real incremental ROAS,
       optimal allocation, attribution gap)
 - [ ] **DL-1…DL-10** — the ten deliverables, each with an objective acceptance criterion
 - [ ] **E-1…E-5** — the five epistemic rules (tagged numbers, layer order, prior freeze,
       numeric SSOT, a€ caption)
-- [ ] **Scope / grain / milestones / degradation / risk** — the six delivery-discipline
-      requirements
+- [x] **Scope / grain / milestones / degradation / risk** — validated above by Phase 1, except
+      the grain and degradation-path requirements, which Phases 2–6 exercise.
 
 ### Out of Scope
 
@@ -53,7 +64,11 @@ Charter §2.2, O-1…O-8. Two of these are enforced mechanically rather than by 
   everywhere; daily grain would change every spec.
 - **Additional MMM frameworks or model averaging** (O-3) — exactly two implementations exist,
   raw PyMC (primary) and pymc-marketing (cross-check only). *Enforced by the forbidden-deps
-  test blocking robyn, lightweight_mmm, prophet, sklearn.*
+  test, which is **import-scoped, not tree-scoped**: it blocks what `ambo`'s own code imports
+  (robyn, lightweight_mmm, prophet, sklearn), not every package name in the resolved
+  dependency tree. Ratified in Phase 1 — `scikit-learn` is legitimately present transitively
+  via `pymc-marketing` → `pymc-extras`, and a tree-scoped guard would false-positive on the
+  Charter-sanctioned cross-check implementation.*
 - **Customer-level modeling, funnel analytics, creative analysis** (O-4) — different data,
   different project.
 - **Hosted apps** (O-5) — the what-if deliverable is Power BI plus exported scenario tables.
@@ -196,4 +211,5 @@ source documents, so none is carried into execution. Full report and resolution 
 | Preserve W2–W5 as must-resolve items inside their phases rather than picking a side | All four are SPEC-vs-SPEC at equal precedence; an implementer silently choosing is exactly the failure mode | — Pending |
 
 ---
-*Last updated: 2026-08-04 after doc ingest and roadmap creation*
+*Last updated: 2026-08-04 after Phase 1 (Repository Foundation) completed — the engineering
+shell exists and its quality bar, scope walls, and governance mechanisms are enforced by CI.*
