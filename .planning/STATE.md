@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: repository-foundation
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-08-04T18:35:56.321Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-08-04T18:47:56.161Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 01 (repository-foundation) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [██░░░░░░░░] 22%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██░░░░░░░░] 22%
 |------|----------|-------|-------|
 | Phase 01 P01 | 20min | 3 tasks | 4 files |
 | Phase 01 P02 | 8min | 3 tasks | 30 files |
+| Phase 01 P03 | 13min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 01-01: git add --renormalize . implies -u; left .planning/STATE.md's pre-existing out-of-scope content edit out of the .gitattributes commit
 - [Phase ?]: Charter O-3 is import-scoped, not tree-scoped: scikit-learn transitive via pymc-marketing does not violate O-3 (binding, from human checkpoint approval on 01-02)
 - [Phase ?]: 134-package uv.lock count accepted as correct — RESEARCH.md's 112 baseline omitted the dev dependency group
+- [Phase ?]: [Phase 1] 01-03: Owner-phase for each risk resolved via ROADMAP.md's M0-M7 to Phase 1-9 mapping table (R-1/R-6 to Phase 6, R-2/R-9 to Phase 7, R-3/R-5 to Phase 5, R-4 to Phase 8, R-7 to Phase 4, R-8/R-12 standing)
+- [Phase ?]: [Phase 1] 01-03: docs/ADR/README.md updated beyond files_modified to move ADR-006 into the ratified table (Rule 2) — the README's own prior text promised this once ratified
 
 ### Pending Todos
 
@@ -128,8 +131,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T18:35:56.304Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-08-04T18:47:56.149Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now

@@ -113,7 +113,7 @@ The summaries below are abridged; the intel file wins on any difference.
 
 ### Scope and delivery discipline (Charter §2, §5, §6, §7)
 
-- [ ] **REQ-scope-in**: Eight in-scope workstreams (simulator, agency pipeline, warehouse,
+- [x] **REQ-scope-in**: Eight in-scope workstreams (simulator, agency pipeline, warehouse,
       Bayesian MMM, validation, decision layer, reporting, engineering + light governance),
       each tracing to its owning SPEC and to at least one WBS task. *(§2.1)*
 
@@ -137,7 +137,7 @@ The summaries below are abridged; the intel file wins on any difference.
       later**; no gray-zone processing while waiting; RB §6.1 alternate framing pre-drafted.
       *(§7, AG-002, risk R-1)*
 
-- [ ] **REQ-risk-register**: Nine charter-level risks R-1…R-9 remain authoritative, each with a
+- [x] **REQ-risk-register**: Nine charter-level risks R-1…R-9 remain authoritative, each with a
       named mitigation binding to a SPEC mechanism, expanded per milestone in
       12_RISK_REGISTER.md with mitigation/fallback/detection triads, reviewed at each phase
       entry. *(§6)*
@@ -191,12 +191,12 @@ This mapping is the roadmap-level view; the task-level view lives in
 | REQ-e3-prior-freeze | Phase 6 | Phase 7 (enforced) | Pending |
 | REQ-e4-numeric-ssot | Phase 5 | Phases 7, 9 | Pending |
 | REQ-e5-anonymized-euro-caption | Phase 9 | Phase 8 (DC-302 caption) | Pending |
-| REQ-scope-in | Phase 1 | standing | Pending |
+| REQ-scope-in | Phase 1 | standing | Complete |
 | REQ-scope-out | Phase 1 | standing | Complete |
 | REQ-grain-and-windows | Phase 6 | Phases 2, 3 (Layer P grain) | Pending |
 | REQ-milestones | Phase 1 | standing (all phases) | Complete |
 | REQ-degradation-path | Phase 6 | Phase 9 (alternate framing) | Pending |
-| REQ-risk-register | Phase 1 | standing (reviewed at each phase entry) | Pending |
+| REQ-risk-register | Phase 1 | standing (reviewed at each phase entry) | Complete |
 
 **Coverage:**
 
