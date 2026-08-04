@@ -244,3 +244,9 @@ run as part of Task 3's own verification (this is also what `make setup` runs).
 ---
 *Phase: 01-repository-foundation*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All 4 artifacts found on disk (`scripts/leak_scan.py`, `tests/unit/test_leak_scan.py`,
+`.pre-commit-config.yaml`, this SUMMARY.md); all 4 commits verified present in git
+history (`868afa9`, `0d12366`, `dc6ddfa`, `9e4fb5b`).

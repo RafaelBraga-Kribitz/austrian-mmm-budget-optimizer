@@ -63,7 +63,7 @@ SPEC-08 §2 *repository* layout (a file tree), not a UI layout.
   4. `dbt/seeds/season_windows.csv` is committed with passing unit tests, so the simulator and dbt read one calendar (AD-020).
   5. The two architectural guard tests exist and fail loudly when violated: forbidden dependencies (robyn, lightweight_mmm, prophet, sklearn) and simulate↔model import independence.
 
-**Plans**: 7/9 plans executed
+**Plans**: 8/9 plans executed
 Plans:
 **Wave 1**
 
@@ -83,7 +83,7 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 01-07-PLAN.md — test scaffold + the four architectural guards, line-ending and ignore tests (wave 4)
-- [ ] 01-08-PLAN.md — `leak_scan.py` three modes + tests, seven pinned pre-commit hooks (wave 4)
+- [x] 01-08-PLAN.md — `leak_scan.py` three modes + tests, seven pinned pre-commit hooks (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -398,7 +398,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Repository Foundation | M0 | 7/9 | In Progress|  |
+| 1. Repository Foundation | M0 | 8/9 | In Progress|  |
 | 2. Ground-Truth Simulator | M1 | 0/TBD | Not started | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
