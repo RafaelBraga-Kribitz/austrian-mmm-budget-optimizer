@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_phase_name: repository-foundation
-status: executing
-stopped_at: Completed 01-08-PLAN.md
-last_updated: "2026-08-04T20:16:17.847Z"
+status: verifying
+stopped_at: Completed 01-09-PLAN.md
+last_updated: "2026-08-04T21:26:29.673Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 01 (repository-foundation) — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [█████████░] 89%
 | Phase 01 P06 | ~15min | 2 tasks | 4 files |
 | Phase 01 P07 | 24min | 3 tasks | 8 files |
 | Phase 01 P08 | ~30min | 3 tasks | 3 files |
+| Phase 01 P09 | ~64min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,10 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 01-08: leak-scan generic private-drop shape requires an explicit [:=] assignment operator (not bare adjacency) -- excludes this repo's own $AMBO_PRIVATE_DROP/staged/-style shell-interpolation documentation
 - [Phase ?]: 01-08: .env.example excluded from the leak scanner's generic private-drop shape check only (01-02's sanctioned fictional example line); the dynamic literal-value check still covers it
 - [Phase ?]: 01-08: pre-commit hook revisions pinned to verified upstream tags -- ruff-pre-commit v0.16.1, pre-commit-hooks v6.0.0, nbstripout 0.9.1; mypy deliberately not a hook (make lint already runs it)
+- [Phase ?]: [Phase 1] 01-09: leak_scan.py doc-comment self-matched its own regex, fixed with an <abs-path> placeholder; scanner is never exempted from scanning its own file
+- [Phase ?]: [Phase 1] 01-09: private-drop test fixtures were Windows-only absolute; now branch on sys.platform so redaction/leak-scan logic is genuinely exercised on every CI leg
+- [Phase ?]: [Phase 1] 01-09: _resolve_private_drop_needles() deduplicates its three separator-form candidates -- an un-deduplicated list double-counted one real match as two Findings on POSIX, masked on Windows
+- [Phase ?]: [Phase 1] 01-09: Phase 1 complete -- all six EB-060 CI jobs confirmed green with none skipped on draft PR #1 (run 30951615385); PR left in draft per D-11
 
 ### Pending Todos
 
@@ -149,8 +154,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T20:16:07.618Z
-Stopped at: Completed 01-08-PLAN.md
+Last session: 2026-08-04T21:26:29.664Z
+Stopped at: Completed 01-09-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now

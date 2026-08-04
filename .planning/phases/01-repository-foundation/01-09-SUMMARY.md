@@ -209,3 +209,12 @@ None — no external service configuration required.
 ---
 *Phase: 01-repository-foundation*
 *Completed: 2026-08-04*
+
+## Self-Check: PASSED
+
+All 10 referenced artifacts found on disk (`scripts/check_layer_order.py`,
+`scripts/check_ssot_consistency.py`, `tests/unit/test_governance_checks.py`,
+`.github/workflows/ci.yml`, `docs/BUILD_LOG.md`, `docs/RISK_REGISTER.md`,
+`scripts/leak_scan.py`, `tests/unit/test_logging.py`, `tests/unit/test_leak_scan.py`,
+this SUMMARY.md); all 7 commits verified present in git history (`60e8a74`, `004e2a2`,
+`2bb8b7c`, `a05d4ee`, `60c3f04`, `7b42a7c`, `984d195`).
