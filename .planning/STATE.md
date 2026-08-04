@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: repository-foundation
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-08-04T19:27:04.927Z"
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-08-04T19:51:44.224Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 01 (repository-foundation) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 Status: Ready to execute
 Last activity: 2026-08-04 — Phase 01 execution started
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [███████░░░] 67%
 | Phase 01 P04 | 12min | 3 tasks | 9 files |
 | Phase 01 P05 | 8min | 2 tasks | 2 files |
 | Phase 01 P06 | ~15min | 2 tasks | 4 files |
+| Phase 01 P07 | 24min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 01-06: Advent read as exactly 4 flagged weeks total ending at the Dec-24 week inclusive, per Guide section 1.2 (D-07)
 - [Phase ?]: 01-06: Schulbeginn read as the second Monday of September (holidays package has no AT-6 school subdivision), per Guide section 1.2 (D-07)
 - [Phase ?]: 01-06: No holidays import in generate_season_windows.py -- none of the five window rules needs a holiday lookup; Phase 2 simulator is the actual future consumer
+- [Phase ?]: 01-07: test_forbidden_deps.py is import-scoped only, does not parse uv.lock -- follows the binding O-3 import-scope ruling from 01-02's human checkpoint (scikit-learn arrives transitively via the sanctioned pymc-marketing chain)
+- [Phase ?]: 01-07: fixed working-tree-only CRLF drift in 12 already-tracked files (committed blobs were already LF-clean) discovered by test_line_endings.py; root cause is core.autocrlf=true short-circuiting a plain git checkout --, fixed via delete + git checkout HEAD --, no commit needed
+- [Phase ?]: 01-07: all four D-23 architectural guards proven red-then-green on a scratch branch with zero commits ever made on it (deleted via safe git branch -d), evidence recorded in docs/BUILD_LOG.md per T-010 AC-1
 
 ### Pending Todos
 
@@ -141,8 +145,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T19:27:04.918Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-08-04T19:51:44.212Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
