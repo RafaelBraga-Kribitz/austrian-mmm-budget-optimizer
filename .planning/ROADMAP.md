@@ -27,6 +27,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -43,6 +44,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 ## Phase Details
 
 ### Phase 1: Repository Foundation
+
 **Goal**: A clone-and-run engineering shell where the quality bar, the scope walls, and the
 governance mechanisms all exist and are enforced before a single line of science is written.
 **Blueprint phase**: P0
@@ -54,22 +56,39 @@ SPEC-08 §2 *repository* layout (a file tree), not a UI layout.
 **Depends on**: Nothing (first phase)
 **Requirements**: REQ-dl8-quality, REQ-scope-in, REQ-scope-out, REQ-milestones, REQ-risk-register
 **Success Criteria** (what must be TRUE):
+
   1. `make setup && make lint && make test` runs green on a fresh clone, on both Windows Git Bash and Linux.
   2. CI `ci.yml` runs all six required jobs and all six pass — phase-gated jobs pass with an explicit "nothing to check yet" exit, never by being absent (EB-060).
   3. Git history begins with a documentation-only baseline commit (charter + specs + blueprint, zero code) that every later commit descends from.
   4. `dbt/seeds/season_windows.csv` is committed with passing unit tests, so the simulator and dbt read one calendar (AD-020).
   5. The two architectural guard tests exist and fail loudly when violated: forbidden dependencies (robyn, lightweight_mmm, prophet, sklearn) and simulate↔model import independence.
+
 **Plans**: 9 plans across 5 waves
 Plans:
+**Wave 1**
+
 - [ ] 01-01-PLAN.md — D-29 audit, `.gitattributes` LF pin, `m0-bootstrap` branch, ADR template + index (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
 - [ ] 01-03-PLAN.md — `MODULE_CONTRACTS.md`, `RISK_REGISTER.md`, ADR-006, PR template (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-04-PLAN.md — `config/settings.yaml` whole, `common/config.py`, `common/logging.py` + tests (wave 3)
 - [ ] 01-05-PLAN.md — the 18-target Makefile with loud stubs, scaffold README (wave 3)
 - [ ] 01-06-PLAN.md — season-windows generator, committed seed, rule tests (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 01-07-PLAN.md — test scaffold + the four architectural guards, line-ending and ignore tests (wave 4)
 - [ ] 01-08-PLAN.md — `leak_scan.py` three modes + tests, seven pinned pre-commit hooks (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 01-09-PLAN.md — the two vacuously-correct governance checks, six-job `ci.yml`, M0 close (wave 5)
+
 **WBS tasks**: T-001…T-012
 **Quality gates**: G-ENG, G-GOV (subset)
 **Rollback**: None meaningful — no downstream consumers. If toolchain choices fail on Windows, fix inside this phase; do not defer.
@@ -100,6 +119,7 @@ be written against the final name once.
 ---
 
 ### Phase 2: Ground-Truth Simulator
+
 **Goal**: A fictional Austrian advertiser whose every parameter is disclosed in-repo, so that
 "the model recovered ROAS" becomes a checkable claim rather than a plot.
 **Blueprint phase**: P1
@@ -109,11 +129,13 @@ be written against the final name once.
 **Depends on**: Phase 1 (season-windows seed must exist — the simulator consumes it)
 **Requirements**: REQ-q1-truth-recovery (contributing), REQ-grain-and-windows (contributing — Layer P grain)
 **Success Criteria** (what must be TRUE):
+
   1. `make simulate && make validate-sim` produces `data/synthetic/{s_a,s_b,s_c}/` and every SIM-070…075 gate reports green.
   2. Running the simulator twice produces byte-identical CSVs and truth files — determinism is proven, not assumed.
   3. Each `truth.json` contains every SPEC-01 §4/§6 parameter plus the §8 derived quantities, schema-validated by a committed pydantic model.
   4. Unit tests prove the closed forms independently: adstock converges to `x/(1−λ)` for constant spend, `Hill(K) = 0.5` exactly, the max revenue week of each simulated year falls in Advent, and SIM-031 spend-pattern statistics hold.
   5. Scenario YAMLs are the authoritative parameter source, and a test asserts they equal the SPEC-01 §4 table — divergence fails the test and a human reconciles, never a silent fix toward either side.
+
 **Plans**: TBD
 **WBS tasks**: T-101…T-109
 **Quality gates**: G-DATA-P, G-SCI-1, G-ENG
@@ -134,6 +156,7 @@ index (00 §5) does not cover this. See `.planning/INGEST-CONFLICTS.md` WARNING 
 ---
 
 ### Phase 3: Warehouse
+
 **Goal**: One queryable source of modeling input, so that the model provably reads a contract
 rather than a pile of CSVs it could quietly reshape.
 **Blueprint phase**: P2
@@ -143,10 +166,12 @@ rather than a pile of CSVs it could quietly reshape.
 **Depends on**: Phase 2 (synthetic CSVs must be committed — dbt builds on them in CI)
 **Requirements**: REQ-q1-truth-recovery (contributing), REQ-grain-and-windows (contributing — weekly spine), REQ-dl1-reproducible-pipeline (contributing — `make transform` opens the DL-1 probe)
 **Success Criteria** (what must be TRUE):
+
   1. `make transform` builds the dbt project green locally and in CI job 3, on committed synthetic data with no private inputs.
   2. `fct_mmm_input` exists as the sole model input contract, and `ambo/common/db.py` accessors return frames matching the documented mart schemas — gapless ascending weekly spine, documented columns, no NaN in spends, revenue > 0.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
+
 **Plans**: TBD
 **WBS tasks**: T-201…T-205
 **Quality gates**: G-DATA-W, G-ARCH (model code demonstrably reads only the mart)
@@ -159,6 +184,7 @@ task time per the Definition of Ready; do not silently re-decide it.
 ---
 
 ### Phase 4: MMM on S-A
+
 **Goal**: A Bayesian MMM that fits the clean scenario with a healthy sampler, so that any later
 recovery failure can be attributed to the science rather than to the machinery.
 **Blueprint phase**: P3
@@ -168,11 +194,13 @@ recovery failure can be attributed to the science rather than to the machinery.
 **Depends on**: Phase 3
 **Requirements**: REQ-q1-truth-recovery (contributing), REQ-q2-real-incremental-roas (contributing — one model definition serves all layers), REQ-dl6-priors-as-deliverable (contributing — `elicit.py` built here at T-308, ahead of its M4 use)
 **Success Criteria** (what must be TRUE):
+
   1. MD-070 transform sanity passes **before** the first fit is attempted: model and simulator transform outputs correlate > 0.95 per channel on the S-A spend series. (This catches convolution bugs cheaply, and the parameterization mismatch is deliberate — MD-070 checks correlation, never equality.)
   2. A full-budget S-A fit passes SPEC-04 §7: R-hat < 1.01 on all parameters, ESS bulk and tail > 400, zero divergences, BFMI > 0.3 on all chains.
   3. The posterior predictive check puts observed revenue inside the 90% band for ≥ 85% of weeks, with the plot committed.
   4. `data/posteriors/P-SA.parquet` (thinned, carrying scale factors and provenance metadata) and `reports/model/diag_P-SA.md` are committed, and the CI smoke-fit is green inside its 15-minute budget.
   5. MD-040's test proves the Layer P priors are channel-agnostic — identical Beta on every λ, identical HalfNormal on every β — so recovery cannot come from priors that encode the truth table.
+
 **Plans**: TBD
 **WBS tasks**: T-301…T-308
 **Quality gates**: G-SCI-2 (sampler health), G-ENG
@@ -188,6 +216,7 @@ effort tripwire through the compute ledger. Pick one number, put it in the singl
 ---
 
 ### Phase 5: Recovery Suite
+
 **Goal**: Proof that the model finds truth it was never shown — and a commit whose ancestry
 makes that proof unfalsifiable for every result that follows.
 **Blueprint phase**: P4
@@ -197,11 +226,13 @@ makes that proof unfalsifiable for every result that follows.
 **Depends on**: Phase 4
 **Requirements**: REQ-q1-truth-recovery (owning), REQ-dl2-recovery-report, REQ-e2-layer-order, REQ-e4-numeric-ssot, REQ-dl1-reproducible-pipeline (contributing)
 **Success Criteria** (what must be TRUE):
+
   1. Every VR-3xx gate is green per scenario at its scenario-specific threshold — including VR-304, where the model must say the zero-effect channel does nothing: P(average ROAS < 0.2) ≥ 0.7 and median contribution share ≤ 3% on S-C's `display_video`.
   2. `reports/recovery/RECOVERY_REPORT.md` is generated (not hand-edited), carries the mandatory SPEC-05 §8 section order, an all-green gate table, and the ≥ 500-character "what this does and does not prove" closing.
   3. VR-401 holdout beats the seasonal-naive MAPE baseline on S-A and S-B, and the VR-602 pymc-marketing cross-check correlates ≥ 0.8 with the raw-PyMC model on S-B.
   4. `make report` regenerates every recovery artifact from the committed thinned posteriors with **zero sampling** (VR-703), and golden tolerance bands live in `tests/golden/` with their generator script.
   5. `scripts/check_layer_order.py` and `scripts/check_ssot_consistency.py` are wired into CI and green — from this point, Layer R work is unlocked, and the unlock is a checked fact rather than a promise (Charter E-2).
+
 **Plans**: TBD
 **WBS tasks**: T-401…T-410
 **Quality gates**: G-SCI-3 (recovery), G-DATA, G-ENG, G-GOV (SSOT + layer-order mechanisms live)
@@ -220,6 +251,7 @@ See `.planning/INGEST-CONFLICTS.md` WARNING 4 and Phase 2.
 ---
 
 ### Phase 6: Agency Intake
+
 **Goal**: Real client data inside the repo without a single identifying or absolute value —
 and the priors written down, with rationales, before anyone has seen a result.
 **Blueprint phase**: P5
@@ -229,11 +261,13 @@ and the priors written down, with rationales, before anyone has seen a result.
 **Depends on**: Phase 5 (for the freeze and any Layer R artifact — Charter E-2). The intake *code* may be built any time after Phase 1.
 **Requirements**: REQ-dl6-priors-as-deliverable, REQ-e3-prior-freeze, REQ-grain-and-windows (owning), REQ-degradation-path, REQ-dl9-honesty (contributing), REQ-q2-real-incremental-roas (contributing — the data)
 **Success Criteria** (what must be TRUE):
+
   1. `docs/DATA_PERMISSION.md` is committed — stating that written permission exists, from whom in role terms only, the date, and the scope — and it was committed **before** any private file was processed. No gray-zone processing happened while waiting.
   2. `make validate-intake` reports AG-060…066 green on the real drop's outputs, and `data/real_anon/` plus `INTAKE_MANIFEST.yaml` are committed carrying no secret factors, no client identity, and no absolute totals.
   3. The leak scan is green in full local mode and in the CI subset, with the log retained.
   4. `config/priors_real.yaml` and the final `docs/PRIOR_ELICITATION.md` land in **one** freeze commit tagged `prior-freeze-v1`, MD-061 doc-lint is green (every channel present, every rationale ≥ 100 characters and not boilerplate, YAML matching the stated ranges), and no Layer R fit artifact exists anywhere in history yet.
   5. dbt `layer_r_present` is flipped to true and AD-044 is active and green — the mart's channel list matches the manifest.
+
 **Plans**: TBD
 **WBS tasks**: T-501…T-510
 **Quality gates**: G-DATA-R, G-GOV (permission, freeze, leak scan), G-DOC (elicitation doc)
@@ -245,6 +279,7 @@ whole of E-3.
 ---
 
 ### Phase 7: Layer R Fit & Sensitivity
+
 **Goal**: The real client's answer, with uncertainty reported as content rather than hidden as
 weakness.
 **Blueprint phase**: P6
@@ -254,11 +289,13 @@ weakness.
 **Depends on**: Phase 6 including the freeze tag. `check_layer_order.py` must be green *before* the first Layer R fit lands; it verifies that ancestry forever after.
 **Requirements**: REQ-q2-real-incremental-roas (owning), REQ-dl3-layer-r-posterior-report, REQ-e2-layer-order (contributing — first exercise), REQ-e3-prior-freeze (contributing — enforced here), REQ-e4-numeric-ssot (contributing)
 **Success Criteria** (what must be TRUE):
+
   1. A Layer R fit under the frozen priors passes SPEC-04 §7 with the MD-074 relaxations (ESS > 300); any tolerated divergences (≤ 5) ship with a committed energy plot, funnel-free pair plots, and a human review note.
   2. `data/posteriors/R.parquet` plus the variant posteriors are committed, and both the layer-order and prior-freeze checks are green in CI **on the very PR that adds them**.
   3. A ROAS table with 90% HDIs, response curves, and an additive contribution decomposition exists for the real client, with the MD-080 additivity test proving components sum to fitted μ within tolerance.
   4. The VR-501 prior-influence forest plot (`reports/recovery/vr_prior_influence.png` — the portfolio artifact of this project), VR-502 leave-one-channel-out, VR-503 S-B contrast, and VR-504 no-promo artifacts are all committed.
   5. SSOT carries `roas_*`, `layer_r_weeks`, `divergences_real_fit`, and `holdout_mape_real`, with the n=13 holdout caveat stated whichever way the holdout lands.
+
 **Plans**: TBD
 **WBS tasks**: T-601…T-605
 **Quality gates**: G-SCI-4 (Layer R honesty), G-GOV
@@ -267,6 +304,7 @@ weakness.
 ---
 
 ### Phase 8: Decision Layer
+
 **Goal**: A budget recommendation a marketing lead can act on, with the extrapolation guard
 rails visible in the output rather than buried in a caveat.
 **Blueprint phase**: P7
@@ -276,11 +314,13 @@ rails visible in the output rather than buried in a caveat.
 **Depends on**: Phase 5 for the code and the Layer P gates (needs committed P posteriors and truth files); Phase 7 for the Layer R runs (T-705)
 **Requirements**: REQ-q3-optimal-allocation, REQ-q4-attribution-gap, REQ-dl4-optimizer-output, REQ-dl5-attribution-gap-artifact, REQ-e5-anonymized-euro-caption (contributing — DC-302 caption)
 **Success Criteria** (what must be TRUE):
+
   1. DC-701 optimizer recovery is green on Layer P: on S-A, allocation cosine similarity ≥ 0.90 versus the true-parameter optimum and regret ≤ 5% of true-optimal; on S-B, ≥ 0.80 and ≤ 10%.
   2. DC-702 reproduces the simulated over-credit **ordering** on S-B: display_video > meta > search_generic > search_brand.
   3. `exports/allocation_scenarios.csv` shows 3 budget rows × channels with historical and optimal shares, expected contribution with HDI, binding-constraint flags, and the 1.3× extrapolation-guard bounds visible per channel.
   4. DC-704's constraint audit is exact — Σ x = B to 1e-6, bounds respected, `search_brand` unchanged — and two runs produce byte-identical CSVs (DC-703).
   5. `exports/attribution_gap.csv` and `reports/decide/dc_attribution_gap.png` regenerate via `make decide` from committed posteriors with no sampling, carrying per-channel P(platform > MMM) and the ≥ 500-character interpretation paragraph written from the marketing chair.
+
 **Plans**: TBD
 **WBS tasks**: T-701…T-705
 **Quality gates**: G-SCI-5 (decision validity), G-ENG
@@ -304,6 +344,7 @@ See `.planning/INGEST-CONFLICTS.md` WARNING 2.
 ---
 
 ### Phase 9: Reporting & Release
+
 **Goal**: Everything a reader touches — and a release a stranger can reproduce from a clean
 clone without any private input.
 **Blueprint phase**: P8
@@ -313,11 +354,13 @@ clone without any private input.
 **Depends on**: Phase 8 for full content
 **Requirements**: REQ-dl1-reproducible-pipeline (owning), REQ-dl7-dashboard, REQ-dl9-honesty, REQ-dl10-readme, REQ-e1-tagged-headline-numbers, REQ-e5-anonymized-euro-caption (owning), REQ-dl8-quality (contributing — release-commit audit), REQ-e4-numeric-ssot (contributing — RB-601 final), REQ-degradation-path (contributing — alternate framing if exercised)
 **Success Criteria** (what must be TRUE):
+
   1. A clean clone runs the DL-1 probe sequence with zero errors and **no fits**, and regenerated artifacts match the committed ones — text byte-equal, MCMC-derived numbers inside VR-702 bands — with the log attached to the release PR. Separately, `make simulate && make validate-sim` byte-reproduces `data/synthetic/`.
   2. README follows the RB §6 order exactly, leads with the recovery verdict and the gain number, embeds RB-201 before RB-202 (money first, credibility second), and every headline number carries its epistemic tag inline.
   3. All five RB-2xx executive charts regenerate via `make report` in under 2 minutes with zero sampling, each carrying a business-English title, unit-labeled axes, a source note, and an epistemic tag.
   4. `LIMITATIONS.md` covers all nine GB §6 items with a 9/9 mapping table, and `check_ssot_consistency.py` is green — proving no number lives outside SSOT.
   5. `dashboards/ambo.pbix` and the four `docs/assets/dashboard_p1..p4.png` screenshots are committed with verified rebuild instructions, the final SSOT is regenerated in the release PR, and the repo is tagged `v1.0`.
+
 **Plans**: TBD
 **WBS tasks**: T-801…T-806
 **Quality gates**: G-VIZ, G-DOC, G-PORT, G-REL
@@ -346,6 +389,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 **Execution Order:** Phases execute in numeric order 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9.
 
 **Standing rules** (`01_PHASES.md` §Phase-independent):
+
 1. Every phase closes with the AGENTS §5 verification protocol run, the milestone checklist ticked in the PR with evidence, a `docs/BUILD_LOG.md` entry, and SSOT regenerated if any number changed.
 2. A phase is **not** entered until the previous phase's PR is merged with all CI jobs green (one milestone, one PR).
 3. Cross-phase parallelism is allowed only along the explicitly parallel tracks in `04_DEPENDENCIES.md` §5–6; everything else is sequential.
