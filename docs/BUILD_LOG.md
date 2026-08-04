@@ -84,3 +84,61 @@ comments on `advent_weeks()` and `schulbeginn_weeks()` are the record; no ADR is
 Both readings are recorded twice, per T-011's own acceptance criteria (`02_WBS.md` lines
 248-249): as the in-script source comments on `advent_weeks()` and
 `schulbeginn_weeks()` in `scripts/generate_season_windows.py`, and as this entry.
+
+### 2026-08-04 — T-010 AC-1: planted-violation proof for all four architectural guards
+
+Per D-23 and T-010 AC-1 (`02_WBS.md` lines 218-221), each of the four standing guard
+tests added in plan 01-07 was proven to actually fail on a planted violation, not just
+proven to pass on a clean tree. The proof ran entirely on a scratch branch
+(`scratch-01-07-planted-violations`, created from `m0-bootstrap` at commit `009f56f`),
+with no commit ever made on it — every planted change was a working-tree edit, reverted
+by hand before the next violation was planted. The branch was deleted with `git branch -d`
+(a safe, non-force delete: since nothing was ever committed to it, it pointed at the same
+commit as `m0-bootstrap` and diverged in zero commits) immediately after the fourth proof,
+restoring `HEAD` to `m0-bootstrap` with a clean working tree. Nothing from the scratch
+branch reached `m0-bootstrap`'s history, preserving EB-082.
+
+1. **`tests/unit/test_import_independence.py` (SIM-003/W-2 firewall).** Planted
+   `src/ambo/simulate/_scratch_violation.py` containing `from ambo.model import fit`.
+   Failing node id: `tests/unit/test_import_independence.py::test_simulate_and_model_do_not_import_each_other`.
+   Message: `AssertionError: simulate<->model cross-import found (SIM-003 / W-2
+   firewall): src/ambo/simulate/_scratch_violation.py imports ambo.model`.
+2. **`tests/unit/test_forbidden_deps.py` (Charter O-3 / EB-030).** Planted
+   `src/ambo/_scratch_violation2.py` containing `import robyn`.
+   Failing node id: `tests/unit/test_forbidden_deps.py::test_no_forbidden_framework_is_imported_anywhere`.
+   Message: `AssertionError: Forbidden framework import(s) found (Charter O-3):
+   src/ambo/_scratch_violation2.py: ['robyn']`.
+3. **`tests/unit/test_repo_layout.py` (D-23 layout guard).** Added a new top-level
+   directory `_scratch_top_level_violation/.gitkeep`, staged with `git add -f` so
+   `git ls-files` would see it.
+   Failing node id: `tests/unit/test_repo_layout.py::test_top_level_entries_are_all_in_the_canonical_layout`.
+   Message: `AssertionError: Top-level entr(y/ies) not in the SPEC-08 section 2 (+
+   D-14) canonical layout: ['_scratch_top_level_violation']. ... Scanned 23 top-level
+   entries across 120 tracked files.`
+4. **`tests/unit/test_line_endings.py` (D-22 LF pin).** Planted
+   `docs/_scratch_crlf_violation.scratchdat` with CRLF bytes, staged with a temporary
+   `.gitattributes` override line (`docs/_scratch_crlf_violation.scratchdat text`) so
+   `git check-attr text` reported `set` rather than relying on the catch-all `auto`.
+   Failing node id: `tests/unit/test_line_endings.py::test_no_tracked_text_file_contains_a_carriage_return`.
+   Message: `AssertionError: Tracked text file(s) contain a carriage-return byte:
+   ['docs/_scratch_crlf_violation.scratchdat']`.
+
+After each proof, the planted file was deleted (and, for violations 3 and 4, unstaged
+with `git restore --staged` and the `.gitattributes` override reverted with
+`git checkout --`) before the next violation was planted, so each proof isolated exactly
+one guard. `uv run pytest tests -q` was confirmed green on the scratch branch immediately
+before switching back to `m0-bootstrap`.
+
+**Related fix, discovered by `test_line_endings.py` itself during authoring (not part of
+the planted-violation proof above):** several already-tracked files
+(`.gitignore`, `PROJECT_CHARTER.md`, four `docs/SPEC-*.md` files, `docs/ADR/
+ADR-000_document-precedence-and-blueprint-defaults.md`, and four `.planning/*.md` files)
+carried CRLF bytes in their on-disk working-tree copies, despite their committed blobs
+already being LF-only (confirmed via `git show HEAD:<path>` before the fix). Root cause:
+this dev machine's `core.autocrlf` is `true`, and a plain `git checkout -- <path>` is a
+no-op when git's clean-filtered comparison already matches the index, so the CRLF bytes
+survived on disk from an earlier write until a *fresh* checkout (delete, then
+`git checkout HEAD -- <path>`) forced the `eol=lf` smudge filter to re-apply. No commit
+was needed — the object database was already correct, only the working-tree bytes
+changed, and `git status --porcelain` was empty for all twelve paths both before and
+after.
