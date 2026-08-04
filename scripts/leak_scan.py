@@ -217,12 +217,21 @@ def _resolve_private_drop_needles() -> list[str]:
     and `PrivatePathFilter` all use) — rather than cached at import, so a test that
     sets the environment variable and clears `load_settings`'s cache genuinely
     changes what this scanner looks for.
+
+    Deduplicated while preserving order: `str(private_drop)` is already in the
+    runner's native separator style (backslash on Windows, forward slash on
+    POSIX), so exactly one of the two `.replace()` calls below is a no-op and
+    would otherwise reproduce the same needle twice. An un-deduplicated list
+    fed the same matching line through `_scan_single_line`'s per-needle loop
+    twice, double-counting a single real match as two `Finding`s -- harmless
+    on Windows, where the no-op happened to be the one that also failed to
+    match the line, but a genuine double-count on POSIX (01-09 fix-forward).
     """
     private_drop = load_settings().private_drop
     if private_drop is None:
         return []
     raw = str(private_drop)
-    return [raw, raw.replace("\\", "/"), raw.replace("/", "\\")]
+    return list(dict.fromkeys((raw, raw.replace("\\", "/"), raw.replace("/", "\\"))))
 
 
 def _git_ls_files(root: Path) -> list[str]:
