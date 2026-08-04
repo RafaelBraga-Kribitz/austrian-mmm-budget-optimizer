@@ -75,9 +75,14 @@ _PRIVATE_DROP_ENV_VAR = "AMBO_PRIVATE_DROP"
 
 # Generic private-drop-adjacent path shape: an absolute Windows path (`C:\...` or
 # `C:/...`) or an absolute POSIX path (`/...`) immediately assigned to the env
-# var's own name via `=` or `:`, e.g. `AMBO_PRIVATE_DROP=C:\Users\...` or
-# `AMBO_PRIVATE_DROP: /srv/agency-drop`. Catches a path pasted into a committed file
-# even where the variable itself is unset on the scanning machine. Requiring an
+# var's own name via `=` or `:`, e.g. `AMBO_PRIVATE_DROP=<abs-path>` (Windows form)
+# or `AMBO_PRIVATE_DROP: <abs-path>` (POSIX form). Catches a path pasted into a
+# committed file even where the variable itself is unset on the scanning machine.
+# The two examples above are deliberately written with a `<abs-path>` placeholder
+# rather than a literal path -- the pattern's own path character class excludes
+# `<`/`>`, so a literal example here would self-match this file when the scanner
+# runs over its own source (this repository's `leak` CI job does exactly that;
+# see 01-09's fix-forward). Requiring an
 # assignment operator (rather than bare adjacency) is deliberate: prose that merely
 # *mentions* the variable name (e.g. "the `AMBO_PRIVATE_DROP` env var") does not
 # match, and neither does the project's own shell-interpolation documentation style
