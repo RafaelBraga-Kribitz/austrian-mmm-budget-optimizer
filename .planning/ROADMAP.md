@@ -136,11 +136,11 @@ be written against the final name once.
   4. Unit tests prove the closed forms independently: adstock converges to `x/(1−λ)` for constant spend, `Hill(K) = 0.5` exactly, the max revenue week of each simulated year falls in Advent, and SIM-031 spend-pattern statistics hold.
   5. Scenario YAMLs are the authoritative parameter source, and a test asserts they equal the SPEC-01 §4 table — divergence fails the test and a human reconciles, never a silent fix toward either side.
 
-**Plans**: 10 plans in 9 waves
+**Plans**: 1/10 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — ADR-007 for the `hypothesis` dev dependency, its blocking legitimacy checkpoint, and the install (wave 1)
+- [x] 02-01-PLAN.md — ADR-007 for the `hypothesis` dev dependency, its blocking legitimacy checkpoint, and the install (wave 1)
 - [ ] 02-02-PLAN.md — `SimulationError`, the `ScenarioConfig` model tree, module contract, structural tests (T-101a) (wave 1)
 
 **Wave 2** *(blocked on Wave 1)*
@@ -187,14 +187,17 @@ resolution:
 
 - The 21-point 0…2× max weekly spend array in `truth.json` is a **diagnostic** sample kept in
   that file only. It shows where the model would be extrapolating and is never the comparison grid.
+
 - `exports/response_curves.csv` (AD-050) carries **one grid only** — MD-082's 21 points over
   0…1.5× max *observed* weekly spend — and the Layer P truth column on that export is the
   closed-form curve evaluated at those same 21 points. VR-303 differences on that grid.
+
 - The true curve is closed-form (β·Hill at steady-state adstock), so it evaluates exactly at any
   spend with no interpolation error. The simulator therefore exposes it as a function of a
   **caller-supplied grid**: plan 02-08 ships `truth.response_curve_at(params, x_grid)` and
   registers it in `docs/MODULE_CONTRACTS.md`, so Phase 3/8's export reuses the formula instead of
   re-deriving it.
+
 - Horizon ordering to preserve downstream: 1.3× optimizer bound (DC-203b) < 1.5× reporting
   horizon (MD-082) < 2.0× truth diagnostic.
 
@@ -447,7 +450,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete    | 2026-08-04 |
-| 2. Ground-Truth Simulator | M1 | 0/10 | Planned | - |
+| 2. Ground-Truth Simulator | M1 | 1/10 | In Progress|  |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |

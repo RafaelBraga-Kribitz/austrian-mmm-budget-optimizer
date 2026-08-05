@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
+current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-08-05T08:40:23.524Z"
-last_activity: 2026-08-04
-last_activity_desc: Phase 01 complete, transitioned to Phase 2
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-08-05T09:25:23.081Z"
+last_activity: 2026-08-05
+last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 19
+  completed_plans: 10
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 01 — repository-foundation
+**Current focus:** Phase 02 — Ground-Truth Simulator
 
 ## Current Position
 
-Phase: 2 — Ground-Truth Simulator
-Plan: Not started
+Phase: 02 (Ground-Truth Simulator) — EXECUTING
+Plan: 2 of 10
 Status: Ready to execute
-Last activity: 2026-08-04 — Phase 01 complete, transitioned to Phase 2
+Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [██████████] 100%
+Progress: [█████░░░░░] 53%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 01 P07 | 24min | 3 tasks | 8 files |
 | Phase 01 P08 | ~30min | 3 tasks | 3 files |
 | Phase 01 P09 | ~64min | 3 tasks | 9 files |
+| Phase 02 P01 | 33min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: [Phase 1] 01-09: private-drop test fixtures were Windows-only absolute; now branch on sys.platform so redaction/leak-scan logic is genuinely exercised on every CI leg
 - [Phase ?]: [Phase 1] 01-09: _resolve_private_drop_needles() deduplicates its three separator-form candidates -- an un-deduplicated list double-counted one real match as two Findings on POSIX, masked on Windows
 - [Phase ?]: [Phase 1] 01-09: Phase 1 complete -- all six EB-060 CI jobs confirmed green with none skipped on draft PR #1 (run 30951615385); PR left in draft per D-11
+- [Phase ?]: 02-01: hypothesis added to [dependency-groups] dev only (never [project] dependencies) per EB-030/O-3, ADR-007 ratified
+- [Phase ?]: 02-01: SUS package-legitimacy verdict for hypothesis treated as a checker data artifact only after explicit human checkpoint approval, not researcher confidence alone
 
 ### Pending Todos
 
@@ -154,9 +157,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-04T23:04:20.511Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-ground-truth-simulator/02-CONTEXT.md
+Last session: 2026-08-05T09:25:23.071Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
 `main` and WARNING 3 is fixed in SPEC-08 §2 plus the [STD] checklist — so Phase 1 can plan
