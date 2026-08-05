@@ -18,6 +18,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from ambo.common.errors import SimulationError
 from ambo.simulate import dgp
@@ -343,3 +345,103 @@ def test_hill_raises_on_non_positive_k() -> None:
 def test_hill_raises_on_non_positive_s() -> None:
     with pytest.raises(SimulationError):
         hill(np.array([1.0]), K=1000.0, s=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Property-based invariants (D-03) -- exactly five, bounded strategies only.
+#
+# `@settings(max_examples=100)` is applied explicitly rather than relying on
+# Hypothesis's implicit default, and no project-wide Hypothesis profile is
+# registered in conftest.py: if suite runtime ever becomes a problem, the fix
+# is a profile there, not a per-test tweak (02-RESEARCH.md Code Examples).
+# Every float strategy passes allow_nan=False, allow_infinity=False plus
+# explicit min_value/max_value so generated inputs stay in-bounds directly
+# rather than via assume() filtering, which trips Hypothesis's
+# too-much-filtering health check (02-RESEARCH.md Pitfall 5). st.integers is
+# used for the one index-valued strategy below, never a float cast.
+# ---------------------------------------------------------------------------
+
+
+@given(
+    x=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    lam=st.floats(min_value=0, max_value=0.99, allow_nan=False, allow_infinity=False),
+)
+@settings(max_examples=100)
+def test_adstock_is_bounded_by_the_geometric_limit(x: float, lam: float) -> None:
+    a = adstock_recursive(np.full(52, x), lam)
+    assert (a >= 0).all()
+    assert (a <= x / (1 - lam) + 1e-6).all()
+
+
+@given(
+    base=st.lists(
+        st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+        min_size=5,
+        max_size=20,
+    ),
+    k=st.integers(min_value=0, max_value=4),
+    delta=st.floats(min_value=0.0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    lam=st.floats(min_value=0, max_value=0.99, allow_nan=False, allow_infinity=False),
+)
+@settings(max_examples=100)
+def test_adstock_is_monotone_in_a_single_spend_value(
+    base: list[float], k: int, delta: float, lam: float
+) -> None:
+    x = np.array(base)
+    a_before = adstock_recursive(x, lam)
+    x_after = x.copy()
+    x_after[k] = x_after[k] + delta
+    a_after = adstock_recursive(x_after, lam)
+    assert (a_after >= a_before - 1e-9).all()
+
+
+@given(
+    base=st.lists(
+        st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+        min_size=5,
+        max_size=20,
+    ),
+    k=st.integers(min_value=1, max_value=4),
+    delta=st.floats(min_value=0.0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    lam=st.floats(min_value=0, max_value=0.99, allow_nan=False, allow_infinity=False),
+)
+@settings(max_examples=100)
+def test_adstock_is_causal_under_a_future_perturbation(
+    base: list[float], k: int, delta: float, lam: float
+) -> None:
+    """The property-based twin of the impulse test: perturbing `x[k]` never
+    changes any `a[j]` for `j < k` -- the strongest available guard against
+    trap T-2 (convolution-direction reversal)."""
+    x = np.array(base)
+    a_before = adstock_recursive(x, lam)
+    x_after = x.copy()
+    x_after[k] = x_after[k] + delta
+    a_after = adstock_recursive(x_after, lam)
+    assert np.array_equal(a_before[:k], a_after[:k])
+
+
+@given(
+    a=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    K=st.floats(min_value=1e-3, max_value=1e6, allow_nan=False, allow_infinity=False),
+    s=st.floats(min_value=0.1, max_value=5, allow_nan=False, allow_infinity=False),
+)
+@settings(max_examples=100)
+def test_hill_output_is_a_unit_fraction(a: float, K: float, s: float) -> None:
+    h = hill(np.array([a]), K, s)
+    assert 0 <= h[0] <= 1
+
+
+@given(
+    a1=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    delta=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
+    K=st.floats(min_value=1e-3, max_value=1e6, allow_nan=False, allow_infinity=False),
+    s=st.floats(min_value=0.1, max_value=5, allow_nan=False, allow_infinity=False),
+)
+@settings(max_examples=100)
+def test_hill_is_monotone_non_decreasing_in_adstocked_spend(
+    a1: float, delta: float, K: float, s: float
+) -> None:
+    a2 = a1 + delta
+    h1 = hill(np.array([a1]), K, s)[0]
+    h2 = hill(np.array([a2]), K, s)[0]
+    assert h1 <= h2 + 1e-12
