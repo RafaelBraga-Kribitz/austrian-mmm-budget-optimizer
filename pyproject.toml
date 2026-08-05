@@ -29,6 +29,7 @@ dev = [
     "mypy",
     "pre-commit",
     "nbstripout",
+    "hypothesis>=6.165.1",
 ]
 
 [build-system]

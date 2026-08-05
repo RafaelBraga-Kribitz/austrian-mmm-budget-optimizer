@@ -6,6 +6,9 @@
 .venv/
 __pycache__/
 .pytest_cache/
+# Hypothesis's local example database (a non-deterministic per-machine cache
+# of shrunk failing examples); see docs/ADR/ADR-007.
+.hypothesis/
 .ipynb_checkpoints/
 .env
 .coverage

@@ -38,7 +38,7 @@ affects the O-3 forbidden-deps surface (`tests/unit/test_forbidden_deps.py` is
 import-scoped to `src/ambo`, and `hypothesis` is never imported there).
 
 Resolved version (from `uv.lock`, back-filled by Task 3 of this plan after the human
-approval gate in Task 2): pending install.
+approval gate in Task 2): `6.165.1`.
 
 A hand-rolled randomized loop (`random.random()` calls plus manual bisection on a failing
 case) was rejected as the alternative: `hypothesis`'s example-shrinking behaviour is exactly
