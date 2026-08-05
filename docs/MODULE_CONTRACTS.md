@@ -81,6 +81,9 @@ built-in exception type for expected failure conditions (09 §A-7).
   subclass this as those modules land; Phase 1 ships the root and its first subclass only.
 - `class ConfigError(AmboError)` — raised by `ambo.common.config` on invalid or missing
   configuration.
+- `class SimulationError(AmboError)` — the `src/ambo/simulate/` package's error root; raised
+  by every module in that package for a missing/invalid scenario YAML, an out-of-domain math
+  input, a missing season-window row, and a failed decomposition audit.
 
 **Invariants** Exception messages never contain private-drop content or file-system paths
 under `AMBO_PRIVATE_DROP` (redaction is the logging filter's job for log records; exceptions
@@ -118,6 +121,54 @@ rather than raising.
 **Testing** `tests/unit/test_logging.py` — redaction proven against a fake private-drop path
 embedded in a log message, and a no-op case proving the filter is inert when
 `AMBO_PRIVATE_DROP` is unset.
+
+### src/ambo/simulate/config.py
+
+**Purpose** The pydantic `ScenarioConfig` model tree that makes SPEC-01 sections 3–6
+mechanically checkable (SIM-002: the scenario YAML is the authoritative parameter source).
+The only module that reads `config/scenarios/*.yaml`; every later `src/ambo/simulate/` module
+reads simulate-layer parameters exclusively through `load_scenario()`.
+
+**Public API**
+- `SPEC_CHANNEL_ORDER: tuple[str, ...]` — the six SPEC-01 §4 channels, `Settings.channels[:6]`.
+- `class TrueParams(BaseModel)` — `lam: float`, `K: float`, `s: float`, `beta: float`.
+- `class SpendPattern(BaseModel)` — `mean`, `sd`, `floor_eur`, `advent_factor`,
+  `spring_factor`, `pulse_every`, `pulse_multiplier`, `burst_length`, `burst_starts`.
+- `class PlatformBiasParams(BaseModel)` — `phi: float | None`, `theta: float | None`,
+  `cpm: float | None`.
+- `class ChannelConfig(BaseModel)` — `true_params: TrueParams`, `spend: SpendPattern`,
+  `platform: PlatformBiasParams`.
+- `class SeasonWeights(BaseModel)` — `advent`, `schulbeginn`, `spring`, `jan_dip`,
+  `summer_lull`, all `float`, no defaults.
+- `class ScenarioConfig(BaseModel)` — `id: str`, `weeks: int`, `seed: int`,
+  `start_iso_year/start_iso_week/end_iso_year/end_iso_week: int`, `collinearity: bool`,
+  `b0/growth/noise_share/aov_base/aov_advent_bonus/promo_multiplier: float`,
+  `season_weights: SeasonWeights`, `promo_weeks: dict[int, tuple[int, ...]]`,
+  `channels: dict[str, ChannelConfig]`; plus `covered_iso_years() -> tuple[int, ...]` and
+  `covered_week_count(iso_year: int, weeks_in_iso_year: int) -> int`.
+- `load_scenario(name: str) -> ScenarioConfig` — cached (`functools.lru_cache`); the module's
+  sole entry point for every caller outside this file.
+
+**Invariants** `extra='forbid'` and `frozen=True` on every model above. `channels` is exactly
+`SPEC_CHANNEL_ORDER` in that order. The `(id, weeks, seed)` triple is pinned to one of the
+three SPEC-01 §5 rows. `channels["display_video"].true_params.beta == 0.0` if and only if
+`id == "s_c"`. Every `promo_weeks` and `burst_starts` entry falls inside
+`[start_iso_year/start_iso_week .. end_iso_year/end_iso_week]`. Bursts in the same channel/year
+never overlap; exact adjacency (`next_start == prev_start + burst_length`) is accepted as two
+distinct bursts. This module performs no calendar arithmetic and never reads
+`dbt/seeds/season_windows.csv` — that read belongs to `dgp.py` (AD-020, single home).
+
+**Failure modes** Every raise site in this module is `SimulationError`: unknown scenario id,
+missing scenario YAML (names the expected absolute path), and any schema violation (names the
+failing key path(s), converted at the module boundary from pydantic's `ValidationError`).
+`ValueError` remains correct *inside* a `field_validator`/`model_validator` — that is the
+pydantic idiom pydantic itself collects into a `ValidationError` — and is not a violation of
+this rule.
+
+**Testing** `tests/unit/test_scenario_config.py` — one positive/negative pair per validator
+listed above, a single-home guard for `SPEC_CHANNEL_ORDER` against `Settings.channels`, a
+frozen-model assertion, and `load_scenario()` boundary-conversion tests for both an unknown
+scenario id and a missing file.
 
 ---
 
