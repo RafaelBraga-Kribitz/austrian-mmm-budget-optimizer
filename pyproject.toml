@@ -66,6 +66,16 @@ ignore_missing_imports = true
 module = ["yaml.*"]
 ignore_missing_imports = true
 
+# `pandas` ships an incomplete py.typed marker for mypy's strict-mode purposes; it
+# is a pinned SPEC-08 §3 runtime dependency (not a new one), so this follows the
+# same precedent as the `yaml` override immediately above rather than adding the
+# separate `pandas-stubs` package, which EB-030 would otherwise treat as a new
+# dependency requiring an ADR. Added in Phase 2 plan 02-04, the first `simulate/`
+# module (`dgp.py`) to import it.
+[[tool.mypy.overrides]]
+module = ["pandas.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --cov=src/ambo --cov-report=term-missing"
 # --cov-fail-under=80 is intentionally commented out per D-15

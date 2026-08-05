@@ -29,3 +29,19 @@ green.
 
 **Status:** Deferred — a future plan touching `02-PATTERNS.md`/`02-RESEARCH.md` (or a
 dedicated formatting pass) should run `uv run ruff format .` on these two files.
+
+## 02-04 — same pre-existing `ruff format --check .` failure re-confirmed, still out of scope
+
+**Found during:** 02-04 Task 1/2/3 verification (`make lint`).
+
+**Issue:** Identical to the 02-01 entry above — `02-PATTERNS.md` and `02-RESEARCH.md` still
+fail `ruff format --check .`. Neither file is in this plan's `files_modified` list and
+neither was touched by any of this plan's three tasks.
+
+**Confirmed pre-existing (again):** `git stash` of every uncommitted 02-04 change reproduces
+the identical two-file failure with the plan's own files removed from the diff.
+
+**Scope decision:** Not fixed, same reasoning as 02-01. `ruff check .` and `uv run mypy` both
+pass cleanly across the whole repository including the three files this plan adds/modifies
+(`src/ambo/simulate/dgp.py`, `tests/unit/test_dgp.py`, `docs/MODULE_CONTRACTS.md`). `uv run
+ruff format --check src/ambo/simulate/dgp.py tests/unit/test_dgp.py` passes in isolation.
