@@ -136,22 +136,70 @@ be written against the final name once.
   4. Unit tests prove the closed forms independently: adstock converges to `x/(1−λ)` for constant spend, `Hill(K) = 0.5` exactly, the max revenue week of each simulated year falls in Advent, and SIM-031 spend-pattern statistics hold.
   5. Scenario YAMLs are the authoritative parameter source, and a test asserts they equal the SPEC-01 §4 table — divergence fails the test and a human reconciles, never a silent fix toward either side.
 
-**Plans**: TBD
+**Plans**: 10 plans in 9 waves
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — ADR-007 for the `hypothesis` dev dependency, its blocking legitimacy checkpoint, and the install (wave 1)
+- [ ] 02-02-PLAN.md — `SimulationError`, the `ScenarioConfig` model tree, module contract, structural tests (T-101a) (wave 1)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 02-03-PLAN.md — promo/burst placement aid, the three scenario YAMLs, BP-G-02 spec-table equality (T-101b) (wave 2)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 02-04-PLAN.md — `dgp.py` week spine, seasonality, baseline demand, adstock + Hill, property tests (T-103, T-104) (wave 3)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 02-05-PLAN.md — `spend_patterns.py` and the SIM-030/031 statistics (T-102) (wave 4)
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 02-06-PLAN.md — `SimulationResult`, `assemble_scenario`, SIM-071/072/073 audits (T-105) (wave 5)
+
+**Wave 6** *(blocked on Wave 5)*
+
+- [ ] 02-07-PLAN.md — `platform_bias.py`, SIM-060/061 and BP-D-02 impressions/conversions (T-106) (wave 6)
+
+**Wave 7** *(blocked on Wave 6)*
+
+- [ ] 02-08-PLAN.md — `truth.py`, `TruthFile`, `response_curve_at`, byte-stable JSON (T-107) (wave 7)
+
+**Wave 8** *(blocked on Wave 7)*
+
+- [ ] 02-09-PLAN.md — CLI, gate runner, real `make simulate`/`validate-sim`, SIM-070 (T-108) (wave 8)
+
+**Wave 9** *(blocked on Wave 8)*
+
+- [ ] 02-10-PLAN.md — commit the nine artifacts, BUILD_LOG M1 entry, milestone sign-off (T-109) (wave 9)
+
 **WBS tasks**: T-101…T-109
 **Quality gates**: G-DATA-P, G-SCI-1, G-ENG
 **Rollback**: If SIM-072 plausibility fails structurally (media share of revenue outside [15%, 45%] with spec parameters), do **not** tune the SPEC-01 §4 values. Re-check the implementation first — the spec's parameter set is designed to pass. Only a proven spec-level infeasibility justifies an ADR plus a human spec fix.
 
-**Must resolve before execution — INGEST-CONFLICTS WARNING 4 (response-curve grid), part 1 of 2:**
-SPEC-01 §8 specifies the truth response-curve sample at 21 grid points over **0…2× max weekly
-spend**; SPEC-04 MD-082 specifies the model's curves at 21 points over **0…1.5× max observed
-weekly spend** ("NOT 2×; extrapolation guard starts here"). Both are SPEC-tier at equal
-precedence. AD-050 then defines a *single* export `exports/response_curves.csv` implying one
-shared grid, and VR-303 differences the two curves without naming a grid or a regridding rule.
+**RESOLVED at source — INGEST-CONFLICTS WARNING 4 (response-curve grid), part 1 of 2.**
+This is **no longer an open decision for Phase 2**. `docs/SPEC-01_ground_truth_simulator.md` §8
+now carries a "Grid note (resolves INGEST-CONFLICTS WARNING 4)" paragraph settling it (verified
+by direct read during Phase 2 research, 2026-08-05 — see `02-RESEARCH.md` Pitfall 1). The
+resolution:
 
-The grid you emit here is consumed by the VR-303 gate in Phase 5, which is a hard M3 exit gate.
-Decide before writing `truth.py`: interpolate truth onto the model grid, truncate the truth grid
-at 1.5×, or emit two grids and state which one VR-303 evaluates on. The blueprint's ambiguity
-index (00 §5) does not cover this. See `.planning/INGEST-CONFLICTS.md` WARNING 4 and Phase 5.
+- The 21-point 0…2× max weekly spend array in `truth.json` is a **diagnostic** sample kept in
+  that file only. It shows where the model would be extrapolating and is never the comparison grid.
+- `exports/response_curves.csv` (AD-050) carries **one grid only** — MD-082's 21 points over
+  0…1.5× max *observed* weekly spend — and the Layer P truth column on that export is the
+  closed-form curve evaluated at those same 21 points. VR-303 differences on that grid.
+- The true curve is closed-form (β·Hill at steady-state adstock), so it evaluates exactly at any
+  spend with no interpolation error. The simulator therefore exposes it as a function of a
+  **caller-supplied grid**: plan 02-08 ships `truth.response_curve_at(params, x_grid)` and
+  registers it in `docs/MODULE_CONTRACTS.md`, so Phase 3/8's export reuses the formula instead of
+  re-deriving it.
+- Horizon ordering to preserve downstream: 1.3× optimizer bound (DC-203b) < 1.5× reporting
+  horizon (MD-082) < 2.0× truth diagnostic.
+
+See `.planning/INGEST-CONFLICTS.md` WARNING 4 and Phase 5 for part 2 (implementing the same
+reconciliation in VR-303).
 
 ---
 
@@ -399,7 +447,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete    | 2026-08-04 |
-| 2. Ground-Truth Simulator | M1 | 0/TBD | Not started | - |
+| 2. Ground-Truth Simulator | M1 | 0/10 | Planned | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
