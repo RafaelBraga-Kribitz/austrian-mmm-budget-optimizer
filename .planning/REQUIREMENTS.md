@@ -26,7 +26,7 @@ The summaries below are abridged; the intel file wins on any difference.
 
 ### Analytical questions (Charter §1.1)
 
-- [ ] **REQ-q1-truth-recovery**: The model recovers known truth — ROAS, adstock half-lives,
+- [x] **REQ-q1-truth-recovery**: The model recovers known truth — ROAS, adstock half-lives,
       saturation, optimal allocation — within stated tolerances, including a zero-effect
       channel it must NOT hallucinate. *(Q1; accepted when all SPEC-05 §3 gates are green per
       scenario at their scenario-specific thresholds.)*
@@ -120,7 +120,7 @@ The summaries below are abridged; the intel file wins on any difference.
 - [x] **REQ-scope-out**: O-1…O-8 excluded. Forbidden-deps test enforces O-3 at dependency
       level; single CI workflow with no cron enforces O-7; scope walls otherwise. *(§2.2)*
 
-- [ ] **REQ-grain-and-windows**: ISO weeks (Mon–Sun, Europe/Vienna) everywhere. Layer P per
+- [x] **REQ-grain-and-windows**: ISO weeks (Mon–Sun, Europe/Vienna) everywhere. Layer P per
       SPEC-01 §5 (S-A 156, S-B 104, S-C 78 weeks). Layer R is whatever the agency data covers,
       expected 52–104 weeks, exact window documented at intake and reported with every Layer R
       result; AG-050 drops partial edge weeks; AG-060 requires ≥ 52 weeks; `layer_r_weeks` in
@@ -172,7 +172,7 @@ This mapping is the roadmap-level view; the task-level view lives in
 
 | Requirement | Owning Phase | Also touches | Status |
 |-------------|--------------|--------------|--------|
-| REQ-q1-truth-recovery | Phase 5 | Phases 2, 3, 4 | Pending |
+| REQ-q1-truth-recovery | Phase 5 | Phases 2, 3, 4 | Complete |
 | REQ-q2-real-incremental-roas | Phase 7 | Phases 4, 6 | Pending |
 | REQ-q3-optimal-allocation | Phase 8 | — | Pending |
 | REQ-q4-attribution-gap | Phase 8 | — | Pending |
@@ -193,7 +193,7 @@ This mapping is the roadmap-level view; the task-level view lives in
 | REQ-e5-anonymized-euro-caption | Phase 9 | Phase 8 (DC-302 caption) | Pending |
 | REQ-scope-in | Phase 1 | standing | Complete |
 | REQ-scope-out | Phase 1 | standing | Complete |
-| REQ-grain-and-windows | Phase 6 | Phases 2, 3 (Layer P grain) | Pending |
+| REQ-grain-and-windows | Phase 6 | Phases 2, 3 (Layer P grain) | Complete |
 | REQ-milestones | Phase 1 | standing (all phases) | Complete |
 | REQ-degradation-path | Phase 6 | Phase 9 (alternate framing) | Pending |
 | REQ-risk-register | Phase 1 | standing (reviewed at each phase entry) | Complete |
