@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-08-05T18:49:10.598Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-08-05T18:57:33.110Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [███████░░░] 71%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [███████░░░] 71%
 | Phase 02 P09 | ~40min | 3 tasks | 4 files |
 | Phase 02 P10 | 20min | 3 tasks | 10 files |
 | Phase 03 P01 | 15min | 3 tasks | 11 files |
+| Phase 03 P02 | 18min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-01: dbt/.user.yml (per-machine random-UUID usage-stats file) added to .gitignore -- discovered generated during Task 1's first dbt invocation, not anticipated by the plan's own read_first note
 - [Phase ?]: 03-01: REQ-dl1-reproducible-pipeline not marked complete -- Phase-9-owned per REQUIREMENTS.md traceability, Phase 3 contributing only, matching 02-02/02-09 precedent
 - [Phase ?]: 03-01: whole-repo ruff format --check . failure on 4 planning markdown files (02-PATTERNS/RESEARCH.md, 03-PATTERNS/RESEARCH.md) logged to deferred-items.md as out of scope, not fixed -- ruff check/mypy pass repo-wide, ruff format scoped to src/tests/scripts passes
+- [Phase ?]: 03-02: DataContractError docstring restates the AmboError redaction invariant explicitly, matching SimulationError's precedent, even though no warehouse input is private today
+- [Phase ?]: 03-02: _forbidden_calls()/_forbidden_path_literals()/_py_files() are the only three detector helpers; test_only_db_module_opens_duckdb's bare-import check is inlined in the test body rather than promoted to a fourth module-level helper, per the plan's exact artifacts_this_phase_produces symbol list
+- [Phase ?]: 03-02: _FORBIDDEN_DATA_PATH_PREFIXES deliberately excludes exports/ -- report/ has 03_MODULES section 10-granted legitimate access, verified live by an exports/-prefixed positive-control probe
 
 ### Pending Todos
 
@@ -202,8 +206,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T18:49:10.586Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-08-05T18:57:33.100Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
