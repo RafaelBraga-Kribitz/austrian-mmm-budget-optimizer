@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: Warehouse
+current_phase: 03
+current_phase_name: warehouse
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-08-05T18:31:38.266Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-08-05T18:49:10.598Z"
 last_activity: 2026-08-05
-last_activity_desc: Phase 02 complete, transitioned to Phase 3
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 28
+  completed_plans: 20
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 02 — Ground-Truth Simulator
+**Current focus:** Phase 03 — warehouse
 
 ## Current Position
 
-Phase: 3 — Warehouse
-Plan: Not started
+Phase: 03 (warehouse) — EXECUTING
+Plan: 2 of 9
 Status: Ready to execute
-Last activity: 2026-08-05 — Phase 02 complete, transitioned to Phase 3
+Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: [██████████] 100%
 | Phase 02-ground-truth-simulator P08 | ~40min | 3 tasks | 3 files |
 | Phase 02 P09 | ~40min | 3 tasks | 4 files |
 | Phase 02 P10 | 20min | 3 tasks | 10 files |
+| Phase 03 P01 | 15min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,11 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-09: zero occurrences of the literal substring 'pytest' anywhere in __main__.py (grep -c returns 0) -- the BP-G-02 evidence text names the selector without spelling the test-runner's name, satisfying Task 2's literal-substring acceptance criterion
 - [Phase ?]: M1 closed: nine Layer P artifacts committed, git round-trip proven, BUILD_LOG M1 entry finalized (348min total vs 720/1440min budget/tripwire), human approved via checkpoint sign-off
 - [Phase ?]: requirements mark-complete not invoked for REQ-q1-truth-recovery/REQ-grain-and-windows in 02-10 -- both Phase 5/6-owned per REQUIREMENTS.md traceability table
+- [Phase ?]: 03-01: profiles.yml dev.path is the bare data/warehouse/ambo.duckdb string (no ../ prefix) per RESEARCH.md Pitfall 1's empirical CWD-relative path-resolution finding, red-then-green proven this session
+- [Phase ?]: 03-01: make transform's D-17 conditional removed entirely (D-21) -- unconditional single-line dbt build recipe, matching simulate:'s bare-uv-run shape
+- [Phase ?]: 03-01: dbt/.user.yml (per-machine random-UUID usage-stats file) added to .gitignore -- discovered generated during Task 1's first dbt invocation, not anticipated by the plan's own read_first note
+- [Phase ?]: 03-01: REQ-dl1-reproducible-pipeline not marked complete -- Phase-9-owned per REQUIREMENTS.md traceability, Phase 3 contributing only, matching 02-02/02-09 precedent
+- [Phase ?]: 03-01: whole-repo ruff format --check . failure on 4 planning markdown files (02-PATTERNS/RESEARCH.md, 03-PATTERNS/RESEARCH.md) logged to deferred-items.md as out of scope, not fixed -- ruff check/mypy pass repo-wide, ruff format scoped to src/tests/scripts passes
 
 ### Pending Todos
 
@@ -196,9 +202,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T17:16:40.540Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-warehouse/03-CONTEXT.md
+Last session: 2026-08-05T18:49:10.586Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
 `main` and WARNING 3 is fixed in SPEC-08 §2 plus the [STD] checklist — so Phase 1 can plan
