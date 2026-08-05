@@ -226,14 +226,37 @@ rather than a pile of CSVs it could quietly reshape.
 **Plans**: 9 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 03-01-PLAN.md — dbt scaffold, committed profile, raw external views, unconditional `make transform`, warehouse-path and taxonomy-equality tests (T-201)
 - [ ] 03-02-PLAN.md — `DataContractError` and the fifth standing architectural guard, the AD-030 mart-only rule (D-09)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 03-03-PLAN.md — four staging models with BP-D-03 renames, strict AD-043, and the poisoned-fixture proof that duplicate grain keys FAIL (T-202, D-11, D-16)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 03-05-PLAN.md — `dim_layer` with source-presence-derived `channels_present` and its both-directions test (D-13, D-14)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 03-06-PLAN.md — `fct_platform_reported`, dormant AD-044, and the fixture-exercised `layer_r_present` branch (D-24, D-20)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 03-07-PLAN.md — `src/ambo/common/db.py` read-only accessors with contract-derived columns and collect-all-raise-once postconditions (T-204)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 03-08-PLAN.md — `scripts/export_marts.py` registry writer, the committed `exports/mmm_input_weekly.csv`, and its AD-050 contract test (T-205)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
 - [ ] 03-09-PLAN.md — CI job 3 Windows matrix leg and export drift gate, stale-document corrections, M2 build-log close (D-22, D-02)
 
 **WBS tasks**: T-201…T-205
