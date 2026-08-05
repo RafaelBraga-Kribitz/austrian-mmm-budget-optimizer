@@ -1,0 +1,158 @@
+version: 2
+
+# Grain and not-null tests use dbt's bundled `unique`/`not_null`/`accepted_values`
+# generic tests only -- no `dbt_utils` package. The model-level `unique` tests use a
+# composite SQL expression as `column_name`, the officially documented dbt FAQ
+# pattern (docs.getdbt.com/faqs/Tests/uniqueness-two-columns); introducing a dbt
+# package for the same functional result would be an EB-030 ADR event for zero gain
+# (03-RESEARCH.md section Alternatives Considered). `week_start` is cast to varchar
+# inside every concatenation expression because DuckDB's `||` operator does not
+# implicitly concatenate a DATE.
+models:
+  - name: stg_media_weekly
+    description: >
+      Weekly media spend and platform-reported metrics, one row per week x layer x
+      channel. Unioned from Layer P (raw_media_p: spend_eur -> spend,
+      platform_revenue_eur -> platform_conv_value, no clicks column) and Layer R
+      (raw_media_r: spend_aeur -> spend, clicks/platform_conv_value passed through)
+      with BP-D-03's unit-neutral renames applied at this raw-to-staging boundary
+      (AD-043).
+    columns:
+      - name: week_start
+        description: >
+          ISO Monday week start date. Grain component 1 of 3 (week x layer x channel).
+        data_tests:
+          - not_null
+      - name: layer
+        description: >
+          Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain component 2 of 3.
+        data_tests:
+          - not_null
+      - name: channel
+        description: >
+          Marketing channel per the SPEC-02 section 5.2 seven-entry taxonomy.
+          Grain component 3 of 3.
+        data_tests:
+          - not_null
+      - name: spend
+        description: >
+          Media spend per week x layer x channel, in the layer's own monetary unit
+          (EUR for Layer P, anonymized aEUR for Layer R -- see
+          dim_layer.monetary_unit; never encoded in this column's name).
+        data_tests:
+          - not_null
+      - name: clicks
+        description: >
+          Platform-reported clicks per week x layer x channel. Always SQL NULL for
+          Layer P (Layer P media has no clicks column, per BP-D-03); populated for
+          Layer R when present.
+      - name: impressions
+        description: >
+          Platform-reported impressions per week x layer x channel. NULL for
+          offline channels whose source CSV row is empty (not coerced to 0).
+      - name: platform_conversions
+        description: >
+          Platform-reported conversions per week x layer x channel. NULL for
+          offline channels whose source CSV row is empty (not coerced to 0).
+      - name: platform_conv_value
+        description: >
+          Platform-reported conversion value per week x layer x channel, in the
+          layer's own monetary unit. This is a platform-attributed figure, not a
+          truth quantity (AGENTS T-8) -- it must never be treated as ground-truth
+          revenue.
+    data_tests:
+      - unique:
+          column_name: "(cast(week_start as varchar) || '|' || layer || '|' || channel)"
+
+  - name: stg_outcome_weekly
+    description: >
+      Weekly outcome (revenue, orders), one row per week x layer. Unioned from
+      Layer P (raw_outcome_p: revenue_eur -> revenue) and Layer R (raw_outcome_r:
+      revenue_aeur -> revenue) with BP-D-03's unit-neutral renames applied.
+      `promo_flag` is deliberately not projected here -- it is stg_promo's grain
+      (SPEC-03 section 2).
+    columns:
+      - name: week_start
+        description: >
+          ISO Monday week start date. Grain component 1 of 2 (week x layer).
+        data_tests:
+          - not_null
+      - name: layer
+        description: Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain component 2 of 2.
+        data_tests:
+          - not_null
+      - name: revenue
+        description: >
+          Revenue per week x layer, in the layer's own monetary unit (EUR for
+          Layer P, anonymized aEUR for Layer R -- see dim_layer.monetary_unit).
+        data_tests:
+          - not_null
+      - name: orders
+        description: Order count per week x layer.
+        data_tests:
+          - not_null
+    data_tests:
+      - unique:
+          column_name: "(cast(week_start as varchar) || '|' || layer)"
+
+  - name: stg_promo
+    description: >
+      Weekly promo-active flag, one row per week x layer. Layer P's signal comes
+      from raw_outcome_p's promo_flag column; Layer R's from raw_promo_r, a
+      separate promo calendar (SPEC-03 section 2 split).
+    columns:
+      - name: week_start
+        description: >
+          ISO Monday week start date. Grain component 1 of 2 (week x layer).
+        data_tests:
+          - not_null
+      - name: layer
+        description: Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain component 2 of 2.
+        data_tests:
+          - not_null
+      - name: promo_flag
+        description: 1 if the week is inside a promo window for this layer, else 0.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+    data_tests:
+      - unique:
+          column_name: "(cast(week_start as varchar) || '|' || layer)"
+
+  - name: stg_calendar_weekly
+    description: >
+      Typed passthrough of dbt/seeds/season_windows.csv, one row per ISO week --
+      the single source of Austrian-calendar window definitions (AD-020), shared
+      with the simulator. No date arithmetic or window recomputation happens here.
+    columns:
+      - name: iso_year
+        description: ISO year of the week.
+      - name: iso_week
+        description: ISO week number within iso_year.
+      - name: week_start
+        description: ISO Monday week start date. Grain (1 of 1).
+        data_tests:
+          - unique
+          - not_null
+      - name: advent_flag
+        description: 1 if this week falls inside the Advent window, else 0.
+        data_tests:
+          - not_null
+      - name: schulbeginn_flag
+        description: 1 if this week falls inside the school-start window, else 0.
+        data_tests:
+          - not_null
+      - name: jan_dip_flag
+        description: 1 if this week falls inside the January-dip window, else 0.
+        data_tests:
+          - not_null
+      - name: spring_flag
+        description: 1 if this week falls inside the spring window, else 0.
+        data_tests:
+          - not_null
+      - name: summer_lull_flag
+        description: 1 if this week falls inside the summer-lull window, else 0.
+        data_tests:
+          - not_null
