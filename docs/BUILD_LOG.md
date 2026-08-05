@@ -258,3 +258,130 @@ tripwire threshold from this file's own header rule. **Verdict: the tripwire is 
 tripped** — Phase 1's total measured effort, once 01-09 is added, remains far below
 2x its budget; no ADR is triggered. The exact combined total is restated in
 `01-09-SUMMARY.md`'s Performance section for the permanent record.
+
+---
+
+## M1 - Simulator
+
+### 2026-08-05 — M1 close: scope, interpretations, authoring rationale, governance, gate evidence, effort tally (plan 02-10)
+
+Phase 2 (P0's Layer P simulator, T-101…T-109) closes with the nine Layer P artifacts
+committed under `data/synthetic/{s_a,s_b,s_c}/` and a proven git-checkout round-trip.
+This entry consolidates what the ten Phase 2 plans handed off, per T-109's own
+acceptance criteria and the M1 Documentation checklist row.
+
+**Scope.** M1 was executed across ten plans: 02-01 ratified ADR-007 and installed
+`hypothesis` as a dev-only property-testing dependency; 02-02 built the
+`SimulationError`/`ScenarioConfig` pydantic model tree; 02-03 authored the three
+`config/scenarios/{s_a,s_b,s_c}.yaml` files plus the promo/burst placement authoring
+aid; 02-04 built `week_index`/`season_index`/`baseline_demand`/`round_half_up` and the
+simulator's own `adstock_recursive`/`hill`; 02-05 built `generate_spend`; 02-06 built
+`SimulationResult`/`assemble_scenario` and the SIM-071/072/073 audits; 02-07 built
+`platform_report` (SIM-060/061 platform-reporting bias); 02-08 built `truth.py`'s
+schema, closed-form curve evaluator and byte-stable `write_truth`; 02-09 built the
+CLI, byte-stable CSV writers and the full SIM-070…075 + BP-G-02 gate runner plus real
+`make simulate`/`validate-sim` targets; 02-10 (this plan) committed the nine Layer P
+artifacts, proved the git-checkout round-trip, and closes M1.
+
+**Interpretations recorded (not ADRs — D-07).** Each line names the plan that made
+it; none changes spec text, so per `docs/ADR/README.md`'s standing rule each is
+recorded here plus an in-source comment, not filed as an ADR.
+
+1. `SimulationError(AmboError)` supersedes `03_MODULES.md` §2.2/§2.3's `ValueError`
+   for expected failure conditions, because `docs/MODULE_CONTRACTS.md` is the
+   contract of record and A-7 forbids bare built-ins; plain `ValueError` remains
+   correct inside pydantic validators (02-02).
+2. Exactly-adjacent burst spans in the same channel are accepted as two distinct
+   bursts and never merged; only true overlap is rejected — SPEC-01 §3 and Guide
+   §1.1 forbid overlap and are silent on touching (02-02).
+3. Scenario windows: S-A 2021-W01…2023-W52 (156), S-B 2022-W01…2023-W52 (104), S-C
+   2022-W01…2023-W26 (78), each cross-checked against the row count in
+   `dbt/seeds/season_windows.csv`; SPEC-01 §5 fixes the week counts but not the
+   calendar endpoints (02-03).
+4. The four authored per-channel CPM constants and their descriptive-only status —
+   BP-D-02 mandates CPM constants in the scenario YAML but names no values (02-03).
+5. `meta` carries an `advent_factor` of 0.5 in S-A and 0.9 in S-B/S-C: SPEC-01 §3's
+   `meta` row states no seasonal multiplier, but SIM-030's "0.5→0.9 for
+   search_generic/meta" presupposes the 0.5 baseline, and Guide §1.3 requires the
+   switch to live in data (02-03).
+6. Radio's two Advent-anchored bursts are authored as a lead-in burst plus an
+   in-Advent burst, because two 3-week bursts cannot both fit inside a 4-week Advent
+   window without overlapping (02-03).
+7. `season_index` takes the five signed weights as an argument rather than
+   hard-coding them, so SIM-002's YAML stays the only home (02-04).
+8. `generate_spend` takes the week-index frame as a third argument rather than
+   reading the calendar seed itself, preserving the Functional-Core/Imperative-Shell
+   split and AD-020's single home (02-05).
+9. SIM-073 is evaluated for ISO year 2022 only in S-C, because its 2023 half-year
+   does not cover an Advent window; the skipped year is reported by the gate runner,
+   never silently omitted (02-06).
+10. The `truth.json` float-format mechanism actually used, closing 02-RESEARCH.md
+    Assumption A3 (02-08).
+11. SPEC-01 §8's grid note already resolves INGEST-CONFLICTS WARNING 4; the
+    ROADMAP's Phase 2 "must resolve before execution" text was stale, and `truth.py`
+    exposes `response_curve_at` as a function of a caller-supplied grid so Phase 3/8
+    reuses the closed form (02-08).
+
+**Promo/burst authoring rationale.** `scripts/author_scenario_schedules.py` (02-03)
+is a dev-only, one-off placement aid (A-13: kept outside `src/`, never imported by or
+reachable from `src/ambo/`, verified by a standing guard test) that computes the
+unanchored promo/print/radio week placements deterministically from
+`dbt/seeds/season_windows.csv` and prints a YAML fragment to stdout — it performs no
+file I/O itself. Anchored placements (Black Friday, the two Advent-anchored radio
+bursts, the spring 1/3 and 2/3 index-point promo weeks) are computed directly from
+each covered year's window boundaries; unanchored placements (the remaining spread
+promo/print/radio weeks) are drawn via a fixed, auditable spread rule, never a
+`random`/`np.random` call, so the aid's own output is exactly reproducible across
+runs. The printed fragment is hand-copied into `config/scenarios/*.yaml` and frozen
+there (Guide §1.1, D-02): the schedule the simulator reads at `make simulate` time is
+the frozen YAML text, never a runtime recomputation, so a wrong-looking week number is
+fixed by editing the aid and re-pasting its output, never by hand-editing the
+committed YAML.
+
+**Governance.** ADR-007 (`docs/ADR/ADR-007_hypothesis-dev-dependency.md`, ratified
+02-01) adds `hypothesis>=6.165.1` to `[dependency-groups] dev` only (EB-030, O-3) for
+D-03's property-based tests of `adstock_recursive`/`hill`. Its automated `SUS`
+package-legitimacy verdict (reasons: `too-new`, `unknown-downloads`,
+`no-repository`) was surfaced verbatim, alongside independently-gathered
+counter-evidence (maintainer identity, source repository, unbroken 2013-origin
+release history), at a blocking `checkpoint:human-verify` gate; the human confirmed
+all four facts on pypi.org before `uv add` ran. The install order was verified:
+`uv.lock` was unmodified before the approval was recorded, and the lockfile-touching
+commit is strictly after both the ADR commit and the approval.
+
+**Gate evidence.** The full seven-row `make validate-sim` table (re-run for this
+plan, both before and after the git checkout round-trip, with identical results):
+
+```text
+GATE     STATUS     EVIDENCE
+SIM-070  PASS       committed=016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1 regenerated=016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1
+SIM-071  PASS       s_a=0.0, s_b=0.0, s_c=0.0 (max=0.0, bound<=1e-6)
+SIM-072  PASS       s_a: {'min_revenue_pre_clip': 64094.84287664617, 'noise_variance_share': 0.03113949883141409, 'media_share_2021': 0.2730426362263659, 'media_share_2022': 0.26633491313334523, 'media_share_2023': 0.25753447781321676}; s_b: {'min_revenue_pre_clip': 70242.79391112749, 'noise_variance_share': 0.026355908286650902, 'media_share_2022': 0.27442453188862836, 'media_share_2023': 0.26245675624176334}; s_c: {'min_revenue_pre_clip': 62307.90535157751, 'noise_variance_share': 0.03959346809337588, 'media_share_2022': 0.2472965119066494, 'media_share_2023': 0.255949800658689}
+SIM-073  PASS       s_a 2021: peak_week=50 advent_flag=True; s_a 2022: peak_week=51 advent_flag=True; s_a 2023: peak_week=50 advent_flag=True; s_b 2022: peak_week=50 advent_flag=True; s_b 2023: peak_week=50 advent_flag=True; s_c 2022: peak_week=50 advent_flag=True; s_c 2023: skipped (Advent window not fully covered)
+SIM-074  PASS       constant_spend_residual=9.094947017729282e-13 (bound<=1e-9), impulse_residual=2.7755575615628914e-17 (bound<=1e-9), hill_at_K_residual=0.0 (bound<=1e-12)
+SIM-075  PASS       all three truth.json files re-validated and match ScenarioConfig
+BP-G-02  DELEGATED  scenario YAML == SPEC-01 section 4 table (SIM-002 single home); checked by the selector `tests/unit/test_scenario_config.py -k "spec_parameter_table or rule_level"`, run by make validate-sim in the same invocation so the target cannot go green without it.
+```
+
+Exit code `0` both before and after
+`rm -rf data/synthetic/s_a data/synthetic/s_b data/synthetic/s_c && git checkout --
+data/synthetic/` — the round-trip check T-02-43 exists to prove: the committed bytes
+survive a checkout with the repository's pinned `eol=lf` `.gitattributes` rule, with
+no CRLF reintroduction of the kind plan 01-07 found under `core.autocrlf=true`.
+
+**Elapsed effort against the 1.5 d Charter section 5 budget.** Summing each plan's
+measured duration from `.planning/STATE.md`'s Performance Metrics table (same 8-hour
+working-day convention the M0 entry established): P01 (33 min) plus P02 (20 min)
+plus P03 (55 min) plus P04 (25 min) plus P05 (~35 min) plus P06 (~45 min) plus P07
+(35 min) plus P08 (~40 min) plus P09 (~40 min) totals 328 min for plans 02-01…02-09,
+plus plan 02-10's own measured duration (recorded in `02-10-SUMMARY.md`'s
+Performance section, since this entry is written before that plan finishes). 328 min
+(~5.47 h, ~0.68 d) is already well under the 720 min (1.5 d) budget and far from the
+1440 min (2×) strictly-greater stop-and-ADR tripwire from this file's own header
+rule, and plan 02-10's own duration — comparable in scope to the other
+single-task-cluster plans in this phase (35–55 min) — cannot plausibly push the
+combined total anywhere near 1440 min. **Verdict: the tripwire is not tripped** —
+Phase 2's total measured effort, once 02-10 is added, remains far below 2x its
+budget; no ADR is triggered. The exact combined total, including plan 02-10's own
+measured duration, is restated in `02-10-SUMMARY.md`'s Performance section for the
+permanent record.
