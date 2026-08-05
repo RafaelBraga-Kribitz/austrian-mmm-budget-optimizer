@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-08-05T18:57:33.110Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-08-05T19:12:44.576Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [████████░░] 75%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [████████░░] 75%
 | Phase 02 P10 | 20min | 3 tasks | 10 files |
 | Phase 03 P01 | 15min | 3 tasks | 11 files |
 | Phase 03 P02 | 18min | 2 tasks | 3 files |
+| Phase 03 P03 | ~18min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -153,6 +154,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-02: DataContractError docstring restates the AmboError redaction invariant explicitly, matching SimulationError's precedent, even though no warehouse input is private today
 - [Phase ?]: 03-02: _forbidden_calls()/_forbidden_path_literals()/_py_files() are the only three detector helpers; test_only_db_module_opens_duckdb's bare-import check is inlined in the test body rather than promoted to a fourth module-level helper, per the plan's exact artifacts_this_phase_produces symbol list
 - [Phase ?]: 03-02: _FORBIDDEN_DATA_PATH_PREFIXES deliberately excludes exports/ -- report/ has 03_MODULES section 10-granted legitimate access, verified live by an exports/-prefixed positive-control probe
+- [Phase ?]: 03-03: AD-043 test uses DuckDB starts_with()/ends_with() instead of LIKE with escaped underscores -- underscore is a LIKE wildcard, native functions avoid escaping entirely
+- [Phase ?]: 03-03: accepted_values on stg_promo.promo_flag uses the nested arguments: property -- dbt 1.12 flags the top-level values: form as a deprecation, fixed inline before it breaks in a future version
+- [Phase ?]: 03-03: poisoned-fixture harness (synthetic_tree_copy, _dbt_env, _run_dbt_on_tree) proves a duplicate grain key fails dbt build by making it happen -- FAIL 1 unique_stg_media_weekly__..., real warehouse mtime unchanged
 
 ### Pending Todos
 
@@ -206,8 +210,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T18:57:33.100Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-08-05T19:12:44.566Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
