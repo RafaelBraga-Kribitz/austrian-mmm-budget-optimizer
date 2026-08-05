@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-08-05T10:38:59.311Z"
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-08-05T10:52:58.524Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 19
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
-Plan: 6 of 10
+Plan: 7 of 10
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [███████░░░] 74%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [███████░░░] 74%
 | Phase 02 P03 | 55min | 3 tasks | 5 files |
 | Phase 02 P04 | 25min | 3 tasks | 4 files |
 | Phase 02 P05 | ~35min | 2 tasks | 3 files |
+| Phase 02 P06 | ~45min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,10 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-04: pyproject.toml mypy override added for pandas.* (ignore_missing_imports), same precedent as the existing yaml.* override -- pandas is a pinned runtime dependency, not a new one, so no EB-030 ADR event
 - [Phase ?]: 02-05: literal floor/round swap acceptance criterion is mathematically a no-op (integer floor_eur makes round/floor commute) -- red-then-green evidence produced instead via a mean-multiplier/draw order swap (Pitfall 6's other named example)
 - [Phase ?]: 02-05: generate_spend(cfg, rng, weeks) promotes 03_MODULES.md section 2.2's two-argument signature to three -- week-index frame injected since this module performs no I/O
+- [Phase ?]: 02-06: generate_spend imported inside assemble_scenario's function body (not at module level) to break an A-15 import cycle -- spend_patterns.py already imports round_half_up from dgp.py
+- [Phase ?]: 02-06: SIM-071 decomposition invariant enforced as a SimulationResult constructor precondition (raises in __post_init__), proven by both a perturbation test and all-scenario green audits
+- [Phase ?]: 02-06: peak_week_audit records a skipped ISO year (Advent window not fully covered, e.g. S-C's 2023 half-year) under a documented sentinel (-1, True) rather than omitting it silently
+- [Phase ?]: 02-06: test_assemble_zero_beta_channel_contributes_exactly_zero uses the plan's own sanctioned fallback (exact-zero plus exact five-channel-sum equality) since ScenarioConfig pins (id, weeks, seed) to the three frozen SPEC-01 section 5 triples, making a bit-identical S-B-windowed control run unconstructible
 
 ### Pending Todos
 
@@ -175,8 +180,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T10:38:59.297Z
-Stopped at: Completed 02-05-PLAN.md
+Last session: 2026-08-05T10:52:58.512Z
+Stopped at: Completed 02-06-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
