@@ -211,5 +211,7 @@ source documents, so none is carried into execution. Full report and resolution 
 | Preserve W2–W5 as must-resolve items inside their phases rather than picking a side | All four are SPEC-vs-SPEC at equal precedence; an implementer silently choosing is exactly the failure mode | — Pending |
 
 ---
-*Last updated: 2026-08-04 after Phase 1 (Repository Foundation) completed — the engineering
-shell exists and its quality bar, scope walls, and governance mechanisms are enforced by CI.*
+*Last updated: 2026-08-05 after Phase 2 (Ground-Truth Simulator) completed — the fictional
+Austrian advertiser exists in git history with every SIM-070…075 gate green, closing M1.
+REQ-q1-truth-recovery and REQ-grain-and-windows remain Pending (contributing only, not fully
+validated by this phase) — both are owned by later phases per ROADMAP.md.*
