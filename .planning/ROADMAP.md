@@ -136,7 +136,7 @@ be written against the final name once.
   4. Unit tests prove the closed forms independently: adstock converges to `x/(1−λ)` for constant spend, `Hill(K) = 0.5` exactly, the max revenue week of each simulated year falls in Advent, and SIM-031 spend-pattern statistics hold.
   5. Scenario YAMLs are the authoritative parameter source, and a test asserts they equal the SPEC-01 §4 table — divergence fails the test and a human reconciles, never a silent fix toward either side.
 
-**Plans**: 7/10 plans executed
+**Plans**: 8/10 plans executed
 Plans:
 **Wave 1**
 
@@ -165,7 +165,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6)*
 
-- [ ] 02-08-PLAN.md — `truth.py`, `TruthFile`, `response_curve_at`, byte-stable JSON (T-107) (wave 7)
+- [x] 02-08-PLAN.md — `truth.py`, `TruthFile`, `response_curve_at`, byte-stable JSON (T-107) (wave 7)
 
 **Wave 8** *(blocked on Wave 7)*
 
@@ -450,7 +450,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete    | 2026-08-04 |
-| 2. Ground-Truth Simulator | M1 | 7/10 | In Progress|  |
+| 2. Ground-Truth Simulator | M1 | 8/10 | In Progress|  |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
