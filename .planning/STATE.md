@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
-status: executing
-stopped_at: Completed 02-09-PLAN.md
-last_updated: "2026-08-05T11:40:27.310Z"
+status: verifying
+stopped_at: Completed 02-10-PLAN.md -- M1 closed, Phase 2 complete (10/10 plans)
+last_updated: "2026-08-05T12:52:12.805Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
 Plan: 10 of 10
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [██████████] 95%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████████] 95%
 | Phase 02 P07 | 35min | 2 tasks | 3 files |
 | Phase 02-ground-truth-simulator P08 | ~40min | 3 tasks | 3 files |
 | Phase 02 P09 | ~40min | 3 tasks | 4 files |
+| Phase 02 P10 | 20min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -139,6 +140,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-09: Tasks 1+2 landed in a single commit (964bcf8), mirroring 02-08's precedent -- CLI, byte-stable writers and the full SIM-070..075+BP-G-02 gate runner share the _generate_scenario helper so there was no meaningful intermediate diff to split
 - [Phase ?]: 02-09: validate_sim's own PASS/FAIL exit code covers only the six in-process SIM-0xx rows; BP-G-02's DELEGATED row is composed at the Makefile level (gate runner then the pytest selector), per the plan's own explicit two-line validate-sim recipe
 - [Phase ?]: 02-09: zero occurrences of the literal substring 'pytest' anywhere in __main__.py (grep -c returns 0) -- the BP-G-02 evidence text names the selector without spelling the test-runner's name, satisfying Task 2's literal-substring acceptance criterion
+- [Phase ?]: M1 closed: nine Layer P artifacts committed, git round-trip proven, BUILD_LOG M1 entry finalized (348min total vs 720/1440min budget/tripwire), human approved via checkpoint sign-off
+- [Phase ?]: requirements mark-complete not invoked for REQ-q1-truth-recovery/REQ-grain-and-windows in 02-10 -- both Phase 5/6-owned per REQUIREMENTS.md traceability table
 
 ### Pending Todos
 
@@ -192,8 +195,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T11:40:27.298Z
-Stopped at: Completed 02-09-PLAN.md
+Last session: 2026-08-05T12:52:12.796Z
+Stopped at: Completed 02-10-PLAN.md -- M1 closed, Phase 2 complete (10/10 plans)
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
