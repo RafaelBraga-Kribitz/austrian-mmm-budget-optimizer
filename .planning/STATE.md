@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-08-05T10:52:58.524Z"
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-08-05T11:05:46.658Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 19
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
-Plan: 7 of 10
+Plan: 8 of 10
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [████████░░] 79%
+Progress: [████████░░] 84%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [████████░░] 79%
 | Phase 02 P04 | 25min | 3 tasks | 4 files |
 | Phase 02 P05 | ~35min | 2 tasks | 3 files |
 | Phase 02 P06 | ~45min | 2 tasks | 3 files |
+| Phase 02 P07 | 35min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-06: SIM-071 decomposition invariant enforced as a SimulationResult constructor precondition (raises in __post_init__), proven by both a perturbation test and all-scenario green audits
 - [Phase ?]: 02-06: peak_week_audit records a skipped ISO year (Advent window not fully covered, e.g. S-C's 2023 half-year) under a documented sentinel (-1, True) rather than omitting it silently
 - [Phase ?]: 02-06: test_assemble_zero_beta_channel_contributes_exactly_zero uses the plan's own sanctioned fallback (exact-zero plus exact five-channel-sum equality) since ScenarioConfig pins (id, weeks, seed) to the three frozen SPEC-01 section 5 triples, making a bit-identical S-B-windowed control run unconstructible
+- [Phase ?]: 02-07: share_c and platform_revenue_eur computed from result.spend/result.components directly (not media's own placeholder spend_eur), per the plan's read_first sources -- numerically identical either way
+- [Phase ?]: 02-07: zero-total-spend-week test zeroes only result.spend for one week and reuses components unchanged -- SIM-071's decomposition invariant re-sums components alone, so no adjustment is needed to satisfy the SimulationResult constructor precondition
+- [Phase ?]: 02-07: config-not-code test uses pydantic model_copy(update=...) up the frozen ScenarioConfig/ChannelConfig/PlatformBiasParams chain instead of a direct attribute monkeypatch, since frozen=True blocks __setattr__ and model_copy does not re-run validators
 
 ### Pending Todos
 
@@ -180,8 +184,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T10:52:58.512Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-08-05T11:05:46.647Z
+Stopped at: Completed 02-07-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
