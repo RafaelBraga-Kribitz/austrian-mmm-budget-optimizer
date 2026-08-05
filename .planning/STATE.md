@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-08-05T19:12:44.576Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-08-05T19:36:42.820Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [████████░░] 79%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [████████░░] 79%
 | Phase 03 P01 | 15min | 3 tasks | 11 files |
 | Phase 03 P02 | 18min | 2 tasks | 3 files |
 | Phase 03 P03 | ~18min | 3 tasks | 7 files |
+| Phase 03 P04 | 18min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-03: AD-043 test uses DuckDB starts_with()/ends_with() instead of LIKE with escaped underscores -- underscore is a LIKE wildcard, native functions avoid escaping entirely
 - [Phase ?]: 03-03: accepted_values on stg_promo.promo_flag uses the nested arguments: property -- dbt 1.12 flags the top-level values: form as a deprecation, fixed inline before it breaks in a future version
 - [Phase ?]: 03-03: poisoned-fixture harness (synthetic_tree_copy, _dbt_env, _run_dbt_on_tree) proves a duplicate grain key fails dbt build by making it happen -- FAIL 1 unique_stg_media_weekly__..., real warehouse mtime unchanged
+- [Phase ?]: 03-04: AD-042 red-then-green proof must build the mart from a clean tree first, then perturb the CSV, then re-run only the test node with --select -- perturbing before the first build moves both the mart and the test's own CSV read identically and never surfaces drift
+- [Phase ?]: 03-04: itertools.pairwise used instead of zip(seq, seq[1:], strict=True) for the spine's consecutive-gap check -- strict=True unconditionally raises for a self-offset pairwise zip since the second sequence is always one shorter by construction
+- [Phase ?]: 03-04: plan's Task 1 verify-script literal count==2 for week_start=2022-01-03 does not match committed data (P-SA also spans that date); correct count is 3, verified as a plan-text error not a modeling defect -- P-SB/P-SC remain two distinct non-merged rows as intended
 
 ### Pending Todos
 
@@ -210,8 +214,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T19:12:44.566Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-08-05T19:36:42.809Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now

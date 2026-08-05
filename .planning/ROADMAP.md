@@ -223,7 +223,7 @@ rather than a pile of CSVs it could quietly reshape.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: 3/9 plans executed
+**Plans**: 4/9 plans executed
 
 Plans:
 **Wave 1**
@@ -237,7 +237,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
+- [x] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -486,7 +486,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete    | 2026-08-04 |
 | 2. Ground-Truth Simulator | M1 | 10/10 | Complete    | 2026-08-05 |
-| 3. Warehouse | M1→M2 | 3/9 | In Progress|  |
+| 3. Warehouse | M1→M2 | 4/9 | In Progress|  |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
 | 6. Agency Intake | M4 | 0/TBD | Not started | - |
