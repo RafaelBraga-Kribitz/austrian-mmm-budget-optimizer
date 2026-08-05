@@ -53,13 +53,18 @@ setup:
 	uv run pre-commit install
 
 # -----------------------------------------------------------------------------
-# simulate, validate-sim — stubs (Phase 2)
+# simulate, validate-sim — real (Phase 2, T-108). validate-sim runs the in-process
+# SIM-070..075 gate runner, then the BP-G-02 test selection (SIM-002's single home
+# for the scenario-YAML-vs-SPEC-01 §4 check), joined so the target fails if either
+# does — .SHELLFLAGS's errexit pin (top of file) already stops the recipe at the
+# first failing line.
 # -----------------------------------------------------------------------------
 simulate:
-	$(call STUB,2)
+	uv run python -m ambo.simulate all
 
 validate-sim:
-	$(call STUB,2)
+	uv run python -m ambo.simulate validate
+	uv run pytest tests/unit/test_scenario_config.py -k "spec_parameter_table or rule_level" -q
 
 # -----------------------------------------------------------------------------
 # intake, anonymize, validate-intake — stubs (Phase 6)

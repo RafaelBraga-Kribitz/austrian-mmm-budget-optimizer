@@ -411,6 +411,62 @@ float-precision/no-temp-file guarantees, and a single-home grep guard for the cu
 
 ---
 
+### src/ambo/simulate/__main__.py
+
+**Purpose** The simulator CLI and the SIM-070…075 + BP-G-02 gate runner (T-108). The
+only module in `simulate/` that performs I/O (Functional-Core / Imperative-Shell) — every
+other module in this package stays pure and independently testable.
+
+**Public API**
+- `main(argv: list[str] | None = None) -> int` — CLI grammar `python -m ambo.simulate
+  {all|s_a|s_b|s_c|validate} [--outdir PATH]`. Generates the requested scenario(s) (`all`
+  in the fixed order `s_a, s_b, s_c`) into `<outdir>/<scenario>/`, or delegates to
+  `validate_sim(outdir)` for `validate`. Returns 0 on success, 1 on a `SimulationError`;
+  an unrecognised target is rejected by `argparse` itself (exit 2, usage message naming
+  the five valid choices) before any output directory is created. `--outdir` defaults to
+  `repo_root() / "data" / "synthetic"`.
+- `validate_sim(outdir: Path) -> int` — the SIM-070…075 + BP-G-02 gate runner. Logs a
+  fixed-width `GATE | STATUS | EVIDENCE` table (six PASS/FAIL rows plus a `DELEGATED`
+  BP-G-02 row naming its real check, `tests/unit/test_scenario_config.py`'s
+  `spec_parameter_table`/`rule_level`-selected tests) and returns 0 if and only if every
+  SIM-0xx row is `PASS`. `make validate-sim` composes this function's exit code with the
+  delegated selector's own, so the target as a whole cannot go green without both.
+
+**Invariants** Sole I/O module in `simulate/`. One fresh
+`np.random.default_rng(cfg.seed)` per scenario, never reused across scenarios
+(SIM-001/SIM-070). Both CSV writers (`_write_media_csv`, `_write_outcome_csv`) pin SIM-004's
+exact column names and order, UTF-8 encoding, an explicit LF line terminator
+(`newline=""` plus `lineterminator="\n"`, not `.gitattributes`), a fixed `%.6f` float
+format, `na_rep=""` so an offline channel's NULL renders as a genuinely empty field
+distinguishable from `0`, and `index=False`; integer columns are cast to the nullable
+`Int64` dtype so they render with no decimal point. Every write (both CSVs and
+`truth.json`, the latter via `truth.write_truth`) is atomic: a `.tmp-<pid>` sibling then
+`os.replace`, removed on any exception. `validate_sim`'s SIM-070 regeneration and every
+non-vacuous existence check assert all nine expected files exist and are non-empty in
+both trees **before** comparing, so an empty or partial regeneration cannot pass
+vacuously. `validate_sim` performs no remediation on a red gate — it logs the realized
+value against the expected bound and returns 1; widening a bound is never done here
+(ROADMAP Phase 2 rollback rule). `validate_sim` imports nothing from the test framework
+or `tests/` — SIM-074's closed-form checks call `dgp.adstock_recursive`/`dgp.hill`
+directly, in-process.
+
+**Failure modes** `main` returns 1 (message logged) on a `SimulationError` raised
+anywhere in the per-scenario pipeline (`load_scenario`, `assemble_scenario`,
+`compute_truth`). `validate_sim` never raises for an ordinary gate failure — a failing
+row is reported as `FAIL` with its evidence, and the function returns 1; an
+unreadable/invalid `truth.json` is caught and reported as a SIM-075 failure, not
+propagated.
+
+**Testing** `tests/unit/test_simulate_cli.py` — SIM-070 byte-determinism (a two-run,
+non-vacuous nine-file comparison), all-nine-artifacts creation, the SIM-004 header
+strings read from written bytes (not an in-memory frame), offline-channel empty-field
+rendering, no-CR-bytes, the ISO-date/gapless-spine check, media row ordering
+(taxonomy, not alphabetical), single-scenario/unknown-target CLI behavior, and
+`validate_sim`'s pass/fail on a fresh generation, a corrupted `truth.json`, and a
+missing artifact.
+
+---
+
 ## Dependency directions
 
 Reproduced from `03_MODULES.md` §10 (the full package-level table), since two of these edges
