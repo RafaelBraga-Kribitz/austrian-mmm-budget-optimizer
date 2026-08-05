@@ -222,6 +222,45 @@ own trap-T-2 discipline), and D-03's five bounded `hypothesis` property tests.
 
 ---
 
+### src/ambo/simulate/spend_patterns.py
+
+**Purpose** The six per-channel weekly spend series of SPEC-01 §3: always-on Normals with
+seasonal planning multipliers and floors, the `meta` six-week ×1.8 pulse, and flighted
+`print_regional`/`radio` bursts driven by the schedules `config/scenarios/*.yaml` freezes.
+Promotes `03_MODULES.md` §2.2's two-argument `generate_spend(cfg, rng)` signature to three
+arguments, `generate_spend(cfg, rng, weeks)` — SPEC-01 §3's seasonal multipliers need the
+Advent/spring flags, AD-020 forbids recomputing those windows here, and this module performs no
+I/O, so the week-index frame is injected by the caller instead of read here.
+
+**Public API**
+- `generate_spend(cfg: ScenarioConfig, rng: np.random.Generator, weeks: pd.DataFrame) ->
+  pd.DataFrame` — the six spend series, indexed by `weeks`'s `t` column, columns exactly
+  `SPEC_CHANNEL_ORDER` in that order, dtype `int64`, every value `>= 0` (`search_brand`
+  additionally never below its declared floor).
+
+**Invariants** `rng` is an explicit parameter, never a module-level or global RNG (A-5); it is
+consumed as exactly six `rng.normal` calls, one per channel, in `SPEC_CHANNEL_ORDER` — a fixed,
+documented draw order (SIM-001/SIM-070) that `assemble_scenario` (plan 02-06) continues
+immediately afterward with the revenue noise draw. Per channel, the four SPEC-01 §3 steps run in
+exactly this order (Guide §1.3): seasonal/pulse multipliers apply to the *mean*, then the draw,
+then the flighting mask (flighted channels only), then the floor clamp (applied only to
+mask-kept weeks, so a masked-zero week is never lifted to the floor), then whole-euro rounding
+via `dgp.round_half_up` (A-8, single home). A flighted channel is non-zero exactly on its
+authored burst weeks and exactly zero elsewhere, with no stochastic slack. This module contains
+no scenario-name branch — SIM-030's collinearity switch enters only as the `advent_factor`/
+`spring_factor` values a scenario's YAML carries.
+
+**Failure modes** `SimulationError` if `weeks`'s row count does not equal `cfg.weeks`, or if any
+channel's burst span in `cfg` falls outside the `(iso_year, iso_week)` set `weeks` carries — a
+defence-in-depth restatement of `ScenarioConfig`'s own load-time schedule-in-window validator
+(`03_MODULES.md` §2.2).
+
+**Testing** `tests/unit/test_spend_patterns.py` — SIM-030/SIM-031 statistics against
+independently re-derived design values, determinism, draw-order pinning, and Guide §1.3's
+step-order proven to bite via a deliberate swap-and-revert.
+
+---
+
 ## Dependency directions
 
 Reproduced from `03_MODULES.md` §10 (the full package-level table), since two of these edges
