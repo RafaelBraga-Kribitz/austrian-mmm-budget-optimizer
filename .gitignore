@@ -27,6 +27,9 @@ data/cache/*
 # --- dbt ---
 dbt/target/*
 dbt/logs/
+# dbt writes this on first invocation with a random per-machine anonymous-usage-stats
+# UUID (`id:`) -- not reproducible, not meaningful to commit (plan 03-01 finding).
+dbt/.user.yml
 
 # --- Placeholders tracked inside otherwise-ignored directories (01-02 Task 3) ---
 # These directories are ignored for their generated contents, but the directory itself

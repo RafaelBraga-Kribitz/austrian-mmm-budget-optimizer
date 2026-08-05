@@ -79,17 +79,18 @@ validate-intake:
 	$(call STUB,6)
 
 # -----------------------------------------------------------------------------
-# transform — real. D-17 vacuously-correct check, not a stub: runs the actual
-# predicate now (a dbt project exists, or it doesn't) rather than a placeholder.
+# transform — real, unconditional (D-21, plan 03-01). The D-17 conditional this
+# target used to carry existed only so CI job 3 could pass by running rather than
+# being skipped while no dbt project existed yet (Phase 1 D-16); that purpose is
+# spent now that dbt/dbt_project.yml is a real, committed project. A
+# "nothing-to-build" branch here would let a deleted dbt_project.yml report a green
+# CI job by finding nothing to do — the opposite of D-17's own loud-failure intent.
+# dbt itself already fails loudly on a missing project, and
+# tests/unit/test_repo_layout.py already asserts dbt/ against SPEC-08 section 2, so
+# no conditional is needed to protect either invariant.
 # -----------------------------------------------------------------------------
-DBT_PROJECT_FILE := dbt/dbt_project.yml
-
 transform:
-	@if [ -f $(DBT_PROJECT_FILE) ]; then \
-		uv run dbt build --project-dir dbt; \
-	else \
-		echo "make transform: no dbt project at $(DBT_PROJECT_FILE) yet -- nothing to build. Expected until Phase 3. Check ran, found nothing to do."; \
-	fi
+	uv run dbt build --project-dir dbt --profiles-dir dbt
 
 # -----------------------------------------------------------------------------
 # fit-synthetic — stub (Phase 4), sampling target

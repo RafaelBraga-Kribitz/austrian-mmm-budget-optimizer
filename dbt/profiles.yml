@@ -1,0 +1,33 @@
+# AMBO — committed dbt profile (T-201, plan 03-01). No user-specific paths: this
+# file is checked in so `make transform` (and CI) never depends on a `~/.dbt/`
+# profile existing on the machine running it.
+#
+# Path form (D-23, T-03-02): `path: data/warehouse/ambo.duckdb`, deliberately with NO
+# `../` prefix. `.planning/phases/03-warehouse/03-RESEARCH.md` Pitfall 1 empirically
+# disproved `05_IMPLEMENTATION_GUIDES.md` section 8.1's "resolves relative to the
+# profile dir" claim against the installed dbt-core 1.12.0 / dbt-duckdb 1.10.1
+# pairing, for the mandated `--project-dir dbt --profiles-dir dbt` invocation with
+# CWD = repository root: the `path:` value resolves against the process's current
+# working directory at invocation, not against this file's own directory. Since
+# `make transform` always runs with CWD = repo root (Make never chdirs into the
+# recipe's directory), the correct relative form is the bare
+# `data/warehouse/ambo.duckdb` string — a `../`-prefixed form would resolve one
+# directory ABOVE the repository root, exactly the failure `tests/unit/
+# test_warehouse_build.py::test_warehouse_file_lands_at_settings_path` guards against.
+ambo:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/warehouse/ambo.duckdb
+      schema: main
+      threads: 4
+    test:
+      # The throwaway target the poisoned-fixture harness (D-11, plan 03-03) and the
+      # Layer R fixture run (D-20, plan 03-06) build into, so neither ever touches the
+      # real `dev` warehouse. The default value stays inside the already-gitignored
+      # data/warehouse/ directory.
+      type: duckdb
+      path: "{{ env_var('AMBO_TEST_WAREHOUSE', 'data/warehouse/ambo_test.duckdb') }}"
+      schema: main
+      threads: 4

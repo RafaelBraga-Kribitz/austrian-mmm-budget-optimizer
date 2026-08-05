@@ -436,3 +436,63 @@ match, and the 348 min effort total against the 720/1440 min budget/tripwire) an
 responded **"Approved"**, explicitly agreeing to defer the CI-jobs-green and
 quality-standards-review-statement `[STD]` rows to PR-open time since no PR/CI run
 exists yet for this branch. **M1 is closed. Phase 3 may begin.**
+
+---
+
+## M2 - Warehouse and Model on S-A
+
+### 2026-08-05 — M2 opens: budget split, shed order, never-shed list, and three deliberate departures (plan 03-01, Task 1)
+
+M2 covers two Charter phases sharing one 2 d milestone budget (D-17): **Phase 3
+(warehouse) is named at 1 d of M2's 2 d; Phase 4 (model on S-A) takes the other 1 d.**
+Each phase therefore carries its own 2x trip point (2 d for Phase 3, 2 d for Phase 4)
+and its own standing-rule-5 ADR obligation if that phase's own measured effort comes in
+strictly greater than 2x its own 1 d share — not a combined 4 d ceiling for the
+milestone as a whole. This mirrors M1's own single-phase budget bookkeeping precedent.
+
+**D-19 shed order for Phase 3's 1 d -> 2 d zone**, in the order sheds are taken if the
+tripwire zone is entered (recorded here per this file's own append-only, flag-before-not-after
+rule — any shed is written here before it is carried out, never absorbed quietly):
+
+1. The poisoned-fixture harness (D-11) — highest scaffold cost of the three.
+2. The secondary mart contracts on `dim_layer`/`fct_platform_reported` (D-07).
+3. AD-042's S-B/S-C reconciliation extension (D-12) — falls back to P-SA alone.
+
+**Never-shed list** — these three are load-bearing for the phase's own success
+criteria and are never on the table regardless of budget pressure:
+
+1. The `fct_mmm_input` enforced contract (D-06).
+2. The mart-only guard test (D-09).
+3. `channels_present` and its derivation (D-13).
+
+**Three deliberate departures from written guidance**, recorded here so a reviewer
+does not read them as oversights:
+
+1. **D-15 — seed-derived week spine, not `generate_series`.** The gapless spine
+   (AD-020) is enforced by anti-joining each layer's weeks against the
+   `season_windows` seed (`stg_calendar_weekly`) between that layer's own
+   min/max `week_start`, not by generating a date series in SQL. Explicitly
+   rejected by CONTEXT.md D-15: the seed is the single source of week
+   definitions, and SQL date arithmetic could drift from it independently.
+2. **D-16 — AD-043 implemented strictly.** Neither `_eur` nor `_aeur` may appear
+   in any staging or mart output column name, stricter than SPEC-03 AD-001's
+   literal "mixes" wording. A tightening, not a widening — no ADR needed.
+3. **`profiles.yml`'s path form departs from `05_IMPLEMENTATION_GUIDES.md`
+   section 8.1.** The Guide states a relative `path:` "resolves relative to the
+   profile dir," and generic dbt/dbt-duckdb documentation says the same. This
+   research empirically disproved that claim for this project's mandated
+   invocation (`dbt build --project-dir dbt --profiles-dir dbt` from repo root):
+   a live three-part test against the installed dbt-core 1.12.0 / dbt-duckdb
+   1.10.1 pairing showed the `path:` value resolves against the **process's
+   current working directory at invocation**, not against `profiles.yml`'s own
+   directory, whenever `--project-dir`/`--profiles-dir` are passed explicitly.
+   `profiles.yml`'s `dev.path` is therefore the bare `data/warehouse/ambo.duckdb`
+   string, with no `../` prefix — the Guide's `../data/warehouse/ambo.duckdb`
+   form would resolve one directory ABOVE the repository root. Full reproduction
+   and citation: `.planning/phases/03-warehouse/03-RESEARCH.md` Pitfall 1.
+
+**Task 1 status.** `dbt/dbt_project.yml` and `dbt/profiles.yml` created from
+scratch; the `Makefile` `transform` target's D-17 conditional (the
+`DBT_PROJECT_FILE` variable plus the `if [ -f ... ]` branch) is replaced with the
+unconditional single-line recipe `uv run dbt build --project-dir dbt --profiles-dir dbt`,
+matching the `simulate:` target's bare-`uv run` shape (D-21).
