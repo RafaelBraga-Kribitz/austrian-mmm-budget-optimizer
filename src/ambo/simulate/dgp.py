@@ -16,10 +16,9 @@ true parameters" -- is evidence rather than a tautology (SIM-003, 09_ANTI_PATTER
 A-1). `tests/unit/test_import_independence.py` enforces this mechanically.
 
 This is the first half of `dgp.py` (T-103, T-104): the calendar spine, the
-seasonal index, baseline demand, the rounding convention, and (added by Task 2 in
-this same plan) the simulator's own adstock/Hill. `assemble_scenario`,
-`SimulationResult` and the SIM-071/072 audits are plan 02-06's second half of this
-same file.
+seasonal index, baseline demand, the rounding convention, and the simulator's own
+adstock/Hill. `assemble_scenario`, `SimulationResult` and the SIM-071/072 audits
+are plan 02-06's second half of this same file.
 """
 
 from __future__ import annotations
@@ -238,3 +237,72 @@ def baseline_demand(cfg: ScenarioConfig, weeks: pd.DataFrame) -> pd.DataFrame:
             "base": base,
         }
     )
+
+
+def adstock_recursive(x: np.ndarray, lam: float) -> np.ndarray:
+    """Geometric adstock (SPEC-01 section 2.2): `a_t = x_t + lam * a_{t-1}`, with
+    `a_0 = 0` (equivalently, `a[0] = x[0]` in this 0-indexed array form).
+
+    Pure, O(T), causal: `a_t` depends only on `x_{<=t}`. Computed with a plain
+    forward loop over `t` -- deliberately not vectorized with `np.cumsum`,
+    `np.convolve`, `scipy.signal.lfilter` or a strided trick, per
+    `05_IMPLEMENTATION_GUIDES.md` section 1.4 and 09_ANTI_PATTERNS A-14: those
+    forms are exactly where the project's named trap T-2 (convolution-direction
+    reversal) hides, and a clever vectorization must never be traded for the
+    causality property this function exists to guarantee.
+
+    Validates first, raising `SimulationError` naming the offending value and the
+    expected domain on any violation: `x` must be a 1-D array, every element
+    finite and non-negative; `lam` must satisfy `0.0 <= lam < 1.0` (`lam == 1.0`
+    is rejected explicitly because the closed form `x / (1 - lam)` diverges
+    there).
+
+    An empty `x` returns an empty array without raising -- a documented
+    total-function property, not a reachable case in this phase's normal flow,
+    since a valid `ScenarioConfig.weeks` is always one of `{156, 104, 78}`.
+    """
+    if x.ndim != 1:
+        raise SimulationError(f"adstock_recursive(): x must be 1-D, got ndim={x.ndim!r}")
+    if not np.all(np.isfinite(x)):
+        raise SimulationError("adstock_recursive(): x must be all-finite, found NaN or infinity")
+    if x.size > 0 and np.any(x < 0.0):
+        raise SimulationError(
+            f"adstock_recursive(): x must be all non-negative, found min={x.min()!r}"
+        )
+    if not (0.0 <= lam < 1.0):
+        raise SimulationError(
+            f"adstock_recursive(): lam must satisfy 0.0 <= lam < 1.0, got {lam!r}"
+        )
+
+    a = np.empty_like(x, dtype=np.float64)
+    for t in range(x.shape[0]):
+        a[t] = x[t] if t == 0 else x[t] + lam * a[t - 1]
+    return a
+
+
+def hill(a: np.ndarray, K: float, s: float) -> np.ndarray:
+    """Hill saturation on adstocked spend (SPEC-01 section 2.2): `h = a^s / (a^s
+    + K^s)`.
+
+    `hill(K, K, s)` is exactly 0.5 for every `s > 0`, because numerator and
+    denominator differ by exactly a factor of two in floating point when `a ==
+    K`. `hill(0, K, s)` is exactly 0.0. Output lies in `[0, 1]` and is
+    monotonically non-decreasing in `a` for every in-domain `(K, s)`.
+
+    Validates first, raising `SimulationError` naming the offending value and the
+    expected domain on any violation: `a` must be all finite and non-negative;
+    `K` and `s` must both be strictly positive. A negative `a`, a non-finite `a`,
+    or a non-positive `K`/`s` never silently produces a NaN.
+    """
+    if not np.all(np.isfinite(a)):
+        raise SimulationError("hill(): a must be all-finite, found NaN or infinity")
+    if a.size > 0 and np.any(a < 0.0):
+        raise SimulationError(f"hill(): a must be all non-negative, found min={a.min()!r}")
+    if not K > 0.0:
+        raise SimulationError(f"hill(): K must be > 0, got {K!r}")
+    if not s > 0.0:
+        raise SimulationError(f"hill(): s must be > 0, got {s!r}")
+
+    a_s = a**s
+    result: np.ndarray = a_s / (a_s + K**s)
+    return result

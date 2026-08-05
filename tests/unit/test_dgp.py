@@ -22,7 +22,25 @@ import pytest
 from ambo.common.errors import SimulationError
 from ambo.simulate import dgp
 from ambo.simulate.config import SeasonWeights, load_scenario
-from ambo.simulate.dgp import baseline_demand, round_half_up, season_index, week_index
+from ambo.simulate.dgp import (
+    adstock_recursive,
+    baseline_demand,
+    hill,
+    round_half_up,
+    season_index,
+    week_index,
+)
+
+# SPEC-01 section 4, verbatim: (K, s) per channel -- the boundary table for the
+# hill(K)=0.5 exactness test below.
+_SPEC01_HILL_TABLE: tuple[tuple[str, float, float], ...] = (
+    ("search_brand", 800.0, 1.2),
+    ("search_generic", 3000.0, 1.0),
+    ("meta", 2500.0, 0.9),
+    ("display_video", 2000.0, 1.1),
+    ("print_regional", 4000.0, 1.3),
+    ("radio", 3500.0, 1.2),
+)
 
 
 @pytest.fixture(autouse=True)
@@ -227,3 +245,101 @@ def test_baseline_demand_non_promo_week_carries_no_multiplier() -> None:
 def test_round_half_up_rounding_is_half_away_from_zero_not_banker() -> None:
     result = round_half_up(np.array([0.5, 1.5, 2.5]))
     assert list(result) == [1, 2, 3]
+
+
+# ---------------------------------------------------------------------------
+# adstock_recursive -- impulse test FIRST (02-RESEARCH.md Pitfall 4, trap T-2),
+# then the closed-form limit test, per the project's own written-before-trusted
+# ordering discipline.
+# ---------------------------------------------------------------------------
+
+
+def test_adstock_impulse_response_is_causal() -> None:
+    x = np.zeros(50)
+    x[10] = 1000.0
+    a = adstock_recursive(x, lam=0.6)
+    assert (a[:10] == 0).all()
+    for t in range(10, 50):
+        assert abs(a[t] - 1000.0 * 0.6 ** (t - 10)) < 1e-9
+
+
+def test_adstock_closed_form_limit() -> None:
+    x = np.full(200, 1000.0)
+    a = adstock_recursive(x, lam=0.6)
+    assert abs(a[-1] - 1000.0 / (1 - 0.6)) < 1e-9
+
+
+def test_adstock_finite_t_exactness() -> None:
+    x = np.full(200, 1000.0)
+    a = adstock_recursive(x, lam=0.6)
+    for t in range(200):
+        expected = 1000.0 * (1 - 0.6 ** (t + 1)) / (1 - 0.6)
+        assert abs(a[t] - expected) < 1e-9
+
+
+def test_adstock_all_zero_input_is_exactly_all_zero() -> None:
+    a = adstock_recursive(np.zeros(52), 0.6)
+    assert (a == 0.0).all()
+
+
+def test_adstock_single_element_input_is_exact() -> None:
+    a = adstock_recursive(np.array([1234.0]), 0.6)
+    assert list(a) == [1234.0]
+
+
+def test_adstock_empty_input_returns_empty_without_raising() -> None:
+    a = adstock_recursive(np.array([]), 0.6)
+    assert a.shape == (0,)
+
+
+@pytest.mark.parametrize("channel", [row[0] for row in _SPEC01_HILL_TABLE])
+def test_hill_at_k_is_exactly_half_across_spec01_table(channel: str) -> None:
+    table = dict((row[0], (row[1], row[2])) for row in _SPEC01_HILL_TABLE)
+    k, s = table[channel]
+    result = hill(np.array([k]), K=k, s=s)
+    assert abs(result[0] - 0.5) < 1e-12
+
+
+def test_hill_at_zero_spend_is_exactly_zero() -> None:
+    result = hill(np.array([0.0]), K=2500.0, s=0.9)
+    assert result[0] == 0.0
+
+
+def test_adstock_raises_on_negative_element() -> None:
+    with pytest.raises(SimulationError):
+        adstock_recursive(np.array([1.0, -1.0]), 0.6)
+
+
+def test_adstock_raises_on_nan() -> None:
+    with pytest.raises(SimulationError):
+        adstock_recursive(np.array([1.0, float("nan")]), 0.6)
+
+
+def test_adstock_raises_on_infinity() -> None:
+    with pytest.raises(SimulationError):
+        adstock_recursive(np.array([1.0, float("inf")]), 0.6)
+
+
+def test_adstock_raises_on_lam_equal_to_one() -> None:
+    with pytest.raises(SimulationError):
+        adstock_recursive(np.array([1.0, 2.0]), 1.0)
+
+
+def test_adstock_raises_on_negative_lam() -> None:
+    with pytest.raises(SimulationError):
+        adstock_recursive(np.array([1.0, 2.0]), -0.1)
+
+
+def test_hill_raises_on_negative_a() -> None:
+    with pytest.raises(SimulationError):
+        hill(np.array([-1.0]), K=1000.0, s=1.0)
+
+
+def test_hill_raises_on_non_positive_k() -> None:
+    with pytest.raises(SimulationError):
+        hill(np.array([1.0]), K=0.0, s=1.0)
+
+
+def test_hill_raises_on_non_positive_s() -> None:
+    with pytest.raises(SimulationError):
+        hill(np.array([1.0]), K=1000.0, s=0.0)
