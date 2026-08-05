@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-08-05T10:22:03.685Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-08-05T10:38:59.311Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 19
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
-Plan: 5 of 10
+Plan: 6 of 10
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [███████░░░] 68%
+Progress: [███████░░░] 74%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [███████░░░] 68%
 | Phase 02 P02 | 20min | 2 tasks | 4 files |
 | Phase 02 P03 | 55min | 3 tasks | 5 files |
 | Phase 02 P04 | 25min | 3 tasks | 4 files |
+| Phase 02 P05 | ~35min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-04: SimulationError replaces 03_MODULES.md's implicit ValueError on every domain violation in dgp.py, consistent with 02-02's identical promotion
 - [Phase ?]: 02-04: _expected_keys() reconstructs the declared week spine via date.fromisocalendar()/isocalendar() independent of the (possibly corrupted) seed file, rather than re-reading the same file being diagnosed -- plain ISO-calendar arithmetic, not a reimplementation of the five AD-020 window-classification rules
 - [Phase ?]: 02-04: pyproject.toml mypy override added for pandas.* (ignore_missing_imports), same precedent as the existing yaml.* override -- pandas is a pinned runtime dependency, not a new one, so no EB-030 ADR event
+- [Phase ?]: 02-05: literal floor/round swap acceptance criterion is mathematically a no-op (integer floor_eur makes round/floor commute) -- red-then-green evidence produced instead via a mean-multiplier/draw order swap (Pitfall 6's other named example)
+- [Phase ?]: 02-05: generate_spend(cfg, rng, weeks) promotes 03_MODULES.md section 2.2's two-argument signature to three -- week-index frame injected since this module performs no I/O
 
 ### Pending Todos
 
@@ -172,8 +175,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T10:22:03.674Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-08-05T10:38:59.297Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
