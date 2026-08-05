@@ -385,3 +385,54 @@ Phase 2's total measured effort, once 02-10 is added, remains far below 2x its
 budget; no ADR is triggered. The exact combined total, including plan 02-10's own
 measured duration, is restated in `02-10-SUMMARY.md`'s Performance section for the
 permanent record.
+
+### 2026-08-05 — M1 close: effort tally finalized and human sign-off recorded (plan 02-10, Task 3)
+
+This entry corrects nothing in the M1 close entry above (2026-08-05); it appends the
+one figure that entry left open — plan 02-10's own measured duration — and records
+the Task 3 checkpoint's outcome, per this file's own append-only rule (a correction
+is a new dated entry that cites the entry it corrects, never a rewrite).
+
+**Elapsed effort, finalized.** Plan 02-10 measured ~20 min across its two `auto`
+tasks and the Task 3 checkpoint wrap-up (commit timestamps: `885743a` at 13:40:45
+CEST -> `dd29e78` at 13:43:25 CEST, Task 1, ~3 min; `dd29e78` -> `260d12d` at
+13:46:58 CEST, Task 2, ~3 min; plus the Task 3 evidence-gathering and sign-off work
+in this session). Added to the 328 min already summed for plans 02-01...02-09, the
+Phase 2 total is **348 min (~5.8 h, ~0.72 d)** — well under the 720 min (1.5 d)
+Charter section 5 budget and far below the 1440 min (2x) strictly-greater
+stop-and-ADR tripwire. **Verdict: the tripwire is not tripped; no ADR is required.**
+
+**Task 3 checkpoint re-verification.** Re-run in this session, after the M1 close
+entry above was already written: `make lint` -- `ruff check .` (lint proper) and
+`uv run mypy` (strict, whole `src/ambo`) both pass cleanly; the whole-repo
+`ruff format --check .` step still fails only on the same pre-existing,
+already-deferred `02-PATTERNS.md`/`02-RESEARCH.md` markdown-embedded-code-fence
+issue first logged by 02-01 and re-confirmed by every plan since (02-04 through
+02-09) -- confirmed here as still out of scope (neither file is in this plan's
+`files_modified`; both predate this plan, landed in `4a1a214`); `ruff format --check`
+scoped to `src/ambo tests scripts` (40 files) passes cleanly. `make test` passes
+fully: 281 passed, coverage of `src/ambo` at 93% (`>= 80%` M1 threshold). `grep -rn
+"TODO\|FIXME\|XXX" src/ tests/ scripts/` returns no matches. `make simulate && make
+validate-sim` reproduces the identical seven-row gate table pasted in the M1 close
+entry above, including the identical SIM-070 hash pair
+(`016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1` on both sides),
+both before and independently confirmed against the already-proven git-checkout
+round-trip from Task 1. `data/synthetic/s_c/truth.json`'s `display_video` entry
+carries exact `0.0` for `true_avg_roas`, `total_contribution_eur` and
+`contribution_share`; `data/synthetic/s_a/media_weekly.csv`'s header is exactly
+`week_start,channel,spend_eur,impressions,platform_conversions,platform_revenue_eur`
+with `print_regional` rows ending in three empty fields.
+
+**No CI run and no PR exist yet for this branch** (`m0-bootstrap`) -- the `[STD]`
+merge-readiness rows requiring a green CI run and a human quality-standards review
+statement are not self-certifiable pre-PR. Per the human's explicit approval below,
+these two rows are deferred to PR-open time (`/gsd-ship`), consistent with the M0
+precedent (01-09 Task 3) where the CI-run evidence line was likewise appended only
+once a human had observed a real run.
+
+**Human sign-off.** The human reviewed the evidence bundle above (281 tests passed,
+93% coverage, all seven SIM-0xx/BP-G-02 gates green, the SIM-070 round-trip hash
+match, and the 348 min effort total against the 720/1440 min budget/tripwire) and
+responded **"Approved"**, explicitly agreeing to defer the CI-jobs-green and
+quality-standards-review-statement `[STD]` rows to PR-open time since no PR/CI run
+exists yet for this branch. **M1 is closed. Phase 3 may begin.**
