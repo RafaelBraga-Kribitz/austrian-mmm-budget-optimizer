@@ -266,6 +266,43 @@ orders rule, the promo-flag/YAML match, the zero-effect channel, and same-seed d
 
 ---
 
+### src/ambo/simulate/platform_bias.py
+
+**Purpose** SIM-060's simulated platform-reporting over-credit and BP-D-02's impressions/
+conversions, completing `media_weekly.csv`'s three previously-null columns (T-106). SIM-061:
+this makes "platform ROAS vs true ROAS" a known quantity in Layer P that Phase 8's DC-702
+attribution-gap gate must later recover.
+
+**Public API**
+- `platform_report(result: SimulationResult) -> pd.DataFrame` — `03_MODULES.md` §2.4's
+  contract exactly. Returns a frame with `6 * cfg.weeks` rows and SIM-004's six columns
+  (`week_start, channel, spend_eur, impressions, platform_conversions, platform_revenue_eur`)
+  in order, row order identical to the input `result.media`.
+
+**Invariants** Pure — every value is derived from the handed `SimulationResult`; no I/O; never
+imports `ambo.model` (SIM-003). `share_{c,t} = spend_{c,t} / total_spend_t` is computed with a
+guarded expression so a zero-total-spend week yields exactly `0.0` for every channel's share,
+never `NaN` or infinity. `print_regional` and `radio` (`platform.phi is None`) carry NULL in
+all three platform columns for every row — offline channels have no platform reporting at all.
+`impressions`/`platform_conversions` are nullable `Int64`, `platform_revenue_eur` is nullable
+`Float64`, so NULL is a true missing value that survives to an empty CSV field rather than `0`
+or `nan`. `phi`, `theta` and `cpm` are read from `result.cfg.channels[c].platform` — this
+module contains no such literal, so SPEC-01 §6's table keeps exactly one home (the scenario
+YAML), the same single-home rule BP-G-02 already guards at load time.
+
+**Failure modes** `SimulationError` if `result.media`'s row count is not `6 * cfg.weeks`, or
+its column set is not exactly SIM-004's six columns — this module is a completion step and
+must not silently reshape its input.
+
+**Testing** `tests/unit/test_platform_bias.py` — a hand-computed identity to 1e-9 (literal
+arithmetic in the test, not a second call to the module), offline-NULL and online-non-null
+coverage across all three scenarios, the CPM/AOV impressions/conversions rules, the
+zero-total-spend-week no-NaN case, a config-not-code monkeypatch proof, SIM-061's over-credit
+ordering (`display_video > meta > search_generic > search_brand`) on S-A/S-B, and row-order
+preservation.
+
+---
+
 ### src/ambo/simulate/spend_patterns.py
 
 **Purpose** The six per-channel weekly spend series of SPEC-01 §3: always-on Normals with
