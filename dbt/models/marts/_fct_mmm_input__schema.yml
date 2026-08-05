@@ -1,0 +1,177 @@
+version: 2
+
+# fct_mmm_input's enforced contract (D-06/D-07/D-08) -- the single normative home for
+# the mart column contract. `db.py` (plan 03-07) derives its expected column set from
+# this file rather than restating it; `docs/MODULE_CONTRACTS.md` cites it by path. A
+# contract change here must propagate, never drift silently.
+#
+# Columns-only contract form (03-RESEARCH.md Pattern 2): no `constraints:` block --
+# DuckDB does not appear in dbt's official per-platform constraint support table, so
+# which constraint types compile to working DDL is unverified for this adapter
+# (Pitfall 2). The columns-and-types half of contract enforcement is adapter-agnostic
+# in dbt-core (a typed CREATE TABLE that the database itself rejects on mismatch);
+# grain uniqueness (AD-040 half) is an ordinary dbt `unique` test instead, which is a
+# plain SQL query unaffected by adapter constraint support.
+#
+# fct_mmm_input is THE model input contract (AD-030). It freezes at the end of this
+# plan; any schema change after Phase 4 starts is an ADR-worthy contract break
+# (ROADMAP Phase 3 rollback rule).
+models:
+  - name: fct_mmm_input
+    description: >
+      The single model input contract (AD-030) -- grain week x layer. Phase 4's
+      model code reads only this mart via `ambo/common/db.py`, never CSVs. Every
+      spend column is zero-filled when the channel is structurally absent for a
+      layer; model code learns which of the seven spend columns are real for a
+      layer by iterating `dim_layer.channels_present` (D-13), never by assuming all
+      seven carry data.
+    config:
+      contract: {enforced: true}
+      materialized: table
+    columns:
+      - name: week_start
+        data_type: date
+        description: >
+          ISO Monday week start date. Grain component 1 of 2 (week x layer). Sourced
+          from stg_outcome_weekly, which drives this mart's grain.
+        data_tests:
+          - not_null
+      - name: layer
+        data_type: varchar
+        description: >
+          Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain component 2 of 2 --
+          two rows sharing a week_start but differing in layer are distinct rows
+          and never merge (AD-002).
+        data_tests:
+          - not_null
+      - name: revenue
+        data_type: double
+        description: >
+          Total revenue for that week and layer, in the layer's own monetary unit
+          (named in dim_layer.monetary_unit, never in this column's suffix -- see
+          AD-043).
+        data_tests:
+          - not_null
+      - name: orders
+        data_type: bigint
+        description: Order count for that week and layer.
+        data_tests:
+          - not_null
+      - name: promo_flag
+        data_type: integer
+        description: 1 if the week is inside a promo window for this layer, else 0.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: advent_flag
+        data_type: integer
+        description: >
+          1 if this week falls inside the Advent window, else 0. Sourced from
+          dbt/seeds/season_windows.csv and never recomputed (AD-020).
+        data_tests:
+          - not_null
+      - name: jan_dip_flag
+        data_type: integer
+        description: >
+          1 if this week falls inside the January-dip window, else 0. Sourced from
+          dbt/seeds/season_windows.csv and never recomputed (AD-020).
+        data_tests:
+          - not_null
+      - name: spring_flag
+        data_type: integer
+        description: >
+          1 if this week falls inside the spring window, else 0. Sourced from
+          dbt/seeds/season_windows.csv and never recomputed (AD-020).
+        data_tests:
+          - not_null
+      - name: schulbeginn_flag
+        data_type: integer
+        description: >
+          1 if this week falls inside the school-start window, else 0. Sourced from
+          dbt/seeds/season_windows.csv and never recomputed (AD-020).
+        data_tests:
+          - not_null
+      - name: summer_lull_flag
+        data_type: integer
+        description: >
+          1 if this week falls inside the summer-lull window, else 0. Sourced from
+          dbt/seeds/season_windows.csv and never recomputed (AD-020).
+        data_tests:
+          - not_null
+      - name: spend_search_brand
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the search_brand channel, in
+          the layer's own monetary unit. Zero-filled when the channel is absent for
+          that layer. Model code iterates dim_layer.channels_present to learn which
+          of the seven spend columns are real for a layer, never assumes all seven
+          carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_search_generic
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the search_generic channel,
+          in the layer's own monetary unit. Zero-filled when the channel is absent
+          for that layer. Model code iterates dim_layer.channels_present to learn
+          which of the seven spend columns are real for a layer, never assumes all
+          seven carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_meta
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the meta channel, in the
+          layer's own monetary unit. Zero-filled when the channel is absent for
+          that layer. Model code iterates dim_layer.channels_present to learn
+          which of the seven spend columns are real for a layer, never assumes all
+          seven carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_display_video
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the display_video channel,
+          in the layer's own monetary unit. Zero-filled when the channel is absent
+          for that layer. Model code iterates dim_layer.channels_present to learn
+          which of the seven spend columns are real for a layer, never assumes all
+          seven carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_print_regional
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the print_regional channel,
+          in the layer's own monetary unit. Zero-filled when the channel is absent
+          for that layer. Model code iterates dim_layer.channels_present to learn
+          which of the seven spend columns are real for a layer, never assumes all
+          seven carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_radio
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the radio channel, in the
+          layer's own monetary unit. Zero-filled when the channel is absent for
+          that layer. Model code iterates dim_layer.channels_present to learn
+          which of the seven spend columns are real for a layer, never assumes all
+          seven carry data (D-13).
+        data_tests:
+          - not_null
+      - name: spend_other
+        data_type: double
+        description: >
+          Total media spend for that week, layer, and the other channel, in the
+          layer's own monetary unit. `other` is Layer-R-only (BP-D-04), so this
+          column is exactly 0.0 on every Layer P row -- a structurally absent
+          channel is zero-filled by the pivot, never NULL and never omitted. Model
+          code iterates dim_layer.channels_present to learn which of the seven
+          spend columns are real for a layer, never assumes all seven carry data
+          (D-13).
+        data_tests:
+          - not_null
+    data_tests:
+      - unique:
+          column_name: "(cast(week_start as varchar) || '|' || layer)"
