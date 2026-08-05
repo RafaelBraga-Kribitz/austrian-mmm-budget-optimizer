@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-08-PLAN.md
-last_updated: "2026-08-05T11:22:18.715Z"
+stopped_at: Completed 02-09-PLAN.md
+last_updated: "2026-08-05T11:40:27.310Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
-Plan: 9 of 10
+Plan: 10 of 10
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [█████████░] 89%
 | Phase 02 P06 | ~45min | 2 tasks | 3 files |
 | Phase 02 P07 | 35min | 2 tasks | 3 files |
 | Phase 02-ground-truth-simulator P08 | ~40min | 3 tasks | 3 files |
+| Phase 02 P09 | ~40min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-08: Assumption A3 resolved -- float precision pinned via pre-normalisation through %.10g before json.dumps, not a custom JSONEncoder subclass (json's default= never fires for a native float)
 - [Phase ?]: 02-08: SPEC-01 section 8's grid question required no new decision -- response_curve_at is generic over a caller-supplied grid, proven against an independent MD-082-style 1.5x recomputation
 - [Phase ?]: 02-08: marginal_roas_at's a==0 branch returns 0.0 for s>=1.0, raises SimulationError for s<1.0 -- defensive only, never exercised since compute_truth rejects zero-total-spend channels first
+- [Phase ?]: 02-09: Tasks 1+2 landed in a single commit (964bcf8), mirroring 02-08's precedent -- CLI, byte-stable writers and the full SIM-070..075+BP-G-02 gate runner share the _generate_scenario helper so there was no meaningful intermediate diff to split
+- [Phase ?]: 02-09: validate_sim's own PASS/FAIL exit code covers only the six in-process SIM-0xx rows; BP-G-02's DELEGATED row is composed at the Makefile level (gate runner then the pytest selector), per the plan's own explicit two-line validate-sim recipe
+- [Phase ?]: 02-09: zero occurrences of the literal substring 'pytest' anywhere in __main__.py (grep -c returns 0) -- the BP-G-02 evidence text names the selector without spelling the test-runner's name, satisfying Task 2's literal-substring acceptance criterion
 
 ### Pending Todos
 
@@ -188,8 +192,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T11:22:18.701Z
-Stopped at: Completed 02-08-PLAN.md
+Last session: 2026-08-05T11:40:27.298Z
+Stopped at: Completed 02-09-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
