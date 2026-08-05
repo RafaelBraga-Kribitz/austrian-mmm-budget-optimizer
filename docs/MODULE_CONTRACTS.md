@@ -342,6 +342,75 @@ step-order proven to bite via a deliberate swap-and-revert.
 
 ---
 
+### src/ambo/simulate/truth.py
+
+**Purpose** `truth.json`'s schema, the closed-form true-response-curve evaluator, and
+byte-stable emission (SPEC-01 §4/§6/§8, SIM-060, SIM-070, SIM-075, Guide §1.5, BP-D-02/
+BP-D-16, T-107). This is the single home of the closed-form `beta·Hill` curve formula (A-8)
+and of the `truth.json` serialisation format. `response_curve_at` and `marginal_roas_at`
+reuse `dgp.hill` so the truth curve and the generated per-week contributions cannot diverge.
+
+**Public API**
+- `response_curve_at(params: TrueParams, x_grid: np.ndarray) -> np.ndarray` — the true
+  response curve at steady-state adstock (`a = x/(1-lam)`, contribution `beta * hill(a, K,
+  s)`), evaluated at a **caller-supplied grid** (SPEC-01 §8's grid note, resolving
+  INGEST-CONFLICTS WARNING 4): this phase calls it once with the 21-point diagnostic grid
+  over 0…2× max weekly spend; Phase 3/8's `exports/response_curves.csv` calls the same
+  function again with MD-082's 21-point 0…1.5× observed grid — no interpolation, no second
+  home for the formula. `response_curve_at(params, [0.0]) == [0.0]` exactly; identically
+  `0.0` when `beta == 0.0`. Raises `SimulationError` on a non-1-D, non-finite or negative
+  grid.
+- `marginal_roas_at(params: TrueParams, x_mean: float) -> float` — Guide §1.5's analytic
+  derivative `beta·s·K^s·a^{s-1}/(a^s+K^s)^2 · 1/(1-lam)` at `a = x_mean/(1-lam)`.
+  Truth-side only: uses SPEC-01's raw-recursion steady state, never the model's normalized
+  one (BP-D-16). Returns exactly `0.0` when `beta == 0.0`; at `a == 0.0` returns `0.0` for
+  `s >= 1.0` and raises `SimulationError` for `s < 1.0` (unbounded derivative at the origin).
+- `class ChannelTruth(BaseModel)` — one channel's disclosed truth: the §4 parameters (`lam`,
+  `K`, `s`, `beta`), `half_life_weeks`, spend/contribution aggregates, `true_avg_roas`,
+  `true_marginal_roas_at_mean_spend`, the 21-point `response_curve_spend_eur`/
+  `response_curve_contribution_eur` arrays, and the §6 platform quantities (`platform_phi`,
+  `platform_theta`, `platform_cpm`, `platform_roas`), all `None` for offline channels.
+- `class TruthFile(BaseModel)` — scenario metadata, the §2.1/§2.3 scalars (`b0`, `growth`,
+  `noise_share`, `aov_base`, `aov_advent_bonus`, `promo_multiplier`, `season_weights`),
+  window aggregates (`total_revenue_eur`, `total_media_contribution_eur`,
+  `media_share_of_revenue`), `response_curve_grid_max_multiple` (always `2.0`), and
+  `channels: tuple[ChannelTruth, ...]` in `SPEC_CHANNEL_ORDER`.
+- `compute_truth(result: SimulationResult, media: pd.DataFrame) -> TruthFile` — pure;
+  aggregates `result` and the platform-completed `media` frame (from
+  `platform_bias.platform_report`) into a `TruthFile`. Raises `SimulationError` naming any
+  channel whose total spend over the window is `0.0` — a `0/0` average ROAS never reaches a
+  committed artifact.
+- `write_truth(t: TruthFile, path: Path) -> None` — byte-stable (SIM-070): `sort_keys=True`,
+  2-space indent, every float pre-normalised through a fixed `%.10g` format, one trailing
+  newline, LF endings pinned in the writer (`newline="\n"`, not `.gitattributes`). Atomic
+  (EB-050): writes `<path>.tmp-<pid>` then `os.replace`s onto `path`, removing the temp file
+  on any exception.
+
+**Invariants** Both pydantic models are `extra='forbid'` and frozen. `channels` is always in
+`SPEC_CHANNEL_ORDER`. The diagnostic response-curve grid is 21 points over 0…2× max weekly
+spend and is never the comparison grid (SPEC-01 §8: `1.3× optimizer bound < 1.5× reporting
+horizon < 2.0× truth diagnostic`); the curve evaluator itself takes a caller-supplied grid,
+so no reconciliation rule is needed between the 1.3×/1.5×/2.0× horizons. Offline channels
+(`print_regional`, `radio`) carry `None` in all four platform fields, never a fabricated
+zero. `compute_truth`'s `contribution_share` values sum to `media_share_of_revenue` exactly,
+since both divide by the same `total_revenue_eur`. This module imports nothing from
+`ambo.model` (SIM-003).
+
+**Failure modes** `SimulationError`: `response_curve_at` given a non-1-D, non-finite or
+negative grid; `marginal_roas_at` given a non-finite or negative `x_mean`, or an unbounded
+derivative at `a == 0.0` with `s < 1.0`; `compute_truth` given a channel whose total spend
+over the window is `0.0`.
+
+**Testing** `tests/unit/test_truth.py` — SIM-075 schema completeness and parameter equality
+against `load_scenario` for all three scenarios, frozen/`extra='forbid'` rejection,
+`true_avg_roas` re-derivation, contribution-share-sums-to-media-share, marginal-ROAS-vs-
+finite-difference agreement, response-curve monotonicity and the S-C zero-effect exact-zero
+spot check, the caller-supplied-grid property Phase 3/8 depends on, offline-null platform
+fields, the zero-total-spend `SimulationError`, `write_truth` byte-stability/sorted-keys/
+float-precision/no-temp-file guarantees, and a single-home grep guard for the curve formula.
+
+---
+
 ## Dependency directions
 
 Reproduced from `03_MODULES.md` §10 (the full package-level table), since two of these edges
