@@ -223,7 +223,19 @@ rather than a pile of CSVs it could quietly reshape.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: TBD
+**Plans**: 9 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — dbt scaffold, committed profile, raw external views, unconditional `make transform`, warehouse-path and taxonomy-equality tests (T-201)
+- [ ] 03-02-PLAN.md — `DataContractError` and the fifth standing architectural guard, the AD-030 mart-only rule (D-09)
+- [ ] 03-03-PLAN.md — four staging models with BP-D-03 renames, strict AD-043, and the poisoned-fixture proof that duplicate grain keys FAIL (T-202, D-11, D-16)
+- [ ] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
+- [ ] 03-05-PLAN.md — `dim_layer` with source-presence-derived `channels_present` and its both-directions test (D-13, D-14)
+- [ ] 03-06-PLAN.md — `fct_platform_reported`, dormant AD-044, and the fixture-exercised `layer_r_present` branch (D-24, D-20)
+- [ ] 03-07-PLAN.md — `src/ambo/common/db.py` read-only accessors with contract-derived columns and collect-all-raise-once postconditions (T-204)
+- [ ] 03-08-PLAN.md — `scripts/export_marts.py` registry writer, the committed `exports/mmm_input_weekly.csv`, and its AD-050 contract test (T-205)
+- [ ] 03-09-PLAN.md — CI job 3 Windows matrix leg and export drift gate, stale-document corrections, M2 build-log close (D-22, D-02)
+
 **WBS tasks**: T-201…T-205
 **Quality gates**: G-DATA-W, G-ARCH (model code demonstrably reads only the mart)
 **Rollback**: The `fct_mmm_input` contract freezes at T-203. Any mart schema change after Phase 4 starts is an ADR-worthy contract break, because it forces a change to the model contract.
