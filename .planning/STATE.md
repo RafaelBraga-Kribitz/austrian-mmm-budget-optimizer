@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-08-05T10:04:09.970Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-08-05T10:22:03.685Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 19
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (Ground-Truth Simulator) — EXECUTING
-Plan: 4 of 10
+Plan: 5 of 10
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 02 execution started
 
-Progress: [██████░░░░] 63%
+Progress: [███████░░░] 68%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [██████░░░░] 63%
 | Phase 02 P01 | 33min | 3 tasks | 6 files |
 | Phase 02 P02 | 20min | 2 tasks | 4 files |
 | Phase 02 P03 | 55min | 3 tasks | 5 files |
+| Phase 02 P04 | 25min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 02-03: meta.spend.advent_factor read as 0.5(S-A)/0.9(S-B,S-C), mirroring search_generic's SIM-030 switch, since SPEC-01 section 3's meta row states no seasonal multiplier by itself but SIM-030 presupposes a 0.5 baseline
 - [Phase ?]: 02-03: four online-channel cpm constants authored (not spec-given, BP-D-02): search_brand=12.0, search_generic=20.0, meta=6.0, display_video=4.0, identical across S-A/B/C
 - [Phase ?]: 02-03: test_promo_week_counting_rules asserts spring-anchor presence directly plus a >=2 sanity count, not ==2 -- an unconstrained spread pick can coincidentally also land inside the spring window (observed s_b 2022), which is correct authoring-aid behavior not a bug
+- [Phase ?]: 02-04: season_index(weeks, season_weights) promotes 03_MODULES.md section 2.3's signature to a (week-index frame, SeasonWeights) pair -- the five weights are SIM-002 YAML values, never hard-coded in code
+- [Phase ?]: 02-04: SimulationError replaces 03_MODULES.md's implicit ValueError on every domain violation in dgp.py, consistent with 02-02's identical promotion
+- [Phase ?]: 02-04: _expected_keys() reconstructs the declared week spine via date.fromisocalendar()/isocalendar() independent of the (possibly corrupted) seed file, rather than re-reading the same file being diagnosed -- plain ISO-calendar arithmetic, not a reimplementation of the five AD-020 window-classification rules
+- [Phase ?]: 02-04: pyproject.toml mypy override added for pandas.* (ignore_missing_imports), same precedent as the existing yaml.* override -- pandas is a pinned runtime dependency, not a new one, so no EB-030 ADR event
 
 ### Pending Todos
 
@@ -167,8 +172,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T10:03:58.107Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-08-05T10:22:03.674Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
