@@ -23,6 +23,7 @@ are plan 02-06's second half of this same file.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date, timedelta
 
 import numpy as np
@@ -30,7 +31,7 @@ import pandas as pd
 
 from ambo.common.config import repo_root
 from ambo.common.errors import SimulationError
-from ambo.simulate.config import ScenarioConfig, SeasonWeights
+from ambo.simulate.config import SPEC_CHANNEL_ORDER, ScenarioConfig, SeasonWeights
 
 # The committed calendar seed (AD-020): the sole calendar authority for this
 # module. Never recomputed here -- see the module docstring.
@@ -306,3 +307,162 @@ def hill(a: np.ndarray, K: float, s: float) -> np.ndarray:
     a_s = a**s
     result: np.ndarray = a_s / (a_s + K**s)
     return result
+
+
+# The per-channel media-contribution component columns (`m_<c>`) stored in
+# `SimulationResult.components`, in `SPEC_CHANNEL_ORDER` -- what SIM-071 re-sums.
+_CONTRIBUTION_COLUMNS: tuple[str, ...] = tuple(f"m_{c}" for c in SPEC_CHANNEL_ORDER)
+
+
+def _max_decomposition_deviation(components: pd.DataFrame) -> tuple[float, int]:
+    """The SIM-071 re-sum: `base + Σ_c m_c + eps`, re-summed from `components`'s own
+    stored arrays (never from any expression that produced `revenue_pre_clip` at
+    construction time), compared against the stored `revenue_pre_clip` column.
+
+    Returns `(max_abs_deviation, worst_row_position)`. Shared by
+    `SimulationResult.__post_init__` (which raises `SimulationError` when the
+    deviation exceeds 1e-6) and the public `decomposition_audit` function (plan
+    02-06 Task 2), so the two never drift out of sync with each other.
+    """
+    channel_sum = components[list(_CONTRIBUTION_COLUMNS)].sum(axis=1).to_numpy()
+    recomputed = components["base"].to_numpy() + channel_sum + components["eps"].to_numpy()
+    deviation = np.abs(recomputed - components["revenue_pre_clip"].to_numpy())
+    worst_position = int(np.argmax(deviation))
+    return float(deviation[worst_position]), worst_position
+
+
+@dataclass(frozen=True)
+class SimulationResult:
+    """The full assembled output of one `assemble_scenario` run (SPEC-01 §2.3, T-105).
+
+    `cfg` — the scenario this result was built from. `weeks` — `week_index(cfg)`'s
+    output, the gapless ISO-Monday spine. `spend` — `generate_spend`'s wide
+    week x channel frame (int €). `components` — every intermediate array kept for
+    audit: `trend`, `season`, `promo_mult`, `promo_flag`, `base` (from
+    `baseline_demand`); `adstock_<c>`/`m_<c>` per channel in `SPEC_CHANNEL_ORDER`;
+    `eps`; `revenue_pre_clip`; `revenue` (post-clip). `media` — the SIM-004 long
+    frame with `week_start`, `channel`, `spend_eur` plus three all-null placeholder
+    columns (`impressions`, `platform_conversions`, `platform_revenue_eur`) that
+    plan 02-07's `platform_bias.platform_report` populates; sorted by `week_start`
+    ascending then `SPEC_CHANNEL_ORDER` position. `outcome` — the SIM-004
+    `week_start`, `revenue_eur`, `orders`, `promo_flag` frame, sorted by
+    `week_start` ascending.
+
+    Invariant (SIM-071): constructing a `SimulationResult` whose `components` do
+    not re-sum to `revenue_pre_clip` within 1e-6 raises `SimulationError` in
+    `__post_init__` — this makes the decomposition invariant a constructor
+    precondition, not an after-the-fact report. A `SimulationResult` that
+    violates the decomposition cannot exist.
+    """
+
+    cfg: ScenarioConfig
+    weeks: pd.DataFrame
+    spend: pd.DataFrame
+    components: pd.DataFrame
+    media: pd.DataFrame
+    outcome: pd.DataFrame
+
+    def __post_init__(self) -> None:
+        max_deviation, worst_position = _max_decomposition_deviation(self.components)
+        if max_deviation > 1e-6:
+            worst_week = self.weeks["week_start"].iloc[worst_position]
+            raise SimulationError(
+                f"SimulationResult(): SIM-071 decomposition invariant violated at week "
+                f"{worst_week.date()} (row {worst_position}): base + sum(m_c) + eps deviates "
+                f"from the stored revenue_pre_clip by {max_deviation!r}, exceeding tolerance 1e-6"
+            )
+
+
+def assemble_scenario(cfg: ScenarioConfig, rng: np.random.Generator) -> SimulationResult:
+    """Assemble one scenario run into a `SimulationResult` (SPEC-01 §2.2/§2.3, T-105).
+
+    The only orchestrator in this module. Sequence, in exactly this order:
+    `week_index` -> `baseline_demand` -> `generate_spend` (the generator's first
+    six draw calls, `spend_patterns.py`'s documented order) -> per-channel
+    adstock/Hill in `SPEC_CHANNEL_ORDER` (a plain loop, never vectorized across
+    channels, per A-14) -> one `rng.normal` noise draw, strictly after
+    `generate_spend` on the same generator (SPEC-01 §2.3, Guide §1.3's documented
+    draw-order contract) -> revenue assembly and the ≥0 clip -> orders via
+    `round_half_up` -> the two SIM-004 frames.
+
+    `generate_spend` is imported locally (function-scoped, not at module level):
+    `spend_patterns.py` imports `round_half_up` from this module, so a top-level
+    import here would create an import cycle (A-15) between `dgp.py` and
+    `spend_patterns.py`.
+
+    Returns a `SimulationResult`, letting `__post_init__` run the SIM-071 audit.
+    """
+    from ambo.simulate.spend_patterns import generate_spend
+
+    weeks = week_index(cfg)
+    baseline = baseline_demand(cfg, weeks)
+    spend = generate_spend(cfg, rng, weeks)
+
+    component_columns: dict[str, np.ndarray] = {
+        "trend": baseline["trend"].to_numpy(),
+        "season": baseline["season"].to_numpy(),
+        "promo_mult": baseline["promo_mult"].to_numpy(),
+        "promo_flag": baseline["promo_flag"].to_numpy(),
+        "base": baseline["base"].to_numpy(),
+    }
+
+    channel_sum = np.zeros(len(weeks), dtype=np.float64)
+    for channel_id in SPEC_CHANNEL_ORDER:
+        params = cfg.channels[channel_id].true_params
+        x = spend[channel_id].to_numpy(dtype=np.float64)
+        a_c = adstock_recursive(x, params.lam)
+        m_c = params.beta * hill(a_c, params.K, params.s)
+        component_columns[f"adstock_{channel_id}"] = a_c
+        component_columns[f"m_{channel_id}"] = m_c
+        channel_sum = channel_sum + m_c
+
+    sigma = cfg.noise_share * float(baseline["base"].mean())
+    eps = rng.normal(0.0, sigma, size=len(weeks))
+    component_columns["eps"] = eps
+
+    revenue_pre_clip = component_columns["base"] + channel_sum + eps
+    revenue = np.maximum(revenue_pre_clip, 0.0)
+    component_columns["revenue_pre_clip"] = revenue_pre_clip
+    component_columns["revenue"] = revenue
+
+    components = pd.DataFrame(component_columns)
+
+    aov = cfg.aov_base + cfg.aov_advent_bonus * weeks["advent_flag"].to_numpy()
+    orders = round_half_up(revenue / aov)
+
+    media = pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "week_start": weeks["week_start"].to_numpy(),
+                    "channel": channel_id,
+                    "spend_eur": spend[channel_id].to_numpy(),
+                }
+            )
+            for channel_id in SPEC_CHANNEL_ORDER
+        ],
+        ignore_index=True,
+    )
+    media["impressions"] = np.nan
+    media["platform_conversions"] = np.nan
+    media["platform_revenue_eur"] = np.nan
+    media["channel"] = pd.Categorical(media["channel"], categories=SPEC_CHANNEL_ORDER, ordered=True)
+    media = media.sort_values(["week_start", "channel"]).reset_index(drop=True)
+    media["channel"] = media["channel"].astype(str)
+
+    outcome = (
+        pd.DataFrame(
+            {
+                "week_start": weeks["week_start"].to_numpy(),
+                "revenue_eur": revenue,
+                "orders": orders,
+                "promo_flag": component_columns["promo_flag"],
+            }
+        )
+        .sort_values("week_start")
+        .reset_index(drop=True)
+    )
+
+    return SimulationResult(
+        cfg=cfg, weeks=weeks, spend=spend, components=components, media=media, outcome=outcome
+    )
