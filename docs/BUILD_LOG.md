@@ -496,3 +496,178 @@ scratch; the `Makefile` `transform` target's D-17 conditional (the
 `DBT_PROJECT_FILE` variable plus the `if [ -f ... ]` branch) is replaced with the
 unconditional single-line recipe `uv run dbt build --project-dir dbt --profiles-dir dbt`,
 matching the `simulate:` target's bare-`uv run` shape (D-21).
+
+### 2026-08-06 — Phase 3 (warehouse) close: effort, shed statement, red-then-green evidence index, stale-document corrections (plan 03-09, Task 2)
+
+Phase 3 (T-201…T-205, dbt scaffold through `scripts/export_marts.py`) closes with
+CI job 3's `windows-latest` matrix leg and export drift gate landed (plan 03-09
+Task 1), the three stale-document corrections and the D-05 risk-register entry
+landed (this task), and the `.planning/phases/03-warehouse/03-VALIDATION.md`
+per-task map filled. This entry records what M2's own opening entry (above,
+2026-08-05) said it would: the actual effort against the 1 d D-17 split, an
+explicit shed statement, the red-then-green evidence index across plans
+03-01…03-08, and the three document corrections with their no-ADR-owed
+rationale. Phase 3's own CI-green confirmation (plan 03-09 Task 3, a blocking
+human-verify checkpoint) has not yet been discharged as this entry is written;
+see that plan's own checkpoint record for the outcome once a human confirms it.
+
+**Elapsed effort against the 1 d (480 min) D-17 budget and 2 d (960 min) tripwire.**
+Summing each plan's measured duration from `.planning/STATE.md`'s Performance
+Metrics table (same 8-hour working-day convention the M0/M1 entries established):
+P01 (15 min) + P02 (18 min) + P03 (~18 min) + P04 (~18 min) + P05 (~55 min) + P06
+(~18 min) + P07 (~30 min) + P08 (~35 min) totals **207 min** for plans 03-01…03-08,
+plus plan 03-09's own measured duration (recorded in `03-09-SUMMARY.md`'s
+Performance section once that plan closes, since this entry is written mid-plan,
+before Task 3's checkpoint has been discharged — same convention the M0/M1 close
+entries used for their own final plan). 207 min (~3.45 h, ~0.43 d) is already well
+under the 480 min (1 d) budget and far from the 960 min (2×) strictly-greater
+stop-and-ADR tripwire from this file's own header rule, and plan 03-09's own
+duration — comparable in scope to the other single-task-cluster plans in this
+phase — cannot plausibly push the combined total anywhere near 960 min.
+**Verdict: the tripwire is not tripped** — Phase 3's total measured effort, once
+03-09 is added, remains far below 2× its 1 d budget; no standing-rule-5 ADR is
+triggered. The exact combined total, including plan 03-09's own measured
+duration, is restated in `03-09-SUMMARY.md`'s Performance section for the
+permanent record.
+
+**Shed statement: no shed was taken.** D-19's three-item shed order for the 1 d →
+2 d zone (`docs/BUILD_LOG.md`'s 2026-08-05 M2-opens entry, above) was never
+invoked — Phase 3 never entered the tripwire zone the shed order exists to
+protect. All three items D-19 named as shed candidates were delivered in full:
+
+1. The poisoned-fixture harness (D-11) — implemented as `synthetic_tree_copy` /
+   `_dbt_env` / `_run_dbt_on_tree` in plan 03-03, proving a duplicate grain key
+   fails `dbt build` (not merely that the `unique` test exists), and reused
+   unmodified by plans 03-05 and 03-06.
+2. The secondary mart contracts on `dim_layer` and `fct_platform_reported` (D-07)
+   — both shipped as full `contract: {enforced: true}` schema-yml contracts in
+   plans 03-05 and 03-06 respectively, identical in form to `fct_mmm_input`'s.
+3. AD-042's S-B/S-C reconciliation extension (D-12) — plan 03-04's
+   `ad042_revenue_reconciliation.sql` parameterizes over all three Layer P
+   layers (P-SA/P-SB/P-SC), not P-SA alone.
+
+The never-shed list (`fct_mmm_input`'s enforced contract, the mart-only guard
+test, `channels_present` and its derivation) was of course also delivered, since
+it was never on the table.
+
+**Red-then-green evidence index, by plan.** Every dbt test, architectural guard,
+and contract this phase added was proven to actually fire on a poisoned or
+perturbed input before being trusted green, per D-18's "tests ship in the plan
+that creates what they verify" rule. Full commands, exact failing node IDs, and
+assertion text are recorded in each plan's own SUMMARY under "Deviations from
+Plan" or "Accomplishments" — indexed here so a reader does not need to open all
+eight:
+
+- **03-01** — the BP-G-03 taxonomy-equality test and the D-23 warehouse-path
+  test each proven to fail on a planted defect (a swapped `channel_taxonomy`
+  entry; a `../`-prefixed `profiles.yml` path reproducing RESEARCH.md Pitfall
+  1's exact wrong-resolution outcome one directory above the repo root), then
+  reverted to green.
+- **03-02** — the fifth standing architectural guard (D-09, AD-030 mart-only
+  rule) proven non-vacuous against four synthetic offender shapes: a `read_csv`
+  call under `model/`, a `duckdb.connect` call under `decide/`, a
+  `data/warehouse`-prefixed string literal under `report/`, and a positive
+  control (an `exports/`-prefixed literal under `report/` correctly does *not*
+  trip the guard).
+- **03-03** — the strict AD-043 unit-suffix test proven to fire on a renamed
+  `revenue` → `revenue_eur` column (and proven *not* to fire on the raw layer's
+  untouched `spend_eur`, confirming the `stg_`/`fct_`/`dim_`-prefix scope is
+  deliberate); the D-11 poisoned-fixture harness proven to fail `dbt build` on
+  an exact duplicate `(week_start, channel)` grain key, with the real warehouse
+  untouched.
+- **03-04** — `fct_mmm_input`'s enforced contract proven to reject all three
+  drift shapes (a type mismatch, a missing declared column, an extra declared
+  column), each producing a DuckDB `assert_columns_equivalent` compilation
+  error; AD-040's seed-derived spine proven to fail on an interior week deleted
+  from a tmp-copied CSV; AD-042's three-layer reconciliation proven to fail on a
+  `revenue_eur` value perturbed by 1.0 (mart built from a clean tree first, CSV
+  perturbed after, only the singular test node re-run — the ordering the proof
+  itself required to avoid a false green).
+- **03-05** — `channels_present_both_directions` proven to fire in both labelled
+  directions (a listed channel with its source rows removed; an unlisted
+  channel with nonzero spend), and the AD-043 mart-dependency extension proven
+  to fire on `fct_mmm_input.revenue` renamed to `revenue_eur`.
+- **03-06** — AD-044's dormant-gate parse-time proof (`dbt build --warn-error`
+  against a missing `intake_channels` seed produces a hard Compilation Error,
+  exit 2, naming the missing node — clarifying that dbt-core's *default* CLI
+  behavior for the same condition is a WARNING plus silent node exclusion,
+  exit 0, a proof-mechanism finding recorded in the test file's own header for
+  Phase 6); the `layer_r_present` branch executed end-to-end for the first time
+  in the project's history against `tests/fixtures/real_anon_fake/`, building
+  every raw/staging/mart model and every contract green on a four-layer
+  warehouse.
+- **03-07** — `db.py`'s collect-all-raise-once postcondition proven against a
+  synthetic frame carrying two simultaneous violations (a non-ascending
+  `week_start` and a NaN in `spend_meta`), driven through the real
+  `read_mmm_input()` code path via a minimal fake connection, producing one
+  `DataContractError` naming both; the read-only connection proven to reject a
+  write with the warehouse confirmed unmodified afterward.
+- **03-08** — AD-050's duplicate-grain-key check proven to fail the export
+  contract on a poisoned 2-row frame carrying a duplicated `(P-SA,
+  2021-01-04)` key, naming the layer in the raised error; D-02's local drift
+  gate proven clean (two fresh regenerations plus the committed file all
+  byte-for-byte identical) ahead of plan 03-09 wiring the same proof into CI.
+
+**Three document corrections, with the Phase 1 D-07 rationale.** Each corrects a
+stale statement of already-ratified fact rather than changing a spec or a gate,
+so per Phase 1's D-07 precedent (`docs/BUILD_LOG.md`'s "T-011 season-window spec
+interpretations" entry, 2026-08-04) this build-log entry is the record; no ADR is
+owed for any of the three:
+
+1. **WBS T-205 AC-3** (`docs/EXECUTION_BLUEPRINT/02_WBS.md`) read "Exports land
+   gitignored; `.gitkeep` intact" — written before the W5 ingest-conflict
+   resolution flipped `exports/*.csv` from gitignored to committed-by-design.
+   Corrected in place (2026-08-06) to name `docs/SPEC-08_engineering.md` §2 and
+   EB-081 as the superseding source. `docs/EXECUTION_BLUEPRINT/` is gitignored
+   internal build scaffolding (D-01 of Phase 1's `01-CONTEXT.md`), so the edit
+   lives on disk and does not appear in any commit diff — this build-log entry
+   is the tracked record.
+2. **`.planning/ROADMAP.md`'s Phase 3 effort-budget line** read "Shares M2's 2 d
+   with Phase 4," leaving Charter §5's per-phase 2× tripwire with nothing to
+   measure against. Corrected to state the D-17 split explicitly (1 d of M2's
+   2 d for Phase 3, 1 d for Phase 4, each with its own 2× trip point and
+   standing-rule-5 ADR obligation) — the same split this file's M2-opens entry
+   already recorded on 2026-08-05.
+3. **`.planning/ROADMAP.md`'s Phase 3 BP-D-05 note** read "`layer_r_present`
+   starts `false`... a blueprint default, not a ratified decision. Accept or
+   override it explicitly at task time" — stale since `docs/ADR/ADR-000` D-2
+   ratified BP-D-01…BP-D-20 wholesale on 2026-08-04, stating the
+   Definition-of-Ready accept/override item is satisfied for all twenty
+   defaults by that ADR. Corrected to state the default is binding, not an open
+   task-time decision.
+
+Both `ROADMAP.md` corrections are scoped edits confirmed by `git diff
+.planning/ROADMAP.md` to touch only Phase 3's own section — no other phase's
+text was modified.
+
+**Three deliberate departures, reconfirmed as-built.** `docs/BUILD_LOG.md`'s
+2026-08-05 M2-opens entry (above) pre-recorded three departures from written
+guidance so a reviewer would not read them as oversights. All three are
+confirmed accurate against what actually shipped:
+
+1. **D-15 — seed-derived week spine, not `generate_series`.** `ad040_gapless_
+   week_spine.sql` (plan 03-04) anti-joins each layer's own min/max
+   `week_start` bounds against `stg_calendar_weekly`, with zero week
+   arithmetic in SQL — as built.
+2. **D-16 — AD-043 implemented strictly.** `ad043_no_unit_suffix_columns.sql`
+   (plan 03-03, extended by 03-05/03-06) forbids `_eur`/`_aeur` anywhere in
+   staging/mart output, stricter than SPEC-03 AD-001's literal "mixes"
+   wording — as built, and proven to fire (see the evidence index above).
+3. **`profiles.yml`'s path form departs from `05_IMPLEMENTATION_GUIDES.md`
+   §8.1.** `dev.path` is the bare `data/warehouse/ambo.duckdb` string, no
+   `../` prefix (plan 03-01), per the live three-part disproof of the Guide's
+   "resolves relative to the profile dir" claim recorded in
+   `03-RESEARCH.md` Pitfall 1 — as built.
+
+All three still need a line in the M2 pull-request description so a reviewer
+does not read them as oversights (D-19 of `03-CONTEXT.md`); noted here as an
+open action item for the M2 PR (shared with Phase 4, per Phase 1's D-11 — one
+PR at the M2 exit gate, not one per phase), not yet discharged since the M2 PR
+has not been opened as of this entry.
+
+**No CI run and no PR exist yet for the `m2-warehouse-model` branch** as this
+entry is written — plan 03-09's own Task 3 is the blocking human-verify
+checkpoint that pushes the milestone branch and confirms both `dbt` matrix legs
+(plus the other five CI jobs) are green. That evidence is appended once a human
+has observed the real run, per the M0/M1 precedent (`01-09-SUMMARY.md` Task 3;
+`02-10-SUMMARY.md` Task 3) — not claimed here in advance of it.

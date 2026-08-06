@@ -212,7 +212,9 @@ reconciliation in VR-303).
 rather than a pile of CSVs it could quietly reshape.
 **Blueprint phase**: P2
 **Milestone**: M1→M2 seam (counts against M2's 2 d)
-**Effort budget**: Shares M2's 2 d with Phase 4
+**Effort budget**: 1 d of M2's 2 d (D-17) — Phase 4 takes the other 1 d. Each phase carries its
+own 2x trip point and its own standing-rule-5 ADR obligation; measured effort is recorded in
+`docs/BUILD_LOG.md`'s M2 entries, not summed against a combined milestone ceiling.
 **Drop-blocked**: No
 **Depends on**: Phase 2 (synthetic CSVs must be committed — dbt builds on them in CI)
 **Requirements**: REQ-q1-truth-recovery (contributing), REQ-grain-and-windows (contributing — weekly spine), REQ-dl1-reproducible-pipeline (contributing — `make transform` opens the DL-1 probe)
@@ -264,8 +266,9 @@ Plans:
 **Rollback**: The `fct_mmm_input` contract freezes at T-203. Any mart schema change after Phase 4 starts is an ADR-worthy contract break, because it forces a change to the model contract.
 
 **Note:** `layer_r_present` starts `false` and AD-044 stays dormant until Phase 6 flips it. That
-is BP-D-05 — a blueprint default, not a ratified decision. Accept or override it explicitly at
-task time per the Definition of Ready; do not silently re-decide it.
+is BP-D-05, and it is binding: `docs/ADR/ADR-000` D-2 ratified BP-D-01…BP-D-20 wholesale, stating
+the Definition-of-Ready accept/override item is satisfied for all twenty blueprint defaults by
+that ADR. It is not an open decision to accept or override at task time.
 
 ---
 
