@@ -529,3 +529,162 @@ def test_channels_present_responds_to_source_row_removal(
         f"{nonzero_radio_count} P-SA row(s) have nonzero spend_radio after every "
         "radio source row was removed from the source tree"
     )
+
+
+# --- D-20 Layer R fixture run (plan 03-06) ------------------------------------------
+#
+# The one dbt invocation in this repository that actually sets `layer_r_present:
+# true` and exercises the `layer_r_present` jinja branch end-to-end (raw -> staging
+# -> marts, every contract, every AD-040/041/043 and both-directions test) against a
+# small, obviously-fake fixture -- so Phase 6 inherits a path that has already run
+# rather than flipping a flag onto dead SQL for the first time in a phase that also
+# carries a permission gate, a prior freeze, and real client data (AGENTS A-2, A-4).
+# `data/real_anon/` itself stays empty this phase; the fixture lives under
+# `tests/fixtures/real_anon_fake/`, committed and scanned by `scripts/leak_scan.py`
+# like every other tracked file.
+
+_LAYER_R_FIXTURE_RELATIVE = Path("tests") / "fixtures" / "real_anon_fake"
+
+
+def _run_dbt_with_layer_r_fixture(
+    repo_root: Path, fixture_dir: Path, env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
+    """Run the `test`-target dbt build with `layer_r_present` true and
+    `data_real_anon_path` pointed at `fixture_dir`.
+
+    `fixture_dir` is rendered with `Path.as_posix()` before being embedded in the
+    `--vars` JSON string, for the same reason `_run_dbt_on_tree` does -- a raw
+    Windows path's backslashes are invalid JSON escape sequences (T-03-11,
+    RESEARCH.md Pitfall 4)."""
+    vars_json = json.dumps({"layer_r_present": True, "data_real_anon_path": fixture_dir.as_posix()})
+    return subprocess.run(
+        [*_DBT_BUILD_PREFIX, "--target", "test", "--vars", vars_json],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+
+def test_layer_r_branch_builds_green_against_fixture(repo_root: Path, tmp_path: Path) -> None:
+    """D-20: one full `dbt build` with `layer_r_present: true` and
+    `data_real_anon_path` pointed at the committed fake fixture builds every raw,
+    staging and mart model green, including all contracts and the AD-040/041/043
+    and both-directions tests, on a four-layer warehouse. A red result here is the
+    finding this plan exists to produce -- diagnosable from the captured output
+    without re-running."""
+    mtime_before = _real_warehouse_mtime(repo_root)
+    env = _dbt_env(tmp_path)
+    fixture_dir = repo_root / _LAYER_R_FIXTURE_RELATIVE
+
+    result = _run_dbt_with_layer_r_fixture(repo_root, fixture_dir, env)
+    combined = result.stdout + result.stderr
+    tail = "\n".join(combined.splitlines()[-40:])
+
+    assert result.returncode == 0, (
+        f"layer_r_present fixture build exited {result.returncode}, expected 0 -- "
+        "every raw, staging and mart model plus every contract and the "
+        "AD-040/041/043 and both-directions tests must build green with the flag "
+        f"on (D-20). Last 40 lines of output:\n{tail}"
+    )
+
+    tmp_warehouse = Path(env["AMBO_TEST_WAREHOUSE"])
+    con = duckdb.connect(str(tmp_warehouse), read_only=True)
+    try:
+        dim_layer_rows = con.execute(
+            "select layer, weeks, monetary_unit, source_tag, channels_present "
+            "from dim_layer order by layer"
+        ).fetchall()
+        assert len(dim_layer_rows) == 4, (
+            "expected 4 dim_layer rows (three Layer P plus Layer R) with the flag "
+            f"on, got {len(dim_layer_rows)}: {dim_layer_rows}. Last 40 lines of "
+            f"output:\n{tail}"
+        )
+        r_row = next((row for row in dim_layer_rows if row[0] == "R"), None)
+        assert r_row is not None, (
+            f"no layer='R' row in dim_layer with the flag on: {dim_layer_rows}. "
+            f"Last 40 lines of output:\n{tail}"
+        )
+        _, weeks, monetary_unit, source_tag, channels_present = r_row
+        assert weeks == 12, f"layer R weeks={weeks}, expected 12. Last 40 lines of output:\n{tail}"
+        assert monetary_unit == "aEUR", (
+            f"layer R monetary_unit={monetary_unit!r}, expected 'aEUR'. Last 40 "
+            f"lines of output:\n{tail}"
+        )
+        assert source_tag == "REAL-ANON", (
+            f"layer R source_tag={source_tag!r}, expected 'REAL-ANON'. Last 40 "
+            f"lines of output:\n{tail}"
+        )
+        assert channels_present == "search_brand,meta,other", (
+            f"layer R channels_present={channels_present!r}, expected "
+            f"'search_brand,meta,other' (taxonomy order). Last 40 lines of "
+            f"output:\n{tail}"
+        )
+
+        total_rows, r_rows = con.execute(
+            "select count(*), count(*) filter (where layer = 'R') from fct_mmm_input"
+        ).fetchone()
+        assert total_rows == 350, (
+            f"fct_mmm_input total row count is {total_rows}, expected 350 (338 "
+            f"Layer P + 12 Layer R). Last 40 lines of output:\n{tail}"
+        )
+        assert r_rows == 12, (
+            f"fct_mmm_input layer='R' row count is {r_rows}, expected 12. Last 40 "
+            f"lines of output:\n{tail}"
+        )
+
+        (
+            spend_other_min,
+            radio_nonzero,
+            search_generic_nonzero,
+            display_video_nonzero,
+            print_regional_nonzero,
+        ) = con.execute(
+            """
+            select
+                min(spend_other),
+                count(*) filter (where spend_radio <> 0.0),
+                count(*) filter (where spend_search_generic <> 0.0),
+                count(*) filter (where spend_display_video <> 0.0),
+                count(*) filter (where spend_print_regional <> 0.0)
+            from fct_mmm_input
+            where layer = 'R'
+            """
+        ).fetchone()
+        assert spend_other_min is not None and spend_other_min > 0, (
+            f"layer R spend_other minimum is {spend_other_min}, expected > 0 on "
+            f"every row. Last 40 lines of output:\n{tail}"
+        )
+        zero_channel_counts = (
+            radio_nonzero,
+            search_generic_nonzero,
+            display_video_nonzero,
+            print_regional_nonzero,
+        )
+        assert zero_channel_counts == (0, 0, 0, 0), (
+            "layer R rows have nonzero spend on a channel outside the fixture's "
+            f"three-channel taxonomy subset: spend_radio nonzero={radio_nonzero}, "
+            f"spend_search_generic nonzero={search_generic_nonzero}, "
+            f"spend_display_video nonzero={display_video_nonzero}, "
+            f"spend_print_regional nonzero={print_regional_nonzero}. Last 40 lines "
+            f"of output:\n{tail}"
+        )
+
+        platform_reported_count = con.execute(
+            "select count(*) from fct_platform_reported"
+        ).fetchone()[0]
+        assert platform_reported_count == 2064, (
+            f"fct_platform_reported row count is {platform_reported_count}, "
+            f"expected 2064 (2028 Layer P + 36 Layer R). Last 40 lines of "
+            f"output:\n{tail}"
+        )
+    finally:
+        con.close()
+
+    assert _real_warehouse_mtime(repo_root) == mtime_before, (
+        "the real warehouse's modification time changed during the "
+        "layer_r_present fixture build -- the run touched "
+        f"data/warehouse/ambo.duckdb instead of staying inside {tmp_warehouse}. "
+        f"Last 40 lines of output:\n{tail}"
+    )
