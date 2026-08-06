@@ -97,21 +97,45 @@ jobs:
           SMOKE: "1"
 
   # ---------------------------------------------------------------------------
-  # 3. dbt -- make transform. D-17 vacuously-correct real check (the actual
-  #    dbt-project-exists predicate), not a stub -- green today, real work once
-  #    Phase 3 lands a dbt project.
+  # 3. dbt -- builds the dbt project on committed synthetic data with no private
+  #    inputs, matrixed ubuntu/windows (D-22, same Chocolatey make-install step
+  #    job 2 uses -- job NAME stays `dbt`, so this stays one of EB-060's six
+  #    jobs, not a seventh, matching how `test` stays one job despite two
+  #    matrix legs, D-21). The Ubuntu leg resolves RESEARCH.md Assumptions Log
+  #    A2 (the CWD-relative warehouse-path resolution, verified on Windows
+  #    only until now). After `make transform`, regenerates the committed
+  #    export and fails on drift (D-02): a mart change that alters the export
+  #    cannot merge unless the committed CSV is regenerated in the same PR --
+  #    the same two-step regenerate-then-diff shape job 1's D-20 seed
+  #    diff-check already uses.
   # ---------------------------------------------------------------------------
   dbt:
     name: dbt
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      # Step-level OS conditional (not a D-16 job-level skip-guard) -- the job
+      # still runs to completion and reports a real result on both legs,
+      # identical in form to the `test` job's Windows make-install step.
+      - name: Install make (Windows only)
+        if: runner.os == 'Windows'
+        run: |
+          choco install make -y
+          make --version
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - run: uv sync
       - run: make transform
+      - run: make export
+      - name: Fail on export drift
+        run: git diff --exit-code exports/
 
   # ---------------------------------------------------------------------------
   # 4. ssot -- scripts/check_ssot_consistency.py. D-17 vacuously-correct real
