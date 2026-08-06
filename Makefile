@@ -126,13 +126,17 @@ decide:
 	$(call STUB,8)
 
 # -----------------------------------------------------------------------------
-# ssot, export — stubs (Phase 5)
+# ssot — stub (Phase 5)
 # -----------------------------------------------------------------------------
 ssot:
 	$(call STUB,5)
 
+# -----------------------------------------------------------------------------
+# export — real (Phase 3, T-205). Registry-driven, byte-stable mart-to-CSV writer;
+# see scripts/export_marts.py for the registry (D-03) and the atomic write (D-04).
+# -----------------------------------------------------------------------------
 export:
-	$(call STUB,5)
+	uv run python scripts/export_marts.py
 
 # -----------------------------------------------------------------------------
 # report — stub (Phase 9)
