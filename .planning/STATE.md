@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-08-05T19:36:42.820Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-08-06T08:26:22.540Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [████████░░] 82%
 | Phase 03 P02 | 18min | 2 tasks | 3 files |
 | Phase 03 P03 | ~18min | 3 tasks | 7 files |
 | Phase 03 P04 | 18min | 3 tasks | 6 files |
+| Phase 03 P05 | 55min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-04: AD-042 red-then-green proof must build the mart from a clean tree first, then perturb the CSV, then re-run only the test node with --select -- perturbing before the first build moves both the mart and the test's own CSV read identically and never surfaces drift
 - [Phase ?]: 03-04: itertools.pairwise used instead of zip(seq, seq[1:], strict=True) for the spine's consecutive-gap check -- strict=True unconditionally raises for a self-offset pairwise zip since the second sequence is always one shorter by construction
 - [Phase ?]: 03-04: plan's Task 1 verify-script literal count==2 for week_start=2022-01-03 does not match committed data (P-SA also spans that date); correct count is 3, verified as a plan-text error not a modeling defect -- P-SB/P-SC remain two distinct non-merged rows as intended
+- [Phase ?]: Layer identity model promoted, not bolted on: layer is a first-class key on every mart grain, dim_layer is the identity table those grains reference (plan 03-05 assumption-delta decision)
+- [Phase ?]: channels_present derived strictly from stg_media_weekly source-row presence, never nonzero spend, and inner-joined to the taxonomy ordinal so out-of-taxonomy channels are dropped for AD-044 to catch later
 
 ### Pending Todos
 
@@ -214,8 +217,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-05T19:36:42.809Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-08-06T08:26:22.529Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
