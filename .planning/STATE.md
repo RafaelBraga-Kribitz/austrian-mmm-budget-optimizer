@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-08-06T08:26:22.540Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-08-06T08:52:12.673Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [█████████░] 86%
 | Phase 03 P03 | ~18min | 3 tasks | 7 files |
 | Phase 03 P04 | 18min | 3 tasks | 6 files |
 | Phase 03 P05 | 55min | 3 tasks | 5 files |
+| Phase 03 P06 | 18min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-04: plan's Task 1 verify-script literal count==2 for week_start=2022-01-03 does not match committed data (P-SA also spans that date); correct count is 3, verified as a plan-text error not a modeling defect -- P-SB/P-SC remain two distinct non-merged rows as intended
 - [Phase ?]: Layer identity model promoted, not bolted on: layer is a first-class key on every mart grain, dim_layer is the identity table those grains reference (plan 03-05 assumption-delta decision)
 - [Phase ?]: channels_present derived strictly from stg_media_weekly source-row presence, never nonzero spend, and inner-joined to the taxonomy ordinal so out-of-taxonomy channels are dropped for AD-044 to catch later
+- [Phase ?]: 03-06: fct_platform_reported built as the third contract-enforced mart, frozen Layer P surface with D-24 clicks-at-M4 pre-declaration
+- [Phase ?]: 03-06: AD-044 shipped dormant, gated on intake_manifest_present independently of layer_r_present; dbt's default missing-ref behavior is a WARNING not a failure, --warn-error needed to observe the parse-time gate proof
+- [Phase ?]: 03-06: layer_r_present jinja branch executed end-to-end for the first time against tests/fixtures/real_anon_fake/ (round-constant, obviously-fake data per AGENTS A-4) -- Phase 6 inherits a proven path
 
 ### Pending Todos
 
@@ -217,8 +221,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-06T08:26:22.529Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-08-06T08:52:12.662Z
+Stopped at: Completed 03-06-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
