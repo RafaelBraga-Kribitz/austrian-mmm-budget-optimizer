@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: warehouse
 status: executing
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-08-06T08:52:12.673Z"
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-08-06T09:13:55.199Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 28
-  completed_plans: 25
+  completed_plans: 26
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (warehouse) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 03 execution started
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 89%
 | Phase 03 P04 | 18min | 3 tasks | 6 files |
 | Phase 03 P05 | 55min | 3 tasks | 5 files |
 | Phase 03 P06 | 18min | 3 tasks | 9 files |
+| Phase 03-warehouse P07 | 30min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -168,6 +169,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Phase ?]: 03-06: fct_platform_reported built as the third contract-enforced mart, frozen Layer P surface with D-24 clicks-at-M4 pre-declaration
 - [Phase ?]: 03-06: AD-044 shipped dormant, gated on intake_manifest_present independently of layer_r_present; dbt's default missing-ref behavior is a WARNING not a failure, --warn-error needed to observe the parse-time gate proof
 - [Phase ?]: 03-06: layer_r_present jinja branch executed end-to-end for the first time against tests/fixtures/real_anon_fake/ (round-constant, obviously-fake data per AGENTS A-4) -- Phase 6 inherits a proven path
+- [Phase ?]: 03-07: kept exactly the plan's six named db.py symbols (no seventh _valid_layers helper); the D-10 multi-violation test drives the real read_mmm_input() path via a minimal fake connection rather than a new testable helper
+- [Phase ?]: 03-07: split Tasks 1/2 into two atomic commits against the same new db.py file by staging an intermediate Task-1-only version, preserving per-task commit discipline
 
 ### Pending Todos
 
@@ -221,8 +224,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-08-06T08:52:12.662Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-08-06T09:13:55.185Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None
 
 Next: `/gsd-plan-phase 1`. Both original Phase-1 blockers are cleared — the branch is now
