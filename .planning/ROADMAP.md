@@ -82,7 +82,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-07-PLAN.md — test scaffold + the four architectural guards, line-ending and ignore tests (wave 4)
+- [x] 01-07-PLAN.md — test scaffold + the four architectural guards, line-ending and ignore tests (wave 4)
 - [ ] 01-08-PLAN.md — `leak_scan.py` three modes + tests, seven pinned pre-commit hooks (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
