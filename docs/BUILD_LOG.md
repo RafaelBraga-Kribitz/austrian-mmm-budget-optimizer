@@ -105,3 +105,10 @@ exception text (CR-02). Copied from verified m0-bootstrap `5f12504` (2A).
 Plant-and-revert: inserting `target_accept` into `src/ambo/common/errors.py` failed
 `test_sampler_keys_appear_nowhere_else_in_src_ambo`; revert restored green. 19 unit tests
 pass; mypy clean on `src/ambo`.
+
+### 2026-09-01 — T-006 closed (01-05)
+
+Canonical Makefile: 18 SPEC-08 §5 targets, `SHELL := /bin/sh` and `.SHELLFLAGS := -eu -c`,
+twelve D-27 stubs, vacuous `transform` (D-17), `all` fails fast without fitting. Scaffold
+README with `## Roadmap` nine-phase table (D-28). Copied from m0-bootstrap `0d46727` /
+`64e8fe5` (2A). `make test` 19 passed.
