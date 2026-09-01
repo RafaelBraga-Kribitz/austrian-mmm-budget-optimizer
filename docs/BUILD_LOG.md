@@ -112,3 +112,31 @@ Canonical Makefile: 18 SPEC-08 §5 targets, `SHELL := /bin/sh` and `.SHELLFLAGS 
 twelve D-27 stubs, vacuous `transform` (D-17), `all` fails fast without fitting. Scaffold
 README with `## Roadmap` nine-phase table (D-28). Copied from m0-bootstrap `0d46727` /
 `64e8fe5` (2A). `make test` 19 passed.
+
+### 2026-08-04 — D-07: T-011 season-window spec interpretations (advent, schulbeginn)
+
+`scripts/generate_season_windows.py` (plan 01-06) fills two gaps SPEC-01 section 2.1
+leaves open. Per D-07 (`01-CONTEXT.md`), the spec text stands unchanged in both cases and
+the work fills a gap, not a change — so this build-log entry plus the in-script source
+comments on `advent_weeks()` and `schulbeginn_weeks()` are the record; no ADR is owed.
+
+1. **Advent is read as exactly 4 flagged weeks total, ending at the Dec-24 week
+   inclusive.** SPEC-01 section 2.1 says "advent = 1 in the 4 ISO weeks before and incl.
+   the week of Dec 24", which is compatible with either 4 weeks total (3 before + the
+   Dec-24 week) or 5 weeks total (4 before + the Dec-24 week). `docs/EXECUTION_BLUEPRINT/
+   05_IMPLEMENTATION_GUIDES.md` section 1.2 resolves this in favour of 4 weeks total:
+   "the ISO week containing Dec 24 and the 3 preceding ISO weeks (total 4 weeks)". The
+   generator implements the Guide's reading. Evidence: SPEC-01 section 2.1 (line 32),
+   Guide section 1.2 (lines 31-34).
+2. **Styrian school start (schulbeginn) is read as the second Monday of September.**
+   SPEC-01 section 2.1 says only "1 in the 2 weeks around Styrian school start, early
+   Sep", naming no precise date. The `holidays` package's Austria calendar carries no
+   AT-6 (Styria) school-holiday subdivision, so there is no data source encoding the
+   actual first school day of any given year. The Guide (section 1.2, lines 35-37) fixes
+   the reading as "second Monday of September (fixed rule)": flag that ISO week and the
+   ISO week before it. The generator implements this fixed rule every year in range,
+   2019-2027, with no calendar-package lookup.
+
+Both readings are recorded twice, per T-011's own acceptance criteria (`02_WBS.md` lines
+248-249): as the in-script source comments on `advent_weeks()` and
+`schulbeginn_weeks()` in `scripts/generate_season_windows.py`, and as this entry.
