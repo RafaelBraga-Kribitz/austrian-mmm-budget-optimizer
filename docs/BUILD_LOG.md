@@ -188,3 +188,70 @@ After each proof, the planted file was deleted (and, for violations 3 and 4, uns
 with `git restore --staged` and the `.gitattributes` override reverted with
 `git checkout --`) before the next violation was planted. `uv run pytest tests -q
 --no-cov` was green on the scratch branch immediately before switching back.
+
+### 2026-09-01 — M0 close: consolidated evidence (plan 01-09)
+
+Phase 1 (P0/M0) lands `.github/workflows/ci.yml` (the single six-job workflow) and
+the two governance checks (`scripts/check_layer_order.py`,
+`scripts/check_ssot_consistency.py`). This entry consolidates what the eight prior
+plans handed off. The CI-run line is a pending placeholder — plan 01-09 Task 3 is a
+`checkpoint:human-verify` gate that appends the real run URL and the Windows-leg
+`make --version` string once a human has observed a run against `main`.
+
+This execution loop delivers Phase 1 as stacked `cursor/*-9588` PRs (human 4B), not
+as a single `m0-bootstrap` milestone PR. CI triggers are `push`/`pull_request`
+against `main` only (D-19), so the six jobs do not run on stacked PRs whose base is
+another `cursor/*` branch. Task 3 therefore waits for a pull request against `main`
+(after the stack merges, or a dedicated draft).
+
+**Audit verdicts (plan 01-01) and which task closed each failure.**
+
+| WBS AC | Verdict | Closed by |
+| --- | --- | --- |
+| T-001 AC-1 | PASS | — |
+| T-001 AC-2 (`.gitattributes` / LF pin) | FAIL | 01-01 Task 2 (committed `.gitattributes`, D-22) |
+| T-001 AC-3 | PASS | — |
+| T-003 AC-1 | FAIL then PASS | 01-02 Task 3 (SPEC-08 §2 skeleton) |
+| T-003 AC-2 (ignore-rule probe) | PASS | — |
+| T-003 AC-3 (LICENSE) | FAIL then PASS | 01-02 Task 3 |
+| T-012 AC-1 (ADR template) | FAIL | 01-01 Task 3 (`docs/ADR/TEMPLATE.md`) |
+| T-012 AC-2 (reserved ADR slots listed) | FAIL | 01-01 Task 3 (`docs/ADR/README.md`) |
+| T-012 AC-3 (BUILD_LOG append-only header) | FAIL | 01-01 Task 1 (this file) |
+
+**Four planted-violation guard proofs (plan 01-07).** Recorded in the 2026-09-01
+T-010 AC-1 entry above: the four node ids
+`test_import_independence.py::test_simulate_and_model_do_not_import_each_other`,
+`test_forbidden_deps.py::test_no_forbidden_framework_is_imported_anywhere`,
+`test_repo_layout.py::test_top_level_entries_are_all_in_the_canonical_layout`,
+`test_line_endings.py::test_no_tracked_text_file_contains_a_carriage_return` — each
+red on a planted violation on `scratch-01-07-planted-violations` (zero commits),
+then green after revert.
+
+**Fake-key probe result (plan 01-08).** On `scratch-01-08-fake-key-probe`, a staged
+synthetic PEM-style RSA block was blocked by `detect-private-key` before any commit
+object existed: `git commit` exited 1 with `Private key found:
+docs/_scratch_fake_key_probe.pem`; `HEAD` remained `521b4c9`. Scratch branch deleted
+with `git branch -d` (zero unique commits).
+
+**Two season-window interpretations (plan 01-06).** Recorded in the 2026-08-04 D-07
+entry (copied onto this lineage 2026-09-01): advent is 4 flagged weeks total ending
+at the Dec-24 week inclusive; schulbeginn is the second Monday of September.
+
+**The eighteen Makefile target names** (SPEC-08 section 5, plan 01-05): `setup`,
+`simulate`, `validate-sim`, `intake`, `anonymize`, `validate-intake`, `transform`,
+`fit-synthetic`, `fit-real`, `recover`, `sensitivity`, `decide`, `ssot`, `export`,
+`report`, `test`, `lint`, `all`.
+
+**The six CI job names** (EB-060): `lint`, `test`, `dbt`, `ssot`, `layer-order`,
+`leak`. `test` is matrixed over `ubuntu-latest`/`windows-latest` (D-21).
+
+**CI run evidence (appended at the plan 01-09 Task 3 checkpoint):** *pending — no
+six-job run against `main` exists yet on this lineage.*
+
+**Elapsed effort against the 0.5 d Charter section 5 budget.** This 2026-09-01 loop
+completed remaining Phase 1 plans (01-01 Task 3 through 01-09 Tasks 1–2) as stacked
+PRs, copying verified `m0-bootstrap` artifacts (2A). Measured wall time for the
+loop is well under the 480 min (1.0 d) strictly-greater-than-2× tripwire.
+**Verdict: the tripwire is not tripped.** No ADR. Exact combined minutes are not
+restated here as a false-precision sum; Task 3's CI wait is human calendar, not
+implementation effort.
