@@ -92,3 +92,16 @@ Cites the 2026-08-04 D-29 audit entry. The SPEC-08 §2 skeleton, `.env.example` 
 are in the tree. Ignore probe re-run: `data/warehouse/x.duckdb` ignored; `exports/foo.csv`
 untracked-not-ignored; probe files deleted, nothing residual staged. T-003 AC-1 and AC-3
 verdict cells above flipped FAIL → PASS — the one sanctioned in-place edit for those rows.
+
+### 2026-09-01 — T-004 and T-005 closed (01-04)
+
+`config/settings.yaml` is the single configuration home: SPEC-02 §5.2 channel order,
+adstock L=8, six paths (warehouse is the DuckDB file), MD-050 sampler block, parameter-free
+scenario registry. `load_settings()` is cached, `extra='forbid'`, wraps validation failures
+in `ConfigError` naming the key path. `get_logger` attaches `PrivatePathFilter`, which
+reads the drop path only through `load_settings()` and redacts `msg`, `args`, and
+exception text (CR-02). Copied from verified m0-bootstrap `5f12504` (2A).
+
+Plant-and-revert: inserting `target_accept` into `src/ambo/common/errors.py` failed
+`test_sampler_keys_appear_nowhere_else_in_src_ambo`; revert restored green. 19 unit tests
+pass; mypy clean on `src/ambo`.

@@ -76,7 +76,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-04-PLAN.md — `config/settings.yaml` whole, `common/config.py`, `common/logging.py` + tests (wave 3)
+- [x] 01-04-PLAN.md — `config/settings.yaml` whole, `common/config.py`, `common/logging.py` + tests (wave 3)
 - [ ] 01-05-PLAN.md — the 18-target Makefile with loud stubs, scaffold README (wave 3)
 - [ ] 01-06-PLAN.md — season-windows generator, committed seed, rule tests (wave 3)
 
