@@ -64,6 +64,7 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [Ingest]: Roadmap mirrors blueprint P0–P8 1:1 as Phases 1–9 — re-deriving would orphan the T-001…T-806 WBS and the traceability matrix.
 - [Ingest]: All 25 REQ IDs carried verbatim; no new IDs invented for Phases 2–4.
 - [2026-08-04]: All 7 ingest warnings resolved at source rather than deferred into phases — the source SPECs were contradictory independently of the ingest, so fixing the documents (not annotating the plan) was the only resolution that survives into implementation. See ADR-000 and the INGEST-CONFLICTS resolution log.
+- [2026-08-04, ADR-000 D-1]: Precedence is scoped, not ranked — Charter governs goals/scope/acceptance, SPEC governs operative detail, ADR outranks both. The Charter's own passages were corrected where they restated SPEC values wrongly.
 - [2026-09-01]: Delivery topology for this execution loop is **one PR per GSD task** on
   `cursor/*-9588` branches off `main`. That supersedes D-11's milestone-branch PR for the
   duration of the loop. `origin/m0-bootstrap` / draft PR #1 already contain later work;
