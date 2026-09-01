@@ -37,13 +37,18 @@ entries are equally valid and reordering this file is never itself a contract ch
 - `class PathsConfig(BaseModel)` — `data_synthetic: Path`, `data_real_anon: Path`,
   `posteriors: Path`, `warehouse: Path`, `exports: Path`, `reports: Path`.
 - `class SamplerConfig(BaseModel)` — `chains: int` (=4), `tune: int` (=1000), `draws: int`
-  (=1000), `target_accept: float` (=0.9), `seed: int` (=42), `init: str`
+  (=1000), `target_accept: float` (=0.9), `random_seed: int` (=42), `init: str`
   (=`"jitter+adapt_diag"`).
-- `class ScenarioConfig(BaseModel)` — per-scenario simulate-layer parameters (SPEC-01 §4/§6
-  shape); Phase 1 declares the schema only, populated fully once `src/ambo/simulate/` ships.
-- `class Settings(BaseSettings)` — fields: `channels: list[str]` (7, SPEC-02 §5.2 taxonomy
+- `class ScenarioConfig(BaseModel)` — `label: str`, `config: Path` (repository-relative path to
+  the scenario YAML). Phase 1 declares the schema only; full simulate-layer parameters live in
+  the scenario YAML itself once `src/ambo/simulate/` ships, never duplicated here.
+- `class Settings(BaseModel)` — fields: `channels: tuple[str, ...]` (7, SPEC-02 §5.2 taxonomy
   order), `adstock_length: int` (=8), `paths: PathsConfig`, `sampler: SamplerConfig`,
-  `private_drop: Path | None` (from `AMBO_PRIVATE_DROP`).
+  `scenarios: dict[str, ScenarioConfig]`, `private_drop: Path | None` (from
+  `AMBO_PRIVATE_DROP`). `BaseModel`, not `BaseSettings`: `BaseSettings` moved to the separate
+  `pydantic-settings` distribution in pydantic v2, which is not in the SPEC-08 §3 dependency
+  table, and EB-030 makes adding it an ADR event; `BaseModel` plus `load_settings()`'s own
+  `functools.lru_cache` already satisfies EB-040's pydantic-validated single-read requirement.
   Invariants: `extra='forbid'`; `channels` exactly SPEC-02 §5.2's seven entries in order; lists
   become tuples after validation (immutable).
 - `load_settings() -> Settings` — cached; idempotent; raises `ConfigError` naming the failing
