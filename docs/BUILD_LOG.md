@@ -56,3 +56,16 @@ Observed column, not by copying the D-29 known-state table in
   `{"squash": false, "rebase": false, "merge": true}`. Squash and rebase merge are
   disabled at the repository level, so the merge button cannot destroy the task-level
   commit trail EB-082 and the layer-order argument depend on.
+
+### 2026-09-01 — T-012 AC-1 and AC-2 closed (01-01 Task 3)
+
+Cites the 2026-08-04 D-29 audit entry above. `docs/ADR/TEMPLATE.md` now exists at
+`TEMPLATE.md` (not `ADR-000_template.md`, per D-09) with exactly the four GB-201
+level-2 sections: Context, Decision, Consequences, Spec deviations. `docs/ADR/README.md`
+now exists as the ADR index: GB-201 naming convention, D-06 standing bar, ADR-000
+recorded as Ratified, all five GB-202 reserved slots (ADR-001 permission, ADR-002
+channel-mapping, ADR-003 anonymization, ADR-004 Layer R window, ADR-005
+reparameterization) with their topics, plus the standard non-slot triggers. T-012
+AC-3 was already discharged by the audit entry that created this file.
+
+T-012 AC-1: PASS. T-012 AC-2: PASS. T-012 AC-3: PASS (unchanged).
