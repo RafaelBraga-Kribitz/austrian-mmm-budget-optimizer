@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Repository Foundation
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-09-01T19:55:00Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-09-01T20:00:00Z"
 last_activity: 2026-09-01
-last_activity_desc: "01-05 complete (Makefile, scaffold README)"
+last_activity_desc: "01-06 complete (season-windows seed + D-07)"
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 1 — Repository Foundation (P0 / M0), plan 01-06 next
+**Current focus:** Phase 1 — Repository Foundation (P0 / M0), plan 01-07 next
 
 ## Current Position
 
 Phase: 1 of 9 (Repository Foundation)
-Plan: 5 of 9 in current phase (01-01 through 01-05 complete)
-Status: Ready to execute 01-06
-Last activity: 2026-09-01 — 01-05 complete; Wave 3 Makefile/README done
+Plan: 6 of 9 in current phase (01-01 through 01-06 complete)
+Status: Ready to execute 01-07
+Last activity: 2026-09-01 — 01-06 complete; Wave 3 done
 
-Progress: [█████░░░░░] 56% (5/9 Phase 1 plans)
+Progress: [██████░░░░] 67% (6/9 Phase 1 plans)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -46,7 +46,7 @@ Progress: [█████░░░░░] 56% (5/9 Phase 1 plans)
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 5/9 | - | - |
+| 01 | 6/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -127,8 +127,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-01T19:55:00Z
-Stopped at: Completed 01-05-PLAN.md
-Resume file: .planning/phases/01-repository-foundation/01-06-PLAN.md
+Last session: 2026-09-01T20:00:00Z
+Stopped at: Completed 01-06-PLAN.md
+Resume file: .planning/phases/01-repository-foundation/01-07-PLAN.md
 
-Next: execute **01-06** (season-windows generator, committed seed, rule tests).
+Next: execute **01-07** (test scaffold + architectural guards, line-ending and ignore tests).
