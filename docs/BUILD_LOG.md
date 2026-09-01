@@ -140,3 +140,51 @@ comments on `advent_weeks()` and `schulbeginn_weeks()` are the record; no ADR is
 Both readings are recorded twice, per T-011's own acceptance criteria (`02_WBS.md` lines
 248-249): as the in-script source comments on `advent_weeks()` and
 `schulbeginn_weeks()` in `scripts/generate_season_windows.py`, and as this entry.
+
+### 2026-09-01 — T-010 AC-1: planted-violation proof for all four architectural guards
+
+Per D-23 and T-010 AC-1 (`02_WBS.md` lines 218-221), each of the four standing guard
+tests added in plan 01-07 was proven to fail on a planted violation, not just to pass
+on a clean tree. The proof ran entirely on a scratch branch
+(`scratch-01-07-planted-violations`, created from `cursor/architectural-guards-9588`
+at commit `16e5019`), with no commit ever made on it — every planted change was a
+working-tree edit, reverted by hand before the next violation was planted. The branch
+was deleted with `git branch -d` (safe, non-force: it pointed at the same commit as
+the working branch and diverged in zero commits) immediately after the fourth proof,
+restoring `HEAD` to `cursor/architectural-guards-9588` with a clean tree aside from
+the still-uncommitted Task 3 test files. Nothing from the scratch branch reached
+history, preserving EB-082.
+
+Delivery topology is one PR per GSD plan on `cursor/*-9588` (human 4B); the plan's
+acceptance criterion that `HEAD` return to `m0-bootstrap` is therefore not applicable
+on this lineage.
+
+1. **`tests/unit/test_import_independence.py` (SIM-003/W-2 firewall).** Planted
+   `src/ambo/simulate/_scratch_violation.py` containing `from ambo.model import fit`.
+   Failing node id: `tests/unit/test_import_independence.py::test_simulate_and_model_do_not_import_each_other`.
+   Message: `AssertionError: simulate<->model cross-import found (SIM-003 / W-2
+   firewall): src/ambo/simulate/_scratch_violation.py imports ambo.model`.
+2. **`tests/unit/test_forbidden_deps.py` (Charter O-3 / EB-030).** Planted
+   `src/ambo/_scratch_violation2.py` containing `import robyn`.
+   Failing node id: `tests/unit/test_forbidden_deps.py::test_no_forbidden_framework_is_imported_anywhere`.
+   Message: `AssertionError: Forbidden framework import(s) found (Charter O-3):
+   src/ambo/_scratch_violation2.py: ['robyn']`.
+3. **`tests/unit/test_repo_layout.py` (D-23 layout guard).** Added a new top-level
+   directory `_scratch_top_level_violation/.gitkeep`, staged with `git add -f` so
+   `git ls-files` would see it.
+   Failing node id: `tests/unit/test_repo_layout.py::test_top_level_entries_are_all_in_the_canonical_layout`.
+   Message: `AssertionError: Top-level entr(y/ies) not in the SPEC-08 section 2 (+
+   D-14) canonical layout: ['_scratch_top_level_violation']. ... Scanned 23 top-level
+   entries across 122 tracked files.`
+4. **`tests/unit/test_line_endings.py` (D-22 LF pin).** Planted
+   `docs/_scratch_crlf_violation.scratchdat` with CRLF bytes, staged with a temporary
+   `.gitattributes` override line (`docs/_scratch_crlf_violation.scratchdat text`) so
+   `git check-attr text` reported `set` rather than relying on the catch-all `auto`.
+   Failing node id: `tests/unit/test_line_endings.py::test_no_tracked_text_file_contains_a_carriage_return`.
+   Message: `AssertionError: Tracked text file(s) contain a carriage-return byte:
+   ['docs/_scratch_crlf_violation.scratchdat']`.
+
+After each proof, the planted file was deleted (and, for violations 3 and 4, unstaged
+with `git restore --staged` and the `.gitattributes` override reverted with
+`git checkout --`) before the next violation was planted. `uv run pytest tests -q
+--no-cov` was green on the scratch branch immediately before switching back.
