@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Repository Foundation
 status: executing
-stopped_at: Completed 01-08-PLAN.md
-last_updated: "2026-09-01T20:20:00Z"
+stopped_at: 01-09 Task 3 human-verify checkpoint (CI against main)
+last_updated: "2026-09-01T20:35:00Z"
 last_activity: 2026-09-01
-last_activity_desc: "01-08 complete (leak_scan + pre-commit)"
+last_activity_desc: "01-09 Tasks 1-2 landed; waiting on six-job CI against main"
 progress:
   total_phases: 9
   completed_phases: 0
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 1 — Repository Foundation (P0 / M0), plan 01-09 next
+**Current focus:** Phase 1 — Repository Foundation (P0 / M0), 01-09 Task 3 (CI confirm)
 
 ## Current Position
 
 Phase: 1 of 9 (Repository Foundation)
-Plan: 8 of 9 in current phase (01-01 through 01-08 complete)
-Status: Ready to execute 01-09
-Last activity: 2026-09-01 — 01-08 complete; Wave 4 done
+Plan: 9 of 9 in current phase (01-01 through 01-08 complete; 01-09 Tasks 1–2 landed)
+Status: Blocked on 01-09 Task 3 — six-job CI must be observed on a PR against `main`
+Last activity: 2026-09-01 — ci.yml and governance checks committed; CI URL pending
 
-Progress: [████████░░] 89% (8/9 Phase 1 plans)
+Progress: [████████░░] 89% (8/9 Phase 1 plans; 01-09 awaiting human CI confirm)
 
 ## Performance Metrics
 
@@ -127,8 +127,10 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-01T20:20:00Z
-Stopped at: Completed 01-08-PLAN.md
+Last session: 2026-09-01T20:35:00Z
+Stopped at: 01-09 Task 3 (`checkpoint:human-verify`)
 Resume file: .planning/phases/01-repository-foundation/01-09-PLAN.md
 
-Next: execute **01-09** (governance checks, six-job ci.yml, M0 close).
+Next: human confirms six EB-060 jobs green with none skipped on a pull request
+**against `main`**, then reply with the CI run URL and Windows `make --version`.
+The executor appends both to the M0 BUILD_LOG close entry and closes R-13.
