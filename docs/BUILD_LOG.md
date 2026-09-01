@@ -26,9 +26,9 @@ Observed column, not by copying the D-29 known-state table in
 | T-001 AC-1 | Baseline commit contains only documentation, zero code | `git log --oneline 1851f39 -1 --stat` shows 25 files changed, 4943 insertions(+), 0 deletions; every path is `.md` (AGENTS.md, PROJECT_CHARTER.md, docs/EXECUTION_BLUEPRINT/*, docs/SPEC-01..09) | PASS | — |
 | T-001 AC-2 | `.gitattributes` or config pins LF for `*.csv`, `*.py`, `*.yaml`, `*.md` | No `.gitattributes` file exists; `git config --get core.autocrlf` (local) and `git config --global --get core.autocrlf` both exit 1 (unset) | FAIL | 01-01 Task 2 |
 | T-001 AC-3 | No file from outside the corpus committed | Same `--stat` output as AC-1: all 25 paths are charter, agent playbook, SPEC-01..09 or execution-blueprint documents; nothing else | PASS | — |
-| T-003 AC-1 | Tree diff vs SPEC-08 §2 is empty (allowing not-yet-created source files) | `ls` at repo root shows only `.gitignore`, `.git/`, `.planning/`, `AGENTS.md`, `PROJECT_CHARTER.md`, `docs/`. None of `README.md`, `LICENSE`, `Makefile`, `pyproject.toml`, `.pre-commit-config.yaml`, `.env.example`, `config/`, `src/ambo/`, `dbt/`, `scripts/`, `data/`, `exports/`, `reports/`, `dashboards/`, `tests/` exists yet | FAIL | 01-02 Task 3 |
+| T-003 AC-1 | Tree diff vs SPEC-08 §2 is empty (allowing not-yet-created source files) | `ls` at repo root shows only `.gitignore`, `.git/`, `.planning/`, `AGENTS.md`, `PROJECT_CHARTER.md`, `docs/`. None of `README.md`, `LICENSE`, `Makefile`, `pyproject.toml`, `.pre-commit-config.yaml`, `.env.example`, `config/`, `src/ambo/`, `dbt/`, `scripts/`, `data/`, `exports/`, `reports/`, `dashboards/`, `tests/` exists yet | PASS | 01-02 Task 3 |
 | T-003 AC-2 | Ignore rules proven by validation probe | `touch data/warehouse/x.duckdb exports/foo.csv && git status --porcelain`: `data/warehouse/x.duckdb` does not appear (ignored, correct); `exports/foo.csv` appears as untracked (`?? exports/`) — correct per the W5 ingest resolution, which committed `exports/*.csv` by design rather than gitignoring it (SPEC-08 §2, EB-081). Probe files deleted immediately after the check; nothing was staged | PASS | — |
-| T-003 AC-3 | LICENSE = MIT with author line matching Charter header | `ls LICENSE` — no such file | FAIL | 01-02 Task 3 |
+| T-003 AC-3 | LICENSE = MIT with author line matching Charter header | `ls LICENSE` — no such file | PASS | 01-02 Task 3 |
 | T-012 AC-1 | ADR template has the four GB-201 sections | `ls docs/ADR/` shows only `ADR-000_document-precedence-and-blueprint-defaults.md`; no template file exists | FAIL | 01-01 Task 3 |
 | T-012 AC-2 | Pre-planned ADR slots ADR-001..005 listed with their GB-202 topics | No `docs/ADR/README.md` exists; no index of reserved slots exists anywhere | FAIL | 01-01 Task 3 |
 | T-012 AC-3 | BUILD_LOG has its append-only rule stated at top | Before this task ran, `docs/BUILD_LOG.md` did not exist | FAIL | 01-01 Task 1 (this entry) |
@@ -69,3 +69,26 @@ reparameterization) with their topics, plus the standard non-slot triggers. T-01
 AC-3 was already discharged by the audit entry that created this file.
 
 T-012 AC-1: PASS. T-012 AC-2: PASS. T-012 AC-3: PASS (unchanged).
+
+### 2026-09-01 — Locked execution decisions (1A 2A 3A 4B)
+
+Human answers to the four blocking questions, locked for the rest of this loop:
+
+1. **Pin `uv.lock` (1A).** Direct deps match SPEC-08 §3. `scikit-learn` 1.9.0 is present
+   transitively via `pymc-marketing` → `pymc-extras`. Charter O-3 is import-scoped, not
+   tree-scoped; no ADR. The standing guard in plan 01-07 (`tests/unit/test_forbidden_deps.py`)
+   remains the enforcement. EB-030 pin commit is `chore(01-02): pin dependency set per EB-030`.
+2. **Reuse `m0-bootstrap` artifacts (2A).** Later plans copy already-verified files from
+   `origin/m0-bootstrap` rather than rewriting them. Draft PR #1 is still not the merge vehicle.
+3. **No private drop at M4 (3A).** Build all drop-independent work. At M4 write the Charter §7
+   degradation ADR and ship Layers P+D on S-B. Do not invent Layer R data (A-5).
+4. **One PR per GSD plan (4B).** One git commit per task inside the plan. Supersedes the
+   2026-09-01 "one PR per task" topology note for the rest of this loop.
+
+### 2026-09-01 — T-003 AC-1 and AC-3 closed (01-02 Task 3)
+
+Cites the 2026-08-04 D-29 audit entry. The SPEC-08 §2 skeleton, `.env.example` (exactly
+`AMBO_PRIVATE_DROP`, fictional path), and MIT LICENSE (`Copyright (c) 2026 Rafael Braga-Kribitz`)
+are in the tree. Ignore probe re-run: `data/warehouse/x.duckdb` ignored; `exports/foo.csv`
+untracked-not-ignored; probe files deleted, nothing residual staged. T-003 AC-1 and AC-3
+verdict cells above flipped FAIL → PASS — the one sanctioned in-place edit for those rows.
