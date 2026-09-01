@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Repository Foundation
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-09-01T17:10:00Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-09-01T19:45:00Z"
 last_activity: 2026-09-01
-last_activity_desc: "01-01 Task 3: ADR template + GB-202 index; plan 01-01 SUMMARY written"
+last_activity_desc: "01-02 complete; uv.lock pinned (1A); locked 1A 2A 3A 4B"
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 1 — Repository Foundation (P0 / M0), plan 01-02 next
+**Current focus:** Phase 1 — Repository Foundation (P0 / M0), plan 01-03 next
 
 ## Current Position
 
 Phase: 1 of 9 (Repository Foundation)
-Plan: 1 of 9 in current phase (01-01 complete)
-Status: Ready to execute 01-02
-Last activity: 2026-09-01 — 01-01 Task 3 (ADR template + index) landed as its own PR; 01-01 SUMMARY written
+Plan: 2 of 9 in current phase (01-01 and 01-02 complete)
+Status: Ready to execute 01-03
+Last activity: 2026-09-01 — 01-02 complete; human locked 1A 2A 3A 4B
 
-Progress: [█░░░░░░░░░] 11% (1/9 Phase 1 plans)
+Progress: [██░░░░░░░░] 22% (2/9 Phase 1 plans)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -46,7 +46,7 @@ Progress: [█░░░░░░░░░] 11% (1/9 Phase 1 plans)
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 1/9 | - | - |
+| 01 | 2/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -69,6 +69,11 @@ unratified and are candidates for ADR-001+ as they are exercised.
   `cursor/*-9588` branches off `main`. That supersedes D-11's milestone-branch PR for the
   duration of the loop. `origin/m0-bootstrap` / draft PR #1 already contain later work;
   they are not the merge vehicle.
+- [2026-09-01, locked 1A 2A 3A 4B]: (1A) pin `uv.lock`; O-3 is import-scoped so transitive
+  sklearn via pymc-marketing is accepted. (2A) copy verified artifacts from `m0-bootstrap`
+  rather than rewriting. (3A) no private drop — build drop-independent work; Charter §7
+  degradation ADR at M4; ship Layers P+D on S-B. (4B) one PR per GSD plan with one commit
+  per task — supersedes the same-day one-PR-per-task topology for the rest of the loop.
 
 ### Pending Todos
 
@@ -122,11 +127,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-01T17:10:00Z
-Stopped at: Completed 01-01-PLAN.md (Task 3 + SUMMARY). Waiting on per-task PR merge.
-Resume file: .planning/phases/01-repository-foundation/01-02-PLAN.md
+Last session: 2026-09-01T19:45:00Z
+Stopped at: Completed 01-02-PLAN.md
+Resume file: .planning/phases/01-repository-foundation/01-03-PLAN.md
 
-Next: execute **01-02 Task 1** (pyproject.toml + empty `ambo` package) as its own PR after
-01-01 merges. Plan 01-02 is `autonomous: false` — the uv.lock legitimacy checkpoint is a
-human gate. Delivery topology for this loop is one PR per GSD task on `cursor/*-9588`
-branches off `main`, not D-11's `m0-bootstrap` milestone PR.
+Next: execute **01-03** (MODULE_CONTRACTS, RISK_REGISTER, ADR-006, PR template) as one
+plan PR, copying verified files from `origin/m0-bootstrap` (2A).

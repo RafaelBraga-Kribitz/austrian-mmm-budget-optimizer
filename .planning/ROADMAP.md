@@ -71,7 +71,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
+- [x] 01-02-PLAN.md — pyproject + pinned `uv.lock` behind a legitimacy checkpoint, SPEC-08 §2 skeleton, `.env.example`, LICENSE (wave 2)
 - [ ] 01-03-PLAN.md — `MODULE_CONTRACTS.md`, `RISK_REGISTER.md`, ADR-006, PR template (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -398,7 +398,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Repository Foundation | M0 | 1/9 | In Progress | - |
+| 1. Repository Foundation | M0 | 2/9 | In Progress | - |
 | 2. Ground-Truth Simulator | M1 | 0/TBD | Not started | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
