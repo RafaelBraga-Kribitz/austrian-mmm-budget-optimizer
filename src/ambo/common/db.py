@@ -100,3 +100,158 @@ def _check_columns(frame: pd.DataFrame, model_name: str) -> list[str]:
     if actual != expected:
         return [f"{model_name}: column set/order mismatch -- expected {expected}, got {actual}"]
     return []
+
+
+def read_mmm_input(layer: str) -> pd.DataFrame:
+    """The single model input contract (AD-030) -- grain week x layer.
+
+    Implements: AD-030
+
+    Grain: one row per (week_start, layer). Ordering: `week_start` strictly
+    ascending, no ties -- (week_start, layer) is unique in the mart. Postconditions
+    (03_MODULES section 1.3), all checked on every call and collected into a single
+    `DataContractError` if any fail (D-10): the frame is non-empty; the column names
+    and order match `_contract_columns('fct_mmm_input')`; `week_start` is strictly
+    increasing; every consecutive `week_start` difference is exactly seven days; no
+    spend column contains NaN; `revenue` is strictly greater than zero on every row.
+
+    An unknown `layer` argument raises `DataContractError` listing the valid layers
+    read from `dim_layer`, rather than returning an empty frame.
+    """
+    con = connect(read_only=True)
+    try:
+        valid_layers = sorted(
+            row[0] for row in con.execute("select distinct layer from dim_layer").fetchall()
+        )
+        if layer not in valid_layers:
+            raise DataContractError(
+                f"read_mmm_input(): unknown layer {layer!r} -- valid layers are {valid_layers}"
+            )
+        columns = [name for name, _ in _contract_columns("fct_mmm_input")]
+        column_list_sql = ", ".join(columns)
+        frame = con.execute(
+            f"select {column_list_sql} from fct_mmm_input where layer = ? order by week_start asc",
+            [layer],
+        ).df()
+    finally:
+        con.close()
+
+    violations: list[str] = []
+    if frame.empty:
+        violations.append(f"layer={layer!r}: no rows returned")
+    else:
+        violations.extend(_check_columns(frame, "fct_mmm_input"))
+
+        week_start = frame["week_start"]
+        if not week_start.is_monotonic_increasing:
+            bad_positions = [
+                i for i in range(1, len(week_start)) if week_start.iloc[i] <= week_start.iloc[i - 1]
+            ]
+            violations.append(
+                f"layer={layer!r}: week_start is not strictly increasing at index "
+                f"position(s) {bad_positions}"
+            )
+
+        gaps = pd.to_datetime(week_start).diff().dropna()
+        bad_gaps = gaps[gaps != pd.Timedelta(days=7)]
+        if not bad_gaps.empty:
+            bad_weeks = week_start.loc[bad_gaps.index].tolist()
+            violations.append(f"layer={layer!r}: non-seven-day gap before week(s) {bad_weeks}")
+
+        spend_cols = [c for c in frame.columns if c.startswith("spend_")]
+        nan_spend_cols = [c for c in spend_cols if frame[c].isna().any()]
+        if nan_spend_cols:
+            violations.append(f"layer={layer!r}: NaN in spend column(s) {nan_spend_cols}")
+
+        if (frame["revenue"] <= 0).any():
+            bad_weeks = frame.loc[frame["revenue"] <= 0, "week_start"].tolist()
+            violations.append(f"layer={layer!r}: revenue <= 0 at week(s) {bad_weeks}")
+
+    if violations:
+        raise DataContractError(
+            "read_mmm_input() postcondition violation(s):\n" + "\n".join(violations)
+        )
+    return frame
+
+
+def read_platform_reported(layer: str) -> pd.DataFrame:
+    """The third contract-enforced mart (D-07) -- grain week x layer x channel.
+
+    Implements: AD-030
+
+    Grain: one row per (week_start, layer, channel). Ordering: `week_start`
+    ascending, then `channel` ascending, so the returned order is total and stable
+    even though the grain has three keys. Postconditions: the column names and
+    order match `_contract_columns('fct_platform_reported')`; the frame is
+    non-empty; `week_start`, `layer` and `channel` (the three grain columns) carry
+    no NaN. `platform_conversions`, `platform_conv_value` and `impressions` are
+    deliberately NOT asserted non-null -- they are legitimately NULL for offline
+    channels, and coercing or rejecting them would destroy the distinction plan
+    03-06 preserved (AGENTS T-8).
+
+    An unknown `layer` argument raises `DataContractError` listing the valid layers
+    read from `dim_layer`, rather than returning an empty frame.
+    """
+    con = connect(read_only=True)
+    try:
+        valid_layers = sorted(
+            row[0] for row in con.execute("select distinct layer from dim_layer").fetchall()
+        )
+        if layer not in valid_layers:
+            raise DataContractError(
+                f"read_platform_reported(): unknown layer {layer!r} -- valid layers "
+                f"are {valid_layers}"
+            )
+        columns = [name for name, _ in _contract_columns("fct_platform_reported")]
+        column_list_sql = ", ".join(columns)
+        frame = con.execute(
+            f"select {column_list_sql} from fct_platform_reported where layer = ? "
+            "order by week_start asc, channel asc",
+            [layer],
+        ).df()
+    finally:
+        con.close()
+
+    violations: list[str] = []
+    if frame.empty:
+        violations.append(f"layer={layer!r}: no rows returned")
+    else:
+        violations.extend(_check_columns(frame, "fct_platform_reported"))
+        for grain_col in ("week_start", "layer", "channel"):
+            if frame[grain_col].isna().any():
+                violations.append(f"layer={layer!r}: NaN in grain column {grain_col!r}")
+
+    if violations:
+        raise DataContractError(
+            "read_platform_reported() postcondition violation(s):\n" + "\n".join(violations)
+        )
+    return frame
+
+
+def read_dim_layer() -> pd.DataFrame:
+    """The layer-grain dimension (D-07, SPEC-03 section 3).
+
+    Implements: AD-030
+
+    Grain: one row per layer. Ordering: `layer` ascending. Takes no layer argument.
+    Postconditions: the column names and order match
+    `_contract_columns('dim_layer')`; the frame is non-empty.
+    """
+    con = connect(read_only=True)
+    try:
+        columns = [name for name, _ in _contract_columns("dim_layer")]
+        column_list_sql = ", ".join(columns)
+        frame = con.execute(f"select {column_list_sql} from dim_layer order by layer asc").df()
+    finally:
+        con.close()
+
+    violations: list[str] = []
+    violations.extend(_check_columns(frame, "dim_layer"))
+    if frame.empty:
+        violations.append("dim_layer: no rows returned")
+
+    if violations:
+        raise DataContractError(
+            "read_dim_layer() postcondition violation(s):\n" + "\n".join(violations)
+        )
+    return frame
