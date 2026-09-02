@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: Ground-Truth Simulator
+current_phase: 3
+current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 02-09-PLAN.md
-last_updated: "2026-09-02T13:35:00Z"
+stopped_at: Completed 02-10-PLAN.md
+last_updated: "2026-09-02T13:50:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "02-09 complete; make simulate CLI"
+last_activity_desc: "M1 closed; nine Layer P artifacts committed"
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 2 — Ground-Truth Simulator (P1 / M1)
+**Current focus:** Phase 3 — Warehouse (P2 / M1→M2 seam)
 
 ## Current Position
 
-Phase: 2 of 9 (Ground-Truth Simulator)
-Plan: ready to execute 02-10
-Status: Phase 2 executing (02-09 complete)
-Last activity: 2026-09-02 — simulate CLI + SIM-070 tests
+Phase: 3 of 9 (Warehouse)
+Plan: ready to execute 03-01
+Status: Phase 2 / M1 complete
+Last activity: 2026-09-02 — nine Layer P artifacts committed; M1 BUILD_LOG
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [█████████·] 90% (9/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -47,7 +47,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
-| 02 | 9/10 | - | - |
+| 02 | 10/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -128,9 +128,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T13:35:00Z
-Stopped at: Completed 02-09-PLAN.md
-Resume file: .planning/phases/02-ground-truth-simulator/02-10-PLAN.md
+Last session: 2026-09-02T13:50:00Z
+Stopped at: Completed 02-10-PLAN.md (M1)
+Resume file: .planning/phases/03-warehouse/03-01-PLAN.md
 
-Next: execute **02-10** (commit synthetic artifacts, BUILD_LOG M1, sign-off),
-copying from verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
+Next: execute **03-01** (warehouse bootstrap), copying from verified
+`m0-bootstrap` (2A). Do not copy m0 `uv.lock`. M1 is closed.
