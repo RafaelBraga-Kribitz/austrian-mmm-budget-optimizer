@@ -39,18 +39,20 @@ statement of *which module owns which read* (single-home rule). Copy this shape 
 ```python
 class PathsConfig(BaseModel):
     """One-line purpose statement."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
     data_synthetic: Path
     ...
+
 
 class Settings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     channels: tuple[str, ...]
     ...
+
     @field_validator("channels")
     @classmethod
-    def _validate_channel_order(cls, value: tuple[str, ...]) -> tuple[str, ...]:
-        ...
+    def _validate_channel_order(cls, value: tuple[str, ...]) -> tuple[str, ...]: ...
 ```
 `ScenarioConfig` in `simulate/config.py` must follow the exact same shape: nested
 `BaseModel`s with `model_config = ConfigDict(extra="forbid", frozen=True)`, a
@@ -65,6 +67,7 @@ def repo_root() -> Path:
         if (candidate / "pyproject.toml").is_file():
             return candidate
     raise ConfigError(...)
+
 
 @functools.lru_cache(maxsize=1)
 def load_settings() -> Settings:
@@ -250,6 +253,7 @@ def test_adstock_closed_form_limit() -> None:
     a = adstock_recursive(x, lam=0.6)
     assert abs(a[-1] - 1000.0 / (1 - 0.6)) < 1e-9
 
+
 def test_adstock_impulse_response() -> None:
     x = np.zeros(50)
     x[10] = 1000.0
@@ -277,9 +281,7 @@ per Pitfall 5.
 
 **Non-vacuous-scan-guard pattern** (lines 55-64):
 ```python
-assert scanned > 0, (
-    "No files found under ... -- the scan is broken, not vacuously passing."
-)
+assert scanned > 0, "No files found under ... -- the scan is broken, not vacuously passing."
 ```
 Apply the same discipline to the SIM-070 byte-identity test: assert the two generated
 directories actually contain the expected files before asserting byte-equality, so a

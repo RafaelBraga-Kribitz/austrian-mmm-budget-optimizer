@@ -220,6 +220,7 @@ def adstock_recursive(x: np.ndarray, lam: float) -> np.ndarray:
     """Pure, O(T), causal. a_0 = 0. a_t depends only on x_{<=t}."""
     ...
 
+
 def assemble_scenario(cfg: ScenarioConfig, rng: np.random.Generator) -> "SimulationResult":
     """Orchestrator — the only function that sequences the pure pieces above."""
     ...
@@ -253,6 +254,8 @@ should exist (single-home rule, A-8).
 # Source: docs/EXECUTION_BLUEPRINT/05_IMPLEMENTATION_GUIDES.md §1.5 (formula only)
 def _fixed_float(x: float) -> str:
     return f"{x:.10g}"
+
+
 # json.dump's default float repr is NOT what SIM-070 needs -- Python's repr(float)
 # is round-trip-exact but not necessarily identical in string form across float
 # values that differ in the 17th significant digit only; %.10g gives a fixed,
@@ -449,10 +452,12 @@ implementation guides carry math/pseudocode, not literal source — `03_MODULES.
 # a_t = x * (1 - lam**t) / (1 - lam)   # exact finite-T formula
 # Impulse: x = e_k (single spike at week k) -> a_t = lam**(t-k) for t >= k, else 0.
 
+
 def test_adstock_closed_form_limit() -> None:
     x = np.full(200, 1000.0)
     a = adstock_recursive(x, lam=0.6)
     assert abs(a[-1] - 1000.0 / (1 - 0.6)) < 1e-9
+
 
 def test_adstock_impulse_response() -> None:
     x = np.zeros(50)
@@ -470,6 +475,7 @@ def test_adstock_impulse_response() -> None:
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+
 @given(
     x=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
     lam=st.floats(min_value=0, max_value=0.99, allow_nan=False, allow_infinity=False),
@@ -479,6 +485,7 @@ def test_adstock_bounded(x: float, lam: float) -> None:
     assert (a >= 0).all()
     assert (a <= x / (1 - lam) + 1e-6).all()
 
+
 @given(
     a=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
     K=st.floats(min_value=1e-3, max_value=1e6, allow_nan=False, allow_infinity=False),
@@ -487,6 +494,7 @@ def test_adstock_bounded(x: float, lam: float) -> None:
 def test_hill_bounded_and_domain(a: float, K: float, s: float) -> None:
     h = hill(np.array([a]), K, s)
     assert 0 <= h[0] <= 1
+
 
 def test_hill_at_k_is_half() -> None:
     assert abs(hill(np.array([3000.0]), K=3000.0, s=1.0)[0] - 0.5) < 1e-12
