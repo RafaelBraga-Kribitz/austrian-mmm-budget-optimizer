@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-09-02T15:15:00Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-09-02T15:30:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "03-05 dim_layer channels_present complete"
+last_activity_desc: "03-06 fct_platform_reported + dormant AD-044 + D-20 fixture"
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 28
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 3 of 9 (Warehouse)
-Plan: 03-05 complete; next 03-06
+Plan: 03-06 complete; next 03-07
 Status: executing
-Last activity: 2026-09-02 — dim_layer channels_present (D-13/D-14)
+Last activity: 2026-09-02 — fct_platform_reported, dormant AD-044, D-20 fixture
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [█████░░░░░] 56% (5/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████░░░░] 67% (6/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,7 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
-| 03 | 5/9 | - | - |
+| 03 | 6/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -89,6 +89,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
   AD-040 seed-derived spine, AD-041 ranges, AD-042 three-layer reconciliation.
 - [2026-09-02, 03-05]: `dim_layer.channels_present` is source-presence-derived;
   absent `other` vs present-but-ineffective S-C `display_video` is distinguishable.
+- [2026-09-02, 03-06]: `fct_platform_reported` Layer P surface frozen at six columns;
+  AD-044 dormant; `layer_r_present` branch executed once against a fake fixture (D-20).
 
 ### Pending Todos
 
@@ -142,9 +144,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T15:15:00Z
-Stopped at: Completed 03-05-PLAN.md
-Resume file: .planning/phases/03-warehouse/03-06-PLAN.md
+Last session: 2026-09-02T15:30:00Z
+Stopped at: Completed 03-06-PLAN.md
+Resume file: .planning/phases/03-warehouse/03-07-PLAN.md
 
-Next: execute **03-06** (`fct_platform_reported`, dormant AD-044), copying from
-verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
+Next: execute **03-07** (`ambo.common.db` accessors), copying from verified
+`m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
