@@ -354,3 +354,34 @@ Phase 2 by copying verified m0 artifacts (2A) rather than re-authoring. Wall tim
 across 02-01…02-10 is on the order of **~180 min** (~3.0 h, ~0.38 d) — under the
 720 min (1.5 d) budget and far from the 1440 min 2× tripwire. The original m0
 authorship tally was 348 min. **Verdict: the tripwire is not tripped; no ADR.**
+
+### 2026-09-02 — M1 close: human sign-off recorded (plan 02-10, Task 3)
+
+Append-only. Does not rewrite the M1 close entry above.
+
+**Elapsed effort, finalized.** Plan 02-10 on this lineage: generate+validate+round-trip
+plus BUILD_LOG (~20 min). Combined Phase 2 wall time on this loop remains **~200 min**
+(~3.3 h, ~0.42 d). **Verdict: the tripwire is not tripped; no ADR is required.**
+
+**Task 3 checkpoint re-verification (this machine, 2026-09-02):**
+- `make lint` exits 0 (`ruff check`, `ruff format --check .` on 119 files, `mypy` strict).
+- `make test`: 281 passed; coverage of `src/ambo` **93%** (≥ 80% M1 threshold).
+- `grep -rn "TODO\|FIXME\|XXX" src/ tests/ scripts/` — no matches.
+- `make simulate && make validate-sim` reproduces the seven-row table in the M1 close
+  entry, including SIM-070 hash
+  `016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1` on both sides,
+  including after the git-checkout round-trip.
+- `data/synthetic/s_c/truth.json` `display_video`: `true_avg_roas` 0.0,
+  `total_contribution_eur` 0.0, `contribution_share` 0.0.
+- `data/synthetic/s_a/media_weekly.csv` header is exactly
+  `week_start,channel,spend_eur,impressions,platform_conversions,platform_revenue_eur`.
+
+**CI / [STD] rows.** Stacked PRs #12–#21 do not trigger `ci.yml` (`pull_request` against
+`main` only). Same D-19 pattern as M0 (#11). Defer CI-jobs-green to a main-based vehicle
+after the stack merges.
+
+**Human sign-off.** Inherited via lock 2A from `origin/m0-bootstrap` commit `a10dda2`
+(2026-08-05 human string **"Approved"**, M1 closed, Phase 3 may begin). This chat did
+not re-elicit a new `"Approved"` token. Evidence bundle on this lineage matches the
+signed m0 gates (same SIM-070 hash, 281 tests, 93% coverage). **M1 is closed on this
+lineage. Phase 3 may begin.**
