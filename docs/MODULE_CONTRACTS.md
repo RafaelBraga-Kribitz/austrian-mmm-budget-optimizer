@@ -170,6 +170,56 @@ listed above, a single-home guard for `SPEC_CHANNEL_ORDER` against `Settings.cha
 frozen-model assertion, and `load_scenario()` boundary-conversion tests for both an unknown
 scenario id and a missing file.
 
+### src/ambo/simulate/dgp.py
+
+**Purpose** The disclosed data-generating process's mathematical core (SPEC-01 §2.1/§2.2/§2.3):
+the calendar spine, the seasonal index, baseline demand, the project-wide whole-unit rounding
+convention, and the simulator's own geometric adstock and Hill saturation. Nothing in this
+module is imported from or shared with `ambo.model` — the simulator implements its own
+adstock/Hill so the Phase 5 recovery result is evidence rather than a tautology (SIM-003, A-1).
+
+**Public API**
+- `SEED_PATH: Path` — `repo_root() / "dbt" / "seeds" / "season_windows.csv"`, the committed
+  calendar seed this module reads (AD-020).
+- `round_half_up(values: np.ndarray) -> np.ndarray` — half-away-from-zero rounding to `int64`;
+  the single project-wide home for this convention (A-8).
+- `week_index(cfg: ScenarioConfig) -> pd.DataFrame` — the gapless, ISO-Monday weekly spine for
+  `cfg`'s window: `iso_year`, `iso_week`, `week_start`, `t` (1-indexed), and the five window-flag
+  columns, read from `SEED_PATH` and never recomputed.
+- `season_index(weeks: pd.DataFrame, season_weights: SeasonWeights) -> np.ndarray` — the
+  multiplicative season index (SPEC-01 §2.1's five signed weights, summed with no sign flip).
+  Promotes `03_MODULES.md` §2.3's `season_index(weeks: pd.DatetimeIndex, windows: pd.DataFrame)`
+  signature to a `(week-index frame, SeasonWeights)` pair — the five weights are SIM-002 YAML
+  values and must not be hard-coded in code (recorded for `docs/BUILD_LOG.md`).
+- `baseline_demand(cfg: ScenarioConfig, weeks: pd.DataFrame) -> pd.DataFrame` — `trend`,
+  `season`, `promo_mult`, `promo_flag`, and `base` (`b0 * trend * season * promo_mult`), every
+  component returned as its own column (re-summed by plan 02-06's SIM-071 decomposition audit).
+- `adstock_recursive(x: np.ndarray, lam: float) -> np.ndarray` — geometric adstock, `a_t = x_t +
+  lam * a_{t-1}`, `a_0 = 0`; pure, O(T), causal (`a_t` depends only on `x_{<=t}`); a plain
+  forward loop, never `cumsum`/`convolve`/`lfilter` (A-14; the shapes trap T-2 hides in).
+- `hill(a: np.ndarray, K: float, s: float) -> np.ndarray` — Hill saturation, `a^s / (a^s +
+  K^s)`; `hill(K, K, s) == 0.5` exactly for every `s > 0`; `hill(0, K, s) == 0.0` exactly.
+
+**Invariants** The week spine is gapless, strictly ascending, every `week_start` an ISO Monday,
+every consecutive pair exactly 7 days apart, for all three scenarios. No advent, schulbeginn,
+jan_dip, spring or summer-lull rule is reimplemented anywhere in this module — `week_index`
+reads `SEED_PATH` and nothing else classifies a week. `season_index`'s five weights are read
+signed from `SeasonWeights` and added with no sign flip in code (`jan_dip`/`summer_lull` are
+negative in the YAML). `adstock_recursive` never depends on a future `x` value (causality);
+`lam == 1.0` is rejected explicitly because `x / (1 - lam)` diverges there. `hill`'s output lies
+in `[0, 1]` and is monotonically non-decreasing in `a` for every in-domain `(K, s)`. This module
+is never imported by, and never imports, `ambo.model` (SIM-003).
+
+**Failure modes** Every raise site is `SimulationError`: a window `(iso_year, iso_week)` key
+absent from `SEED_PATH` (names the missing key); a duplicate `(iso_year, iso_week)` key in the
+seed (names the duplicate); a non-Monday, non-strictly-increasing, or non-7-day-gap week
+spine; `adstock_recursive` given a non-1-D, non-finite, or negative `x`, or `lam` outside `[0,
+1)`; `hill` given a non-finite or negative `a`, or a non-positive `K`/`s`.
+
+**Testing** `tests/unit/test_dgp.py` — SIM-073 seasonality point tests, SIM-074 adstock/Hill
+point tests (impulse test written and run before the closed-form limit test, per the project's
+own trap-T-2 discipline), and D-03's five bounded `hypothesis` property tests.
+
 ---
 
 ## Dependency directions
