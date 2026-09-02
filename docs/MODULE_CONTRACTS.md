@@ -84,6 +84,9 @@ built-in exception type for expected failure conditions (09 §A-7).
 - `class SimulationError(AmboError)` — the `src/ambo/simulate/` package's error root; raised
   by every module in that package for a missing/invalid scenario YAML, an out-of-domain math
   input, a missing season-window row, and a failed decomposition audit.
+- `class DataContractError(AmboError)` — raised by `ambo.common.db` (the only data doorway for
+  model/decide/report code, AD-030) for a missing warehouse file, an unknown layer argument, a
+  mart-schema mismatch, or a violated frame postcondition.
 
 **Invariants** Exception messages never contain private-drop content or file-system paths
 under `AMBO_PRIVATE_DROP` (redaction is the logging filter's job for log records; exceptions
@@ -91,7 +94,10 @@ raised from `ambo.intake` carry counts, never values, by construction). Subclass
 per module as that module lands, each getting its own entry in this document.
 
 **Failure modes** None — this module raises nothing itself; it only defines the exception
-hierarchy other modules raise into.
+hierarchy other modules raise into. `DataContractError` is raised by `ambo.common.db` for: a
+missing warehouse file (directing the caller to run `make transform`), an unknown layer
+argument, a mart-schema mismatch against the declared column contract, and a violated frame
+postcondition.
 
 **Testing** Raised and asserted from `tests/unit/test_config.py` (`ConfigError` path); no
 standalone test file, since the module has no behavior beyond class definitions.

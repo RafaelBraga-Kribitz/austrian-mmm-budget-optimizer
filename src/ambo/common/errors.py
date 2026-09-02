@@ -34,3 +34,15 @@ class SimulationError(AmboError):
     unchanged — a `SimulationError` message never contains private-drop content or
     path, exactly like every other `AmboError` subclass (no simulate-layer input is
     ever private, but the invariant is stated once on the root and holds for free)."""
+
+
+class DataContractError(AmboError):
+    """Raised by `ambo.common.db` (03_MODULES section 1.3), the only data doorway for
+    model/decide/report code (AD-030), for: a missing warehouse file (message directs
+    the caller to run the `transform` make target), an unknown layer argument, a
+    mart-schema mismatch against the declared column contract, and a violated frame
+    postcondition. Inherits the redaction invariant above unchanged — warehouse data
+    is Layer P and never private today, but plan 03-06's fake Layer R fixture and
+    Phase 6's real anonymized data mean a `DataContractError` message must never
+    carry private-drop content or path, exactly like every other `AmboError`
+    subclass."""
