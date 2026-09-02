@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-09-02T15:00:00Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-09-02T15:15:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "03-04 fct_mmm_input contract complete"
+last_activity_desc: "03-05 dim_layer channels_present complete"
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 28
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 3 of 9 (Warehouse)
-Plan: 03-04 complete; next 03-05
+Plan: 03-05 complete; next 03-06
 Status: executing
-Last activity: 2026-09-02 — fct_mmm_input enforced contract, AD-040/041/042
+Last activity: 2026-09-02 — dim_layer channels_present (D-13/D-14)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [████░░░░░░] 44% (4/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [█████░░░░░] 56% (5/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,7 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
-| 03 | 4/9 | - | - |
+| 03 | 5/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -87,6 +87,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
   information_schema test; poisoned fixture proves duplicate grain keys fail dbt build.
 - [2026-09-02, 03-04]: `fct_mmm_input` is the enforced 17-column model-input contract;
   AD-040 seed-derived spine, AD-041 ranges, AD-042 three-layer reconciliation.
+- [2026-09-02, 03-05]: `dim_layer.channels_present` is source-presence-derived;
+  absent `other` vs present-but-ineffective S-C `display_video` is distinguishable.
 
 ### Pending Todos
 
@@ -140,9 +142,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T15:00:00Z
-Stopped at: Completed 03-04-PLAN.md
-Resume file: .planning/phases/03-warehouse/03-05-PLAN.md
+Last session: 2026-09-02T15:15:00Z
+Stopped at: Completed 03-05-PLAN.md
+Resume file: .planning/phases/03-warehouse/03-06-PLAN.md
 
-Next: execute **03-05** (`dim_layer` + `channels_present`), copying from verified
-`m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
+Next: execute **03-06** (`fct_platform_reported`, dormant AD-044), copying from
+verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
