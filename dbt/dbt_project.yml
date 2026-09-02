@@ -1,0 +1,68 @@
+# AMBO — dbt project definition (T-201, plan 03-01).
+#
+# This file and `profiles.yml` are the two pieces of dbt project scaffolding this
+# plan creates from scratch; nothing here existed before Phase 3.
+
+name: "ambo"
+version: "1.0.0"
+config-version: 2
+profile: "ambo"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+snapshot-paths: ["snapshots"]
+
+# Every var in this block is trusted internal input, set only by the Makefile, CI, or
+# the test suite — never an externally-sourced string. Phase 6 (agency intake) is the
+# first phase to introduce an externally-sourced path (the private drop's standardized
+# output), at which point this trusted-input assumption must be revisited (T-03-01).
+vars:
+  # BP-D-05, ratified by ADR-000 D-2 — binding, not re-litigated here. Defaults to
+  # false so no Layer R path string is ever rendered by a default-invocation build.
+  layer_r_present: false
+  # Gates the dormant AD-044 singular test independently of layer_r_present, so the
+  # D-20 fixture run in plan 03-06 can exercise the Layer R branch without needing the
+  # Phase-6-owned intake_channels seed to exist yet.
+  intake_manifest_present: false
+  # SPEC-02 section 5.2's seven-entry taxonomy, verbatim and in the same order as
+  # config/settings.yaml's `channels` list (BP-G-03). Order matters: dbt pivots over
+  # this list, so a reordering silently changes every downstream mart column order.
+  # tests/unit/test_dbt_config.py pins this equality so the two languages cannot drift.
+  channel_taxonomy:
+    - search_brand
+    - search_generic
+    - meta
+    - display_video
+    - print_regional
+    - radio
+    - other
+  data_synthetic_path: "data/synthetic"
+  data_real_anon_path: "data/real_anon"
+
+models:
+  ambo:
+    raw:
+      +materialized: view
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+
+# The gapless spine (D-15) joins on week_start as a DATE; an inferred VARCHAR from
+# CSV type inference would make that join silently wrong. Every other column keeps
+# dbt-duckdb's default seed type inference.
+seeds:
+  ambo:
+    season_windows:
+      +column_types:
+        week_start: date
+        iso_year: integer
+        iso_week: integer
+        advent_flag: integer
+        schulbeginn_flag: integer
+        jan_dip_flag: integer
+        spring_flag: integer
+        summer_lull_flag: integer
