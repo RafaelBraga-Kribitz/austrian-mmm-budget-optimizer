@@ -43,6 +43,7 @@ from pathlib import Path
 ```python
 _SCAN_DIRS = ("src/ambo", "scripts", "tests")
 
+
 def _iter_py_files(repo_root: Path) -> list[Path]:
     files: list[Path] = []
     for rel in _SCAN_DIRS:
@@ -82,7 +83,9 @@ def test_no_forbidden_framework_is_imported_anywhere(repo_root: Path) -> None:
         hit = _imported_top_level_names(tree) & FORBIDDEN_IMPORT_NAMES
         if hit:
             offenders.append(f"{py_file.relative_to(repo_root).as_posix()}: {sorted(hit)}")
-    assert not offenders, "Forbidden framework import(s) found (Charter O-3): " + "; ".join(offenders)
+    assert not offenders, "Forbidden framework import(s) found (Charter O-3): " + "; ".join(
+        offenders
+    )
     print(f"forbidden-deps guard: scanned {len(py_files)} file(s), 0 forbidden imports.")
 ```
 Every guard test in this repo: (1) asserts the scan itself found files (never a silent vacuous pass), (2) collects offenders into a list rather than failing on first hit, (3) joins offenders into one assertion message, (4) prints a scan-count summary line at the end. D-09's new test must follow all four exactly — this is the house style, not incidental.
@@ -110,8 +113,18 @@ def _tracked_files(repo_root: Path) -> list[str]:
 For D-11's poisoned-fixture proof, mirror this exactly but with `check=False` (RESEARCH.md is explicit: `subprocess.run([...], check=False)`, then assert `returncode != 0`, and ideally grep captured stdout/stderr for the failing test's name so a red exit from an unrelated cause isn't mistaken for proof):
 ```python
 result = subprocess.run(
-    ["uv", "run", "dbt", "build", "--project-dir", "dbt", "--profiles-dir", "dbt",
-     "--vars", '{"data_synthetic_path": "tests/fixtures/warehouse_poisoned"}'],
+    [
+        "uv",
+        "run",
+        "dbt",
+        "build",
+        "--project-dir",
+        "dbt",
+        "--profiles-dir",
+        "dbt",
+        "--vars",
+        '{"data_synthetic_path": "tests/fixtures/warehouse_poisoned"}',
+    ],
     cwd=repo_root,
     check=False,
     capture_output=True,
@@ -124,6 +137,7 @@ assert "unique" in result.stdout  # or the specific test node id
 **D-23 path-assertion pattern** — combine `test_repo_layout.py`'s `git ls-files`-scan discipline with `src/ambo/common/config.py`'s `load_settings().paths.warehouse` accessor (lines 129-171, `load_settings()`):
 ```python
 from ambo.common.config import load_settings
+
 settings = load_settings()
 assert settings.paths.warehouse.is_file()  # after `make transform` has run
 ```
@@ -176,9 +190,7 @@ Consider whether `db.py`'s connection or contract-derived column set warrants th
 try:
     return Settings(**data)
 except ValidationError as exc:
-    failing_keys = ", ".join(
-        ".".join(str(part) for part in error["loc"]) for error in exc.errors()
-    )
+    failing_keys = ", ".join(".".join(str(part) for part in error["loc"]) for error in exc.errors())
     raise ConfigError(
         f"load_settings(): invalid configuration in {settings_path} — failing "
         f"key path(s): {failing_keys}"
@@ -241,9 +253,15 @@ This is the exact D-04 precedent (`%.6f` fixed float format) — `export_marts.p
 **Column-order + dtype-cast-before-write pattern** (`__main__.py` lines 102-117):
 ```python
 _MEDIA_COLUMNS: tuple[str, ...] = (
-    "week_start", "channel", "spend_eur", "impressions",
-    "platform_conversions", "platform_revenue_eur",
+    "week_start",
+    "channel",
+    "spend_eur",
+    "impressions",
+    "platform_conversions",
+    "platform_revenue_eur",
 )
+
+
 def _write_media_csv(media: pd.DataFrame, path: Path) -> None:
     frame = media.reindex(columns=list(_MEDIA_COLUMNS)).copy()
     frame["week_start"] = pd.to_datetime(frame["week_start"]).dt.strftime("%Y-%m-%d")
@@ -414,8 +432,12 @@ Files with no close match in the codebase — this is the first dbt code in the 
 
 ```python
 _MEDIA_COLUMNS: tuple[str, ...] = (
-    "week_start", "channel", "spend_eur", "impressions",
-    "platform_conversions", "platform_revenue_eur",
+    "week_start",
+    "channel",
+    "spend_eur",
+    "impressions",
+    "platform_conversions",
+    "platform_revenue_eur",
 )
 _OUTCOME_COLUMNS: tuple[str, ...] = ("week_start", "revenue_eur", "orders", "promo_flag")
 ```

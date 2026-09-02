@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 02-10-PLAN.md
-last_updated: "2026-09-02T13:50:00Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-09-02T14:10:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "M1 closed; nine Layer P artifacts committed"
+last_activity_desc: "03-01 dbt scaffold and raw layer complete"
 progress:
   total_phases: 9
   completed_phases: 2
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 28
+  completed_plans: 20
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 3 of 9 (Warehouse)
-Plan: ready to execute 03-01
-Status: Phase 2 / M1 complete
-Last activity: 2026-09-02 — nine Layer P artifacts committed; M1 BUILD_LOG
+Plan: 03-01 complete; next 03-02
+Status: executing
+Last activity: 2026-09-02 — dbt scaffold, raw views, unconditional `make transform`
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [█░░░░░░░░░] 11% (1/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,6 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
+| 03 | 1/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -75,6 +76,11 @@ unratified and are candidates for ADR-001+ as they are exercised.
   rather than rewriting. (3A) no private drop — build drop-independent work; Charter §7
   degradation ADR at M4; ship Layers P+D on S-B. (4B) one PR per GSD plan with one commit
   per task — supersedes the same-day one-PR-per-task topology for the rest of the loop.
+- [2026-09-02, 03-01]: `profiles.yml` `dev.path` is the bare `data/warehouse/ambo.duckdb`
+  string (no `../` prefix) per RESEARCH.md Pitfall 1.
+- [2026-09-02, 03-01]: `make transform` is the unconditional single-line dbt build (D-21).
+- [2026-09-02, 03-01]: `dbt/.user.yml` gitignored (per-machine usage-stats UUID).
+- [2026-09-02, 03-01]: REQ-dl1-reproducible-pipeline not marked complete (Phase-9-owned).
 
 ### Pending Todos
 
@@ -128,9 +134,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T13:50:00Z
-Stopped at: Completed 02-10-PLAN.md (M1)
-Resume file: .planning/phases/03-warehouse/03-01-PLAN.md
+Last session: 2026-09-02T14:10:00Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-warehouse/03-02-PLAN.md
 
-Next: execute **03-01** (warehouse bootstrap), copying from verified
-`m0-bootstrap` (2A). Do not copy m0 `uv.lock`. M1 is closed.
+Next: execute **03-02** (`DataContractError` + AD-030 mart-only guard), copying from
+verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.

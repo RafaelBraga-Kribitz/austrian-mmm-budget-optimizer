@@ -665,11 +665,13 @@ def read_mmm_input(layer: str) -> pd.DataFrame:
 _FORBIDDEN_IO_CALLS = {"read_csv", "read_parquet", "read_csv_auto"}  # pandas/duckdb literal calls
 _SCAN_PACKAGES = ("model", "decide")
 
+
 def test_model_and_decide_never_touch_csv_parquet_or_duckdb_directly(repo_root: Path) -> None:
     # AST-walk src/ambo/model/ and src/ambo/decide/ for:
     #   1. any Call whose func attr is in _FORBIDDEN_IO_CALLS
     #   2. any Call to duckdb.connect (outside src/ambo/common/db.py, which is never scanned here)
     ...
+
 
 def test_report_only_reads_exports_directory(repo_root: Path) -> None:
     # AST-walk src/ambo/report/ for any string literal referencing "data/synthetic",
