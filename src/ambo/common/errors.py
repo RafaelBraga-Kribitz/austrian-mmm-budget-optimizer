@@ -25,3 +25,12 @@ class AmboError(Exception):
 
 class ConfigError(AmboError):
     """Raised by `ambo.common.config` on invalid or missing configuration."""
+
+
+class SimulationError(AmboError):
+    """Raised by every module in `src/ambo/simulate/` (SPEC-01) for: a missing or
+    invalid scenario YAML, an out-of-domain math input, a missing season-window row,
+    and a failed decomposition audit. Inherits the redaction invariant above
+    unchanged — a `SimulationError` message never contains private-drop content or
+    path, exactly like every other `AmboError` subclass (no simulate-layer input is
+    ever private, but the invariant is stated once on the root and holds for free)."""
