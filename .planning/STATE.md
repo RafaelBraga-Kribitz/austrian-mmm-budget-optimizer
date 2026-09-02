@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: Repository Foundation
+current_phase: 2
+current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: 01-09 Task 3 human-verify checkpoint (CI against main)
-last_updated: "2026-09-01T20:35:00Z"
-last_activity: 2026-09-01
-last_activity_desc: "01-09 Tasks 1-2 landed; waiting on six-job CI against main"
+stopped_at: Completed 01-09-PLAN.md
+last_updated: "2026-09-02T11:15:00Z"
+last_activity: 2026-09-02
+last_activity_desc: "01-09 complete; M0 CI green; R-13 closed"
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 1 — Repository Foundation (P0 / M0), 01-09 Task 3 (CI confirm)
+**Current focus:** Phase 2 — Ground-Truth Simulator (P1 / M1)
 
 ## Current Position
 
-Phase: 1 of 9 (Repository Foundation)
-Plan: 9 of 9 in current phase (01-01 through 01-08 complete; 01-09 Tasks 1–2 landed)
-Status: Blocked on 01-09 Task 3 — six-job CI must be observed on a PR against `main`
-Last activity: 2026-09-01 — ci.yml and governance checks committed; CI URL pending
+Phase: 2 of 9 (Ground-Truth Simulator)
+Plan: ready to execute 02-01
+Status: Phase 1 / M0 complete
+Last activity: 2026-09-02 — six-job CI green on PR #11; R-13 closed
 
-Progress: [████████░░] 89% (8/9 Phase 1 plans; 01-09 awaiting human CI confirm)
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 not started on this lineage.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -46,7 +46,7 @@ Progress: [████████░░] 89% (8/9 Phase 1 plans; 01-09 awaitin
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 8/9 | - | - |
+| 01 | 9/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -127,10 +127,10 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-01T20:35:00Z
-Stopped at: 01-09 Task 3 (`checkpoint:human-verify`)
-Resume file: .planning/phases/01-repository-foundation/01-09-PLAN.md
+Last session: 2026-09-02T11:15:00Z
+Stopped at: Completed 01-09-PLAN.md (M0)
+Resume file: .planning/phases/02-ground-truth-simulator/02-01-PLAN.md
 
-Next: human confirms six EB-060 jobs green with none skipped on a pull request
-**against `main`**, then reply with the CI run URL and Windows `make --version`.
-The executor appends both to the M0 BUILD_LOG close entry and closes R-13.
+Next: execute **02-01** (ADR-007 + hypothesis dev dependency), copying from
+verified `m0-bootstrap` (2A). Human legitimacy for hypothesis already recorded on
+m0 (`a0330a5`); do not re-open 01-02 lockfile 1A.

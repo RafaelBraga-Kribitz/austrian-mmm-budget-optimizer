@@ -31,7 +31,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Repository Foundation** - Git history, pinned toolchain, six-job CI, and governance scaffolding on an empty-but-honest codebase (P0 / M0)
+- [x] **Phase 1: Repository Foundation** - Git history, pinned toolchain, six-job CI, and governance scaffolding on an empty-but-honest codebase (P0 / M0)
 - [ ] **Phase 2: Ground-Truth Simulator** - Three scenario datasets with disclosed truth files, deterministic to the byte (P1 / M1)
 - [ ] **Phase 3: Warehouse** - DuckDB + dbt marts; `fct_mmm_input` becomes the model's only input contract (P2 / M1→M2 seam)
 - [ ] **Phase 4: MMM on S-A** - Raw-PyMC model fitted on the clean scenario with clean diagnostics (P3 / M2)
@@ -87,7 +87,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 01-09-PLAN.md — the two vacuously-correct governance checks, six-job `ci.yml`, M0 close (wave 5)
+- [x] 01-09-PLAN.md — the two vacuously-correct governance checks, six-job `ci.yml`, M0 close (wave 5)
 
 **WBS tasks**: T-001…T-012
 **Quality gates**: G-ENG, G-GOV (subset)

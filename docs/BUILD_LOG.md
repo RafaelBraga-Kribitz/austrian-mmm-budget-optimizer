@@ -255,3 +255,29 @@ loop is well under the 480 min (1.0 d) strictly-greater-than-2× tripwire.
 **Verdict: the tripwire is not tripped.** No ADR. Exact combined minutes are not
 restated here as a false-precision sum; Task 3's CI wait is human calendar, not
 implementation effort.
+
+### 2026-09-02 — M0 Task 3: six-job CI observed green against main
+
+Cites the 2026-09-01 M0 close entry above (the CI-run line was pending). Draft PR
+#11 (`cursor/m0-ci-against-main-9588` → `main`) fired `ci.yml` on commit `64b8874`.
+Per-plan stacked PRs #2–#10 remain the merge vehicle (4B); #11 is the D-19 CI
+vehicle only.
+
+**Run:** https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/runs/33623157930
+(`conclusion: success`, SHA `64b88749e255fcc9ceab7332a8799ef12be13d5c`)
+
+**Six EB-060 jobs, none skipped** (seven check runs because `test` is matrixed, D-21):
+
+| Job | Result |
+| --- | --- |
+| lint | pass (19s) — season-windows regenerate + `git diff --exit-code` produced no diff |
+| test (ubuntu-latest) | pass (19s) |
+| test (windows-latest) | pass (1m5s) |
+| dbt | pass (16s) |
+| ssot | pass (15s) — printed the nothing-to-reconcile notice |
+| layer-order | pass (15s) — printed the nothing-to-check notice |
+| leak | pass (15s) |
+
+**Windows `make --version` (R-13 closing evidence):** `GNU Make 4.4.1` / `Built for x86_64-w64-mingw32`. Matches the development-machine GNU Make 4.4.1 (ezwinports / mingw lineage).
+
+No job reported skipped. Success Criterion 2 is met by observation, not by absence.
