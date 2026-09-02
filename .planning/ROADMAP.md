@@ -216,13 +216,13 @@ rather than a pile of CSVs it could quietly reshape.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: 1/9 plans executed
+**Plans**: 2/9 plans executed
 
 Plans:
 **Wave 1**
 
 - [x] 03-01-PLAN.md — dbt scaffold, committed profile, raw external views, unconditional `make transform`, warehouse-path and taxonomy-equality tests (T-201)
-- [ ] 03-02-PLAN.md — `DataContractError` and the fifth standing architectural guard, the AD-030 mart-only rule (D-09)
+- [x] 03-02-PLAN.md — `DataContractError` and the fifth standing architectural guard, the AD-030 mart-only rule (D-09)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
