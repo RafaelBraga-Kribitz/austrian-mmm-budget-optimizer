@@ -1,0 +1,74 @@
+version: 2
+
+# dim_layer's enforced contract (D-07, SPEC-03 section 3). Columns-only contract form
+# (03-RESEARCH.md Pattern 2, matching _fct_mmm_input__schema.yml's precedent): no
+# `constraints:` block, since DuckDB's constraint-DDL support is unconfirmed per
+# adapter. `unique` on `layer` is an ordinary dbt generic test instead.
+models:
+  - name: dim_layer
+    description: >
+      Layer-grain dimension (D-07, SPEC-03 section 3). `channels_present` is the
+      Phase 4 interface: model code iterates it to learn which of
+      `fct_mmm_input`'s seven spend columns are real for a layer, never assuming
+      all seven carry data (D-13). `monetary_unit` is the single home for the unit
+      fact BP-D-03's renames removed from every column name (AD-043, D-16).
+    config:
+      contract: {enforced: true}
+      materialized: table
+    columns:
+      - name: layer
+        data_type: varchar
+        description: >
+          Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain (1 of 1) -- one row
+          per layer.
+        data_tests:
+          - not_null
+          - unique
+      - name: weeks
+        data_type: bigint
+        description: >
+          Distinct week count for this layer, sourced from stg_outcome_weekly --
+          a count with the week as its denominator, not a date range. 156 for
+          P-SA, 104 for P-SB, 78 for P-SC.
+        data_tests:
+          - not_null
+      - name: channels_present
+        data_type: varchar
+        description: >
+          The channels with at least one source row in stg_media_weekly for this
+          layer, derived strictly from source-row presence -- never from nonzero
+          spend (D-13). A comma-joined string in SPEC-02 section 5.2 taxonomy
+          order (BP-D-19), e.g.
+          "search_brand,search_generic,meta,display_video,print_regional,radio".
+          Model code iterates this column to learn which of fct_mmm_input's seven
+          spend columns are real for a layer, and must never read the seven spend
+          columns directly to infer presence (D-13) -- a channel that is
+          structurally absent for a layer (zero-filled, e.g. spend_other on every
+          Layer P row) and a channel that is present but has zero true effect
+          (e.g. S-C's display_video, real spend, zero true effect by VR-304
+          design) must never look the same to the model, and this column is what
+          keeps them distinguishable.
+        data_tests:
+          - not_null
+      - name: monetary_unit
+        data_type: varchar
+        description: >
+          The single home for the monetary-unit fact BP-D-03's renames removed
+          from every staging and mart column name -- no mart or staging column
+          name may carry a `_eur`/`_aeur` suffix (AD-043, D-16). 'EUR' for Layer
+          P, 'aEUR' for Layer R.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["EUR", "aEUR"]
+      - name: source_tag
+        data_type: varchar
+        description: >
+          'GROUND-TRUTH' for Layer P (synthetic, known-truth data), 'REAL-ANON'
+          for Layer R (anonymized real data).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["GROUND-TRUTH", "REAL-ANON"]
