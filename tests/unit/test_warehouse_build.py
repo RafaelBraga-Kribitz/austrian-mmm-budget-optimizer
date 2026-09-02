@@ -4,7 +4,8 @@ This file is extended by later plans in Phase 3:
   - plan 03-03 adds the poisoned-fixture proof (D-11): a duplicate-grain-key fixture
     pointed at via `--vars`, asserting `dbt build` fails on the `unique` test.
   - plan 03-04 adds the AD-042 reconciliation assertions (mart revenue vs the
-    simulator's disclosed CSV totals, all three Layer P layers).
+    simulator's disclosed CSV totals, all three Layer P layers) and the AD-040
+    spine ordering assertions (gapless, ascending, uniform seven-day step).
   - plan 03-06 adds the Layer R fixture run (D-20): a minimal fake
     `data/real_anon/`-shaped fixture built with `layer_r_present: true`.
 
@@ -14,12 +15,15 @@ the always-present dbt invocation prefix is defined exactly once.
 
 from __future__ import annotations
 
+import datetime
+import itertools
 import json
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
+import duckdb
 import pytest
 
 from ambo.common.config import load_settings
@@ -246,3 +250,101 @@ def test_duplicate_grain_key_fails_dbt_build(
         f"runs against them, so the tmp duckdb file should still exist. Last 40 "
         f"lines of output:\n{tail}"
     )
+
+
+# --- AD-042 reconciliation and AD-040 spine ordering (plan 03-04) ------------------
+#
+# Independent, Python-side checks against the built mart. `test_mart_revenue_matches
+# _simulator_csv_sums` compares the mart to three literal sums verified from the
+# committed CSVs at planning time, so a change that corrupted both the mart and the
+# dbt singular test's CSV read identically would still be caught. `test_weekly_spine
+# _is_gapless_and_ascending` is the ordering half of the spine guarantee -- the dbt
+# `ad040_gapless_week_spine` test proves no week is missing; this test proves the
+# sequence a consumer sees is monotonic with a uniform seven-day step.
+
+# Verified from the committed s_a/s_b/s_c outcome_weekly.csv files at planning time
+# (03-RESEARCH.md Pattern 4) -- independent of both the mart and the dbt singular
+# test's own CSV read.
+_EXPECTED_REVENUE_SUMS: dict[str, float] = {
+    "P-SA": 14893565.459516,
+    "P-SB": 9794127.034897,
+    "P-SC": 6992687.768258,
+}
+_EXPECTED_ROW_COUNTS: dict[str, int] = {
+    "P-SA": 156,
+    "P-SB": 104,
+    "P-SC": 78,
+}
+_REVENUE_TOLERANCE = 1e-6
+
+
+def test_mart_revenue_matches_simulator_csv_sums(repo_root: Path) -> None:
+    """Per-layer revenue sums and row counts against three literals independently
+    verified from the committed CSVs at planning time -- never re-derived from the
+    CSVs at test time, unlike the dbt `ad042_revenue_reconciliation` singular test
+    this deliberately duplicates (T-03-04 AD-042)."""
+    result = _run_dbt(repo_root)
+    tail = "\n".join(result.stdout.splitlines()[-40:])
+    assert result.returncode == 0, (
+        f"dbt build failed before the AD-042 assertion could run. Last 40 lines of stdout:\n{tail}"
+    )
+
+    warehouse_path = load_settings().paths.warehouse
+    con = duckdb.connect(str(warehouse_path), read_only=True)
+    try:
+        for layer, expected_sum in _EXPECTED_REVENUE_SUMS.items():
+            actual_sum, row_count = con.execute(
+                "select sum(revenue), count(*) from fct_mmm_input where layer = ?",
+                [layer],
+            ).fetchone()
+            assert abs(actual_sum - expected_sum) <= _REVENUE_TOLERANCE, (
+                f"layer={layer!r}: mart revenue sum {actual_sum} does not match the "
+                f"literal expected sum {expected_sum} within {_REVENUE_TOLERANCE} "
+                f"(delta={abs(actual_sum - expected_sum)})"
+            )
+            assert row_count == _EXPECTED_ROW_COUNTS[layer], (
+                f"layer={layer!r}: mart row count {row_count} does not match the "
+                f"expected count {_EXPECTED_ROW_COUNTS[layer]}"
+            )
+    finally:
+        con.close()
+
+
+def test_weekly_spine_is_gapless_and_ascending(repo_root: Path) -> None:
+    """For each of the three P layers, week_start read ascending is strictly
+    increasing with a uniform seven-day step -- the ordering half of the spine
+    guarantee (the dbt `ad040_gapless_week_spine` test proves no week is missing;
+    this proves the sequence is monotonic)."""
+    result = _run_dbt(repo_root)
+    tail = "\n".join(result.stdout.splitlines()[-40:])
+    assert result.returncode == 0, (
+        f"dbt build failed before the AD-040 ordering assertion could run. Last 40 "
+        f"lines of stdout:\n{tail}"
+    )
+
+    warehouse_path = load_settings().paths.warehouse
+    con = duckdb.connect(str(warehouse_path), read_only=True)
+    try:
+        for layer, expected_count in _EXPECTED_ROW_COUNTS.items():
+            weeks: list[datetime.date] = [
+                row[0]
+                for row in con.execute(
+                    "select week_start from fct_mmm_input where layer = ? order by week_start asc",
+                    [layer],
+                ).fetchall()
+            ]
+            assert len(weeks) == expected_count, (
+                f"layer={layer!r}: expected {expected_count} weeks, got {len(weeks)}"
+            )
+            for previous, current in itertools.pairwise(weeks):
+                assert current > previous, (
+                    f"layer={layer!r}: week_start sequence is not strictly "
+                    f"increasing at {previous} -> {current}"
+                )
+                gap = (current - previous).days
+                assert gap == 7, (
+                    f"layer={layer!r}: non-seven-day gap of {gap} day(s) between "
+                    f"{previous} and {current}"
+                )
+    finally:
+        con.close()
