@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-09-02T12:00:00Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-09-02T12:20:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "02-03 complete; scenario YAMLs + BP-G-02 tests"
+last_activity_desc: "02-04 complete; DGP week spine, adstock, Hill"
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 19
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 2 of 9 (Ground-Truth Simulator)
-Plan: ready to execute 02-04
-Status: Phase 2 executing (02-03 complete)
-Last activity: 2026-09-02 — three scenario YAMLs + BP-G-02 tests
+Plan: ready to execute 02-05
+Status: Phase 2 executing (02-04 complete)
+Last activity: 2026-09-02 — DGP core + Hypothesis adstock/Hill tests
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [███·······] 30% (3/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [████······] 40% (4/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -47,7 +47,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
-| 02 | 3/10 | - | - |
+| 02 | 4/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -128,9 +128,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T12:00:00Z
-Stopped at: Completed 02-03-PLAN.md
-Resume file: .planning/phases/02-ground-truth-simulator/02-04-PLAN.md
+Last session: 2026-09-02T12:20:00Z
+Stopped at: Completed 02-04-PLAN.md
+Resume file: .planning/phases/02-ground-truth-simulator/02-05-PLAN.md
 
-Next: execute **02-04** (DGP core: week spine, seasonality, adstock, Hill),
-copying from verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
+Next: execute **02-05** (`generate_spend`, SIM-030/031), copying from
+verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
