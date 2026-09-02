@@ -524,6 +524,67 @@ missing artifact.
 
 ---
 
+### scripts/export_marts.py
+
+**Purpose** The registry-driven, byte-stable export writer (T-205, D-01..D-05).
+Writes `exports/*.csv` from the marts, reading exclusively through
+`ambo.common.db` (AD-030) — this script is Python orchestration over the frozen
+mart contract, never a second SQL layer. `exports/mmm_input_weekly.csv` is the
+first (and today, only) registry entry; Phase 8 and Phase 9 add the remaining
+SPEC-03 §5 files by adding a registry entry, never a second script.
+
+**Public API**
+- `class ExportSpec` — one registry entry: `reader: Callable[[], pd.DataFrame]`,
+  `columns: Callable[[pd.DataFrame], list[str]]` (the ordered column list,
+  derived from the reader's own frame — never restated as a literal, D-08's
+  discipline applied here), `dtype_casts: dict[str, str]` (`"date"` →
+  `YYYY-MM-DD` string, `"Int64"` → nullable pandas integer), `sort_keys:
+  list[str]` (the row-sort order and the frame's grain key).
+- `EXPORT_REGISTRY: dict[str, ExportSpec]` — keyed by output filename (D-03); one
+  entry today, `mmm_input_weekly.csv`, reading every layer `read_dim_layer()`
+  reports via `read_mmm_input(layer)` (no hard-coded layer list), sorted by
+  `layer` then `week_start`.
+- `validate_no_duplicate_grain_keys(frame, sort_keys) -> None` — raises
+  `DataContractError` naming the duplicated key(s) if `frame` has a duplicate on
+  `sort_keys`; never silently deduplicates (AD-050).
+- `build_export_frame(spec: ExportSpec) -> pd.DataFrame` — read, column-order,
+  validate, sort — everything short of dtype casts and the write.
+- `write_export(name: str, outdir: Path) -> Path` — the full pipeline for one
+  registry entry, ending in the atomic write; returns the written path.
+- `main(argv: list[str] | None = None) -> int` — CLI: `python
+  scripts/export_marts.py [NAME ...]`. No arguments writes every registry entry;
+  one or more names writes only those. Resolves the output directory through
+  `load_settings().paths.exports`.
+
+**Invariants** Every float value is written at explicit fixed six-decimal
+precision (`%.6f`), never pandas' default repr (D-04). The write is atomic and
+LF-only — a `.tmp-<pid>` sibling written with `newline=""` and an explicit
+`lineterminator="\n"`, then `os.replace`d onto the destination, with the temp
+file removed on any exception — mirroring
+`ambo.simulate.__main__._atomic_write_csv` verbatim. Row order is explicit and
+stable (sorted by `sort_keys`, currently `layer` then `week_start`), never left
+to DuckDB's scan order, so two runs on an unchanged warehouse are byte-identical.
+Importing this module performs no file writes and no other side effect. The
+mart's column list and order are never restated as a literal here — cited by
+path at `dbt/models/marts/_fct_mmm_input__schema.yml`, the same repoint D-08
+requires of `db.py`.
+
+**Failure modes** `DataContractError`: a duplicated grain key
+(`(week_start, layer)`) in a frame about to be exported, or an unrecognized
+`dtype_casts` cast keyword. `SystemExit(2)` (via `argparse`'s own error path) on
+an unknown registry entry name passed on the command line.
+
+**Testing** `tests/unit/test_export_marts.py` — the registry shape (a non-empty
+dict, every value carrying a reader, column source, dtype casts and sort keys);
+the committed `exports/mmm_input_weekly.csv` matches the mart contract exactly
+(header, 338 data rows, `YYYY-MM-DD` dates, the three Layer P values, sorted by
+layer then `week_start`); a duplicated grain key fails rather than
+deduplicating; every float value is fixed six decimals; the file contains no
+carriage-return byte; and two consecutive writes from the same warehouse, plus
+the committed file, are byte-identical.
+
+---
+
 ## Dependency directions
 
 Reproduced from `03_MODULES.md` §10 (the full package-level table), since two of these edges
