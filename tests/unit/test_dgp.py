@@ -23,11 +23,16 @@ from hypothesis import strategies as st
 
 from ambo.common.errors import SimulationError
 from ambo.simulate import dgp
-from ambo.simulate.config import SeasonWeights, load_scenario
+from ambo.simulate.config import SPEC_CHANNEL_ORDER, SeasonWeights, load_scenario
 from ambo.simulate.dgp import (
+    SimulationResult,
     adstock_recursive,
+    assemble_scenario,
     baseline_demand,
+    decomposition_audit,
     hill,
+    peak_week_audit,
+    plausibility_audit,
     round_half_up,
     season_index,
     week_index,
@@ -445,3 +450,204 @@ def test_hill_is_monotone_non_decreasing_in_adstocked_spend(
     h1 = hill(np.array([a1]), K, s)[0]
     h2 = hill(np.array([a2]), K, s)[0]
     assert h1 <= h2 + 1e-12
+
+
+# ---------------------------------------------------------------------------
+# assemble_scenario / SimulationResult / SIM-071, SIM-072, SIM-073 audits
+# (plan 02-06 Task 2). `-k assemble` selects this whole group.
+# ---------------------------------------------------------------------------
+
+_ALL_SCENARIOS = ["s_a", "s_b", "s_c"]
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_decomposition_audit_within_tolerance(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    max_deviation = decomposition_audit(result)
+    assert max_deviation <= 1e-6, (
+        f"SIM-071: {scenario_id} max abs deviation {max_deviation!r} exceeds tolerance 1e-6"
+    )
+
+
+def test_assemble_decomposition_violation_raises_at_construction() -> None:
+    cfg = load_scenario("s_a")
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    perturbed = result.components.copy()
+    perturb_position = 5
+    perturbed.loc[perturbed.index[perturb_position], "base"] += 1.0
+    expected_week = str(result.weeks["week_start"].iloc[perturb_position].date())
+
+    with pytest.raises(SimulationError, match=expected_week):
+        SimulationResult(
+            cfg=result.cfg,
+            weeks=result.weeks,
+            spend=result.spend,
+            components=perturbed,
+            media=result.media,
+            outcome=result.outcome,
+        )
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_plausibility_bounds(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    stats = plausibility_audit(result)
+
+    assert stats["min_revenue_pre_clip"] >= 0.0, (
+        f"SIM-072: {scenario_id} min_revenue_pre_clip {stats['min_revenue_pre_clip']!r} "
+        "is negative -- the clip bound"
+    )
+    assert 0.02 <= stats["noise_variance_share"] <= 0.10, (
+        f"SIM-072: {scenario_id} noise_variance_share {stats['noise_variance_share']!r} "
+        "outside [0.02, 0.10]"
+    )
+    media_shares = {k: v for k, v in stats.items() if k.startswith("media_share_")}
+    assert media_shares, f"SIM-072: {scenario_id} returned no media_share_<year> entries"
+    for key, value in media_shares.items():
+        assert 0.15 <= value <= 0.45, f"SIM-072: {scenario_id} {key}={value!r} outside [0.15, 0.45]"
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_peak_revenue_week_is_in_advent(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    audit = peak_week_audit(result)
+
+    audited_years = {year: value for year, value in audit.items() if value[0] != -1}
+    assert audited_years, (
+        f"SIM-073: {scenario_id} audited zero ISO years -- the audit must not pass vacuously"
+    )
+    for iso_year, (peak_week, is_advent) in audited_years.items():
+        assert is_advent, (
+            f"SIM-073: {scenario_id} {iso_year}'s peak-revenue week (ISO week {peak_week}) "
+            "does not carry advent_flag == 1"
+        )
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_frame_shapes_and_column_order(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+
+    assert len(result.outcome) == cfg.weeks
+    assert len(result.media) == 6 * cfg.weeks
+    assert list(result.outcome.columns) == ["week_start", "revenue_eur", "orders", "promo_flag"]
+    assert list(result.media.columns) == [
+        "week_start",
+        "channel",
+        "spend_eur",
+        "impressions",
+        "platform_conversions",
+        "platform_revenue_eur",
+    ]
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_week_spine_is_iso_monday_and_gapless(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    weeks = result.weeks
+
+    assert (result.media["week_start"].dt.dayofweek == 0).all()
+    assert (result.outcome["week_start"].dt.dayofweek == 0).all()
+
+    outcome_starts = result.outcome["week_start"]
+    assert outcome_starts.is_unique
+    assert outcome_starts.is_monotonic_increasing
+    diffs = outcome_starts.diff().dropna()
+    assert (diffs.dt.days == 7).all()
+    assert outcome_starts.iloc[0] == weeks["week_start"].iloc[0]
+    assert outcome_starts.iloc[-1] == weeks["week_start"].iloc[-1]
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_media_row_order_is_week_then_taxonomy(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    media = result.media
+
+    pairs = list(zip(media["week_start"], media["channel"], strict=True))
+    assert len(pairs) == len(set(pairs)), "(week_start, channel) pairs are not unique"
+
+    channel_position = {channel: i for i, channel in enumerate(SPEC_CHANNEL_ORDER)}
+    sort_keys = [(week, channel_position[channel]) for week, channel in pairs]
+    assert sort_keys == sorted(sort_keys), (
+        "media rows are not sorted by week_start ascending then SPEC_CHANNEL_ORDER position"
+    )
+
+    first_week = media["week_start"].iloc[0]
+    first_week_rows = media[media["week_start"] == first_week]
+    meta_position = first_week_rows.index[first_week_rows["channel"] == "meta"][0]
+    display_video_position = first_week_rows.index[first_week_rows["channel"] == "display_video"][0]
+    assert meta_position < display_video_position, (
+        "display_video must sort after meta (SPEC_CHANNEL_ORDER order), not before it "
+        "alphabetically -- this is the assertion that catches an accidental alphabetical sort"
+    )
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_orders_follow_the_aov_rule(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    advent_flag = result.weeks["advent_flag"].to_numpy()
+    aov = cfg.aov_base + cfg.aov_advent_bonus * advent_flag
+    expected_orders = round_half_up(result.outcome["revenue_eur"].to_numpy() / aov)
+    assert list(result.outcome["orders"]) == list(expected_orders)
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_promo_flag_matches_the_yaml(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    weeks = result.weeks
+
+    expected_flagged = {
+        (iso_year, iso_week)
+        for iso_year, iso_weeks in cfg.promo_weeks.items()
+        for iso_week in iso_weeks
+    }
+    actual_flagged = {
+        (int(iso_year), int(iso_week))
+        for iso_year, iso_week, flag in zip(
+            weeks["iso_year"], weeks["iso_week"], result.outcome["promo_flag"], strict=True
+        )
+        if flag == 1
+    }
+    assert actual_flagged == expected_flagged
+
+
+def test_assemble_zero_beta_channel_contributes_exactly_zero() -> None:
+    """S-C's `display_video` has `true_params.beta == 0.0` (SPEC-01 section 4's
+    footnote), so `m_display_video` must be exactly 0.0 every week, and the sum
+    over the five nonzero channels must equal the total channel sum exactly.
+
+    The plan's literal first choice -- a bit-identical comparison against a
+    "control" run built from a copy of the S-B config restricted to S-C's window
+    with `display_video.beta` monkeypatched to 0.0 -- is not achievable here:
+    `ScenarioConfig._validate_scenario_identity` pins `(id, weeks, seed)` to one
+    of exactly the three frozen SPEC-01 section 5 triples, so no such hybrid
+    config can be constructed without bypassing validation. Falling back to the
+    plan's own sanctioned alternative instead.
+    """
+    cfg = load_scenario("s_c")
+    result = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+
+    m_display_video = result.components["m_display_video"].to_numpy()
+    assert (m_display_video == 0.0).all()
+
+    channel_sum = result.components[[f"m_{c}" for c in SPEC_CHANNEL_ORDER]].sum(axis=1).to_numpy()
+    nonzero_channels = [c for c in SPEC_CHANNEL_ORDER if c != "display_video"]
+    nonzero_sum = result.components[[f"m_{c}" for c in nonzero_channels]].sum(axis=1).to_numpy()
+    assert np.array_equal(channel_sum, nonzero_sum)
+
+
+@pytest.mark.parametrize("scenario_id", _ALL_SCENARIOS)
+def test_assemble_determinism_same_seed(scenario_id: str) -> None:
+    cfg = load_scenario(scenario_id)
+    first = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    second = assemble_scenario(cfg, np.random.default_rng(cfg.seed))
+    assert first.media.equals(second.media)
+    assert first.outcome.equals(second.outcome)
+    assert first.components.equals(second.components)

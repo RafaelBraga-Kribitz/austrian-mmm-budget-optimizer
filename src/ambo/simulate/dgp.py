@@ -466,3 +466,94 @@ def assemble_scenario(cfg: ScenarioConfig, rng: np.random.Generator) -> Simulati
     return SimulationResult(
         cfg=cfg, weeks=weeks, spend=spend, components=components, media=media, outcome=outcome
     )
+
+
+def decomposition_audit(result: SimulationResult) -> float:
+    """SIM-071: the maximum absolute deviation of `base + Σ_c m_c + eps` from the
+    stored `revenue_pre_clip`, re-summed from `result.components`'s own stored
+    arrays -- never from any expression that produced revenue at construction
+    time (evidence, not a report about a report). Passes when the returned value
+    is `<= 1e-6`. `SimulationResult.__post_init__` already makes this a
+    construction-time invariant; this function exists so 02-09's gate runner can
+    print the realized number `10_VALIDATION_GATES.md` §3 requires.
+    """
+    max_deviation, _ = _max_decomposition_deviation(result.components)
+    return max_deviation
+
+
+def plausibility_audit(result: SimulationResult) -> dict[str, float]:
+    """SIM-072: plausibility statistics for `result`, returned as evidence (not a
+    bare boolean) so 02-09's gate runner can print the numbers
+    `10_VALIDATION_GATES.md` §3 asks for.
+
+    Returns `min_revenue_pre_clip` (the minimum of the pre-clip revenue series --
+    SIM-072 passes when this is `>= 0`, proving the `>= 0` clip in
+    `assemble_scenario` never actually binds), `noise_variance_share`
+    (`var(eps) / var(revenue_pre_clip)`, passes when in `[0.02, 0.10]`), and one
+    `media_share_<iso_year>` entry per ISO year `result.weeks` covers
+    (`Σ_c Σ_t m_{c,t} / Σ_t revenue_t`, restricted to that year's weeks; passes
+    when in `[0.15, 0.45]`).
+    """
+    components = result.components
+    revenue_pre_clip = components["revenue_pre_clip"].to_numpy()
+    revenue = components["revenue"].to_numpy()
+    eps = components["eps"].to_numpy()
+
+    stats: dict[str, float] = {
+        "min_revenue_pre_clip": float(revenue_pre_clip.min()),
+        "noise_variance_share": float(np.var(eps) / np.var(revenue_pre_clip)),
+    }
+
+    total_media = components[list(_CONTRIBUTION_COLUMNS)].sum(axis=1).to_numpy()
+    iso_years = result.weeks["iso_year"].to_numpy()
+    for iso_year in sorted(set(iso_years)):
+        mask = iso_years == iso_year
+        stats[f"media_share_{iso_year}"] = float(total_media[mask].sum() / revenue[mask].sum())
+
+    return stats
+
+
+def peak_week_audit(result: SimulationResult) -> dict[int, tuple[int, bool]]:
+    """SIM-073: per covered ISO year, `(peak_week_number, carries_advent_flag)`
+    for that year's maximum-revenue week. Passes when every *audited* year's
+    boolean is `True`.
+
+    A year is audited only if its Advent window lies inside `result`'s covered
+    span. This is detected as "does at least one row of that year carry
+    `advent_flag == 1`" -- the Advent window sits at the end of the calendar
+    year, so a window whose coverage ends before Advent (e.g. S-C's 2023
+    half-year, ISO weeks 01-26) never has an `advent_flag == 1` row for that
+    year and is therefore known not to be fully covered, without recomputing
+    any calendar rule (AD-020).
+
+    **Skipped-year convention (docstring-declared, not an inline comment, so a
+    caller can rely on it):** a year that is not audited is still present in the
+    returned mapping, recorded as the sentinel `(-1, True)` -- peak week `-1`
+    (never a valid ISO week) paired with boolean `True` (so a skipped year can
+    never itself fail the "every value's boolean is True" SIM-073 pass
+    condition). This makes a skipped year visible to a caller (e.g. 02-09's gate
+    runner, which can filter on `peak_week == -1` to report it) rather than
+    silently absent from the mapping.
+    """
+    weeks = result.weeks
+    revenue = result.components["revenue"].to_numpy()
+    iso_years = weeks["iso_year"].to_numpy()
+    iso_weeks = weeks["iso_week"].to_numpy()
+    advent_flags = weeks["advent_flag"].to_numpy()
+
+    audit: dict[int, tuple[int, bool]] = {}
+    for iso_year in sorted(set(iso_years)):
+        mask = iso_years == iso_year
+        year_advent = advent_flags[mask]
+        if not year_advent.any():
+            audit[int(iso_year)] = (-1, True)
+            continue
+        year_revenue = revenue[mask]
+        year_weeks = iso_weeks[mask]
+        peak_position = int(np.argmax(year_revenue))
+        audit[int(iso_year)] = (
+            int(year_weeks[peak_position]),
+            bool(year_advent[peak_position] == 1),
+        )
+
+    return audit
