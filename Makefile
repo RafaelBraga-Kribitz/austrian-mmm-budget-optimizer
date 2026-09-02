@@ -163,10 +163,24 @@ test:
 # make's default behavior already stops the target at the first line that fails; the
 # .SHELLFLAGS errexit pin (top of file) reinforces the same first-failure semantics
 # for any line that itself runs more than one command.
+#
+# `ruff format --check` is scoped to `src tests scripts` (plan 03-09), not `.`.
+# `ruff check .` and `mypy` (pyproject.toml's `[tool.mypy] files = ["src/ambo"]`)
+# are both already effectively scoped to this project's Python surface -- `ruff
+# check` only lints .py/.pyi/.ipynb files regardless of the `.` argument, and
+# mypy's own config pins `src/ambo`. `ruff format`, uniquely among the three, also
+# walks Markdown files by default looking for fenced Python code blocks to
+# reformat -- a real ruff feature, not a bug, but not this project's `lint`
+# target's intent: the whole-repo `.` argument on this one line let ruff's
+# formatter reach into `.planning/`'s narrative planning documents, which are not
+# source code and were never meant to be held to the format target's style.
+# Scoping this line to match the other two closes that gap rather than papering
+# over a real failure -- `make lint` is unchanged in what it verifies about
+# src/ambo, tests/, and scripts/.
 # -----------------------------------------------------------------------------
 lint:
 	uv run ruff check .
-	uv run ruff format --check .
+	uv run ruff format --check src tests scripts
 	uv run mypy
 
 # -----------------------------------------------------------------------------
