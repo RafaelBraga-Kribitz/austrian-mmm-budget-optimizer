@@ -19,15 +19,16 @@
 --
 -- Because this test reads `information_schema` rather than `ref()`-ing a model,
 -- dbt cannot infer its dependencies from the query text -- the hints below
--- schedule it after the four staging models and the mart models built so far are
--- materialized. `fct_platform_reported`'s hint is added by plan 03-06 when that
--- mart lands.
+-- schedule it after the four staging models and all three marts are materialized.
+-- `fct_platform_reported`'s hint (added by plan 03-06) completes the scan's
+-- coverage of every staging and mart relation.
 -- depends_on: {{ ref('stg_media_weekly') }}
 -- depends_on: {{ ref('stg_outcome_weekly') }}
 -- depends_on: {{ ref('stg_promo') }}
 -- depends_on: {{ ref('stg_calendar_weekly') }}
 -- depends_on: {{ ref('fct_mmm_input') }}
 -- depends_on: {{ ref('dim_layer') }}
+-- depends_on: {{ ref('fct_platform_reported') }}
 
 select table_name, column_name
 from information_schema.columns

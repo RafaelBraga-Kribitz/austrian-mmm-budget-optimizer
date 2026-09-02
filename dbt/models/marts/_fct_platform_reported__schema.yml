@@ -1,0 +1,75 @@
+version: 2
+
+# fct_platform_reported's enforced contract (D-07, SPEC-03 section 3). Columns-only
+# contract form (03-RESEARCH.md Pattern 2, matching _fct_mmm_input__schema.yml and
+# _dim_layer__schema.yml's precedent): no `constraints:` block, since DuckDB's
+# constraint-DDL support is unconfirmed per adapter. Grain uniqueness is an ordinary
+# dbt `unique` test on the concatenated grain expression instead.
+models:
+  - name: fct_platform_reported
+    description: >
+      The third contract-enforced mart (D-07) -- grain week x layer x channel. Feeds
+      Phase 8's DC-702 attribution-gap module (SPEC-06 section 5): platform-reported
+      numbers are the OBJECT of study there, never a calibration target (AGENTS
+      T-8). The Layer P platform surface is FROZEN at these six columns as of Phase
+      3 -- Phase 8 builds DC-702 against this frozen six during the drop-blocked
+      window and must not be surprised by a seventh column appearing later. Layer R
+      adds a `clicks` column at M4 as an anticipated extension recorded in the
+      intake ADR (SPEC-02 section 5, BP-D-11's `k_cnt` discussion); adding `clicks`
+      at that point is therefore a planned contract amendment, not a contract break
+      requiring its own ADR.
+    config:
+      contract: {enforced: true}
+      materialized: table
+    columns:
+      - name: week_start
+        data_type: date
+        description: >
+          ISO Monday week start date. Grain component 1 of 3 (week x layer x
+          channel). Sourced unchanged from stg_media_weekly.
+        data_tests:
+          - not_null
+      - name: layer
+        data_type: varchar
+        description: >
+          Layer identifier ('P-SA'|'P-SB'|'P-SC'|'R'). Grain component 2 of 3.
+        data_tests:
+          - not_null
+      - name: channel
+        data_type: varchar
+        description: >
+          Channel identifier, SPEC-02 section 5.2 taxonomy. Grain component 3 of
+          3.
+        data_tests:
+          - not_null
+      - name: platform_conversions
+        data_type: bigint
+        description: >
+          Platform-reported conversion count for that week, layer and channel.
+          NULL means the channel reports no platform data at all -- an offline
+          channel such as print_regional -- distinct from a reported zero. Never
+          coalesced to 0 by this model; a coerced zero would make a
+          platform-absent channel indistinguishable from a
+          platform-reported-zero channel.
+      - name: platform_conv_value
+        data_type: double
+        description: >
+          The platform-reported conversion value for that week, layer and
+          channel, in the layer's own monetary unit (named in
+          dim_layer.monetary_unit, never in this column's suffix -- see AD-043).
+          This is the BP-D-03 rename of the producing side's
+          `platform_revenue_eur` (Layer P) / `platform_conv_value` (Layer R,
+          already unit-neutral). It is the OBJECT of study in the attribution-gap
+          module (SPEC-06 section 5), never a calibration target (AGENTS T-8) --
+          the model's own posterior ROAS is compared against this figure, not
+          fit to it. NULL means the channel reports no platform data at all,
+          distinct from a reported zero.
+      - name: impressions
+        data_type: bigint
+        description: >
+          Platform-reported impression count for that week, layer and channel.
+          NULL means the channel reports no platform data at all, distinct from
+          a reported zero.
+    data_tests:
+      - unique:
+          column_name: "(cast(week_start as varchar) || '|' || layer || '|' || channel)"
