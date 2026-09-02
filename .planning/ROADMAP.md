@@ -141,7 +141,7 @@ Plans:
 **Wave 1**
 
 - [x] 02-01-PLAN.md — ADR-007 for the `hypothesis` dev dependency, its blocking legitimacy checkpoint, and the install (wave 1)
-- [ ] 02-02-PLAN.md — `SimulationError`, the `ScenarioConfig` model tree, module contract, structural tests (T-101a) (wave 1)
+- [x] 02-02-PLAN.md — `SimulationError`, the `ScenarioConfig` model tree, module contract, structural tests (T-101a) (wave 1)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -443,7 +443,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
-| 2. Ground-Truth Simulator | M1 | 1/10 | In Progress | - |
+| 2. Ground-Truth Simulator | M1 | 2/10 | In Progress | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
