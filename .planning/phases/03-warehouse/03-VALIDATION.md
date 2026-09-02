@@ -74,7 +74,7 @@ created: 2026-08-05
 
 | Behavior | Requirement | Why Manual | Test Instructions | Status |
 | --- | --- | --- | --- | --- |
-| CI job 3 green on the `windows-latest` leg | REQ-dl1-reproducible-pipeline | Cannot be asserted from a local run — requires an actual GitHub Actions execution on a Windows runner | Push the branch, open the Actions run, confirm job 3 passes on both `ubuntu-latest` and `windows-latest` matrix legs | ⬜ pending — this plan's Task 3 checkpoint (`blocking`, human-verify) discharges this row; not yet confirmed |
+| CI job 3 green on the `windows-latest` leg | REQ-dl1-reproducible-pipeline | Cannot be asserted from a local run — requires an actual GitHub Actions execution on a Windows runner | Push the branch, open the Actions run, confirm job 3 passes on both `ubuntu-latest` and `windows-latest` matrix legs | ⬜ pending — Task 3 blocking checkpoint; this lineage's `ci.yml` only fires on push/PR against `main` (D-19). Stacked PRs have empty checks. Same pattern as M0 (#11) / M1. |
 | Contract-drift refusal is genuinely enforced for a **type** mismatch (RESEARCH Open Question 1) | REQ-dl1-reproducible-pipeline | Documented but not red-then-green proven for dbt-core 1.12.0 / dbt-duckdb 1.10.1 | In T-203, temporarily change a contracted column's `data_type` to a mismatched type, confirm `dbt build` fails, then revert and confirm green | ✅ closed — plan 03-04 Task 2 proved all three contract-drift shapes (type mismatch, missing column, extra column) red-then-green on `fct_mmm_input`, see `03-04-SUMMARY.md` coverage id D2 |
 
 ---

@@ -444,3 +444,53 @@ does not read them as oversights:
 verified `m0-bootstrap` `7dcbbcc` (2A); the `Makefile` `transform` target's D-17
 conditional is replaced with the unconditional single-line recipe
 `uv run dbt build --project-dir dbt --profiles-dir dbt`.
+
+### 2026-09-02 — Phase 3 (warehouse) close: effort, shed statement, evidence index, stale-document corrections (plan 03-09, Task 2)
+
+Phase 3 (T-201…T-205) closes on this lineage with CI job 3's `windows-latest` matrix
+leg and export drift gate landed (plan 03-09 Task 1), job 2 warehouse-before-pytest
+(`f58e4f1`), `make lint`'s `ruff format --check` scoped to `src tests scripts`
+(`61ae810`), R-14 recorded, and ROADMAP Phase 3 effort/BP-D-05 notes corrected.
+Science copied from `origin/m0-bootstrap` (2A); CSV export regenerated here (A-5)
+and byte-identical with m0. `03-VALIDATION.md` per-task map was already filled
+in the 03-01 2A context copy of m0 HEAD.
+
+**Elapsed effort against the 1 d (480 min) D-17 budget and 2 d (960 min) tripwire.**
+This execution loop copied verified warehouse science (2A) rather than re-authoring
+it. Wall-clock for 03-01…03-09 on this lineage is well under the 480 min budget
+and far from the 960 min tripwire. **Verdict: the tripwire is not tripped.** No
+standing-rule-5 ADR. m0's own measured sum for 03-01…03-08 was 207 min; this
+lineage is comparable or lower.
+
+**Shed statement: no shed was taken.** All three D-19 candidates shipped in full
+(poisoned-fixture D-11, secondary mart contracts D-07, AD-042 S-B/S-C D-12), plus
+the never-shed list (`fct_mmm_input` contract, mart-only guard, `channels_present`).
+
+**Red-then-green evidence index, by plan** (full traces live on m0 SUMMARYs; this
+lineage copied the science that those proofs produced):
+
+- **03-01** — taxonomy-equality and warehouse-path tests (BP-G-03, D-23).
+- **03-02** — fifth standing guard (D-09 / AD-030) non-vacuous against synthetic offenders.
+- **03-03** — AD-043 + D-11 poisoned-fixture duplicate grain key fails `dbt build`.
+- **03-04** — `fct_mmm_input` contract drift shapes; AD-040 spine; AD-042 three-layer sums.
+- **03-05** — `channels_present` both directions; absent `other` vs present-but-ineffective S-C `display_video`.
+- **03-06** — dormant AD-044; D-20 fake Layer R fixture executed once.
+- **03-07** — collect-all-raise-once `DataContractError`; read-only connect.
+- **03-08** — AD-050 duplicate-grain-key FAIL; local export byte-identical with m0.
+
+**Three document corrections, Phase 1 D-07 rationale (interpretation, not a spec edit, no ADR):**
+
+1. **WBS T-205 AC-3** — `docs/EXECUTION_BLUEPRINT/` is gitignored (D-01); the file is
+   not present on this agent disk. Tracked record of the post-W5 position
+   (`exports/*.csv` committed per SPEC-08 §2 / EB-081) is this BUILD_LOG entry,
+   matching m0 `f8302fe`.
+2. **ROADMAP Phase 3 effort line** — D-17 1 d / 1 d split with own 2× tripwires.
+3. **ROADMAP Phase 3 BP-D-05 note** — binding via ADR-000 D-2, not an open task-time accept/override.
+
+**Three deliberate departures, reconfirmed as-built:** D-15 seed-derived spine,
+D-16 strict AD-043, CWD-relative `profiles.yml` path (RESEARCH Pitfall 1).
+
+**Task 3 (blocking-human CI confirmation) is not discharged here.** `ci.yml` only
+runs on push/PR against `main` (D-19). Stacked warehouse PRs have empty checks.
+Same pattern as M0 (#11) and M1. Do not invent an `"Approved"` token. A main-based
+D-19 vehicle after the stack merges is what confirms job 3 on both OS legs.
