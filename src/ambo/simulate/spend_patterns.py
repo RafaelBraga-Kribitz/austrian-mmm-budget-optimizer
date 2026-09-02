@@ -16,9 +16,9 @@ injected by the caller rather than read here. Recorded for `docs/BUILD_LOG.md`.
 one per channel, in `SPEC_CHANNEL_ORDER` (taxonomy order), each call drawing one
 full length-T vector -- including for a flighted channel's non-burst weeks, so
 stream consumption stays independent of a scenario's burst-schedule length.
-`assemble_scenario` (plan 02-06) draws the revenue noise vector from this same
+`assemble_scenario` (plan 02-06) samples the revenue noise vector from this same
 generator immediately afterward, so this module's six calls are always the
-*first* six draws of any scenario's generator. Adding a seventh channel later
+*first* six draw calls of any scenario's generator. Adding a seventh channel later
 shifts only the streams after it, never the six documented here. The global
 NumPy RNG (`np.random.seed`/`np.random.normal` module-level entry points) is
 never seeded or read anywhere in `src/ambo/simulate/` (anti-pattern A-5) --
