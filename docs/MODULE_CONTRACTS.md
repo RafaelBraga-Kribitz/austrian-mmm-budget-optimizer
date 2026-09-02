@@ -199,6 +199,36 @@ adstock/Hill so the Phase 5 recovery result is evidence rather than a tautology 
   forward loop, never `cumsum`/`convolve`/`lfilter` (A-14; the shapes trap T-2 hides in).
 - `hill(a: np.ndarray, K: float, s: float) -> np.ndarray` — Hill saturation, `a^s / (a^s +
   K^s)`; `hill(K, K, s) == 0.5` exactly for every `s > 0`; `hill(0, K, s) == 0.0` exactly.
+- `class SimulationResult` — frozen dataclass: `cfg`, `weeks`, `spend` (wide, week x channel,
+  int €), `components` (every intermediate array kept for audit — `trend`, `season`,
+  `promo_mult`, `promo_flag`, `base`, `adstock_<c>`/`m_<c>` per channel, `eps`,
+  `revenue_pre_clip`, `revenue`), `media` (SIM-004 long frame, spend columns populated, the three
+  platform columns all-null placeholders plan 02-07's `platform_report` fills in), `outcome`
+  (SIM-004 frame). `__post_init__` runs the SIM-071 decomposition audit and raises
+  `SimulationError` — naming the worst week and its deviation — if it fails, so a
+  `SimulationResult` that violates the decomposition invariant cannot be constructed.
+- `assemble_scenario(cfg: ScenarioConfig, rng: np.random.Generator) -> SimulationResult` — the
+  only orchestrator in this module: `week_index` -> `baseline_demand` -> `generate_spend`
+  (the generator's first six draw calls) -> per-channel adstock/Hill in `SPEC_CHANNEL_ORDER` (a
+  plain loop, never vectorized across channels, A-14) -> one `rng.normal(0.0, sigma, size=T)`
+  noise draw strictly after `generate_spend` on the same generator (SPEC-01 §2.3) -> the ≥0
+  revenue clip -> `orders` via `round_half_up` -> the two SIM-004 frames. `generate_spend` is
+  imported inside the function body, not at module level, because `spend_patterns.py` imports
+  `round_half_up` from this module — a top-level cross-import would cycle (A-15).
+- `decomposition_audit(result: SimulationResult) -> float` — SIM-071: the maximum absolute
+  deviation of `base + Σ_c m_c + eps` from the stored `revenue_pre_clip`, re-summed from
+  `result.components`'s own stored arrays. Passes when `<= 1e-6`.
+- `plausibility_audit(result: SimulationResult) -> dict[str, float]` — SIM-072:
+  `min_revenue_pre_clip`, `noise_variance_share` (`var(eps) / var(revenue_pre_clip)`), and one
+  `media_share_<iso_year>` entry per covered ISO year (media contribution over that year's total
+  revenue). Passes when `min_revenue_pre_clip >= 0`, `0.02 <= noise_variance_share <= 0.10`, and
+  every `media_share_<iso_year>` is in `[0.15, 0.45]`.
+- `peak_week_audit(result: SimulationResult) -> dict[int, tuple[int, bool]]` — SIM-073: per
+  covered ISO year, `(peak_week_number, carries_advent_flag)` for that year's maximum-revenue
+  week. A year is audited only if its Advent window lies inside the covered span (detected as "at
+  least one `advent_flag == 1` row exists for that year"); an unaudited year is still present in
+  the mapping under the documented sentinel `(-1, True)` so a caller can see it was skipped, not
+  silently omitted. Passes when every *audited* year's boolean is `True`.
 
 **Invariants** The week spine is gapless, strictly ascending, every `week_start` an ISO Monday,
 every consecutive pair exactly 7 days apart, for all three scenarios. No advent, schulbeginn,
@@ -209,16 +239,30 @@ negative in the YAML). `adstock_recursive` never depends on a future `x` value (
 `lam == 1.0` is rejected explicitly because `x / (1 - lam)` diverges there. `hill`'s output lies
 in `[0, 1]` and is monotonically non-decreasing in `a` for every in-domain `(K, s)`. This module
 is never imported by, and never imports, `ambo.model` (SIM-003).
+`assemble_scenario`'s revenue-noise draw is one `rng.normal` call, strictly after
+`generate_spend`'s six channel draws, on the same generator (SIM-070/SIM-001 determinism: two
+runs from generators freshly seeded with `cfg.seed` produce elementwise-equal frames). A
+`SimulationResult`'s `components` re-sum to `revenue_pre_clip` within 1e-6 as a **constructor
+precondition** (SIM-071), not an after-the-fact report. `outcome` carries exactly `cfg.weeks`
+rows and `media` exactly `6 * cfg.weeks` rows; `media` is sorted by `week_start` ascending then
+`SPEC_CHANNEL_ORDER` position with `(week_start, channel)` unique; `outcome` is sorted by
+`week_start` ascending with `week_start` unique. Both frames carry SIM-004's exact column names
+and order.
 
 **Failure modes** Every raise site is `SimulationError`: a window `(iso_year, iso_week)` key
 absent from `SEED_PATH` (names the missing key); a duplicate `(iso_year, iso_week)` key in the
 seed (names the duplicate); a non-Monday, non-strictly-increasing, or non-7-day-gap week
 spine; `adstock_recursive` given a non-1-D, non-finite, or negative `x`, or `lam` outside `[0,
-1)`; `hill` given a non-finite or negative `a`, or a non-positive `K`/`s`.
+1)`; `hill` given a non-finite or negative `a`, or a non-positive `K`/`s`; `SimulationResult()`
+given `components` that do not re-sum to `revenue_pre_clip` within 1e-6 (names the worst week
+and its absolute deviation).
 
 **Testing** `tests/unit/test_dgp.py` — SIM-073 seasonality point tests, SIM-074 adstock/Hill
 point tests (impulse test written and run before the closed-form limit test, per the project's
-own trap-T-2 discipline), and D-03's five bounded `hypothesis` property tests.
+own trap-T-2 discipline), D-03's five bounded `hypothesis` property tests, and (plan 02-06)
+`assemble_scenario`/audit tests covering SIM-071/072/073, frame shape and column-order pinning,
+the gapless week spine, media row ordering (the taxonomy-not-alphabetical assertion), the AOV
+orders rule, the promo-flag/YAML match, the zero-effect channel, and same-seed determinism.
 
 ---
 
