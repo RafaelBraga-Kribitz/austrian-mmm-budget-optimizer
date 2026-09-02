@@ -69,6 +69,57 @@ expected path and, where the failure is a validation error, the failing field. U
 unknown key, both `AMBO_PRIVATE_DROP` set and unset, and `ConfigError` raised and asserted for
 a malformed YAML fixture.
 
+### src/ambo/common/db.py
+
+**Purpose** The ONLY data doorway for `model`/`decide`/`report` code (AD-030). The
+single module in `src/ambo/` that opens a duckdb connection or imports `duckdb`;
+plan 03-02's mart-only guard test (`tests/unit/test_mart_only_access.py`) enforces
+the surrounding half of that rule for `model/`, `decide/` and `report/`.
+
+**Public API**
+- `connect(read_only: bool = True) -> duckdb.DuckDBPyConnection` — opens the
+  warehouse at `load_settings().paths.warehouse`. `read_only=True` by default; this
+  is the access-control mechanism the phase depends on (the only write path to the
+  warehouse is `dbt build` itself). `read_only=False` is reserved for tooling and
+  must never be used by `model`, `decide` or `report` code.
+- `read_mmm_input(layer: str) -> pd.DataFrame` — the single model input contract
+  (AD-030), grain week x layer, columns and order cited from
+  `dbt/models/marts/_fct_mmm_input__schema.yml` (never restated here, D-08),
+  ordered by `week_start` ascending.
+- `read_platform_reported(layer: str) -> pd.DataFrame` — grain week x layer x
+  channel, columns cited from `dbt/models/marts/_fct_platform_reported__schema.yml`,
+  ordered by `week_start` then `channel`. Platform-metric NULLs for offline
+  channels are never coalesced to zero.
+- `read_dim_layer() -> pd.DataFrame` — one row per layer, columns cited from
+  `dbt/models/marts/_dim_layer__schema.yml`, ordered by `layer`.
+
+**Invariants** `connect()` is read-only by default — the only write path to the
+warehouse is `dbt build` itself (ASVS V4). This module is the only place in
+`src/ambo/` that opens a duckdb connection or imports `duckdb`. Each mart's column
+contract is cited **by path** — `dbt/models/marts/_fct_mmm_input__schema.yml`,
+`_dim_layer__schema.yml`, `_fct_platform_reported__schema.yml` — and derived at
+runtime by the private `_contract_columns()` helper; the column list is never
+restated as a literal here or in this document (D-08). Every postcondition
+violation on a call is collected and raised as a single `DataContractError`
+(D-10), never one violation per run — Phase 5's VR-310 debug ladder is what
+actually reads that message.
+
+**Failure modes** `DataContractError`: a missing warehouse file (message names the
+`make transform` command); an unknown `layer` argument (message lists the valid
+layers read from `dim_layer`); a mart named in `_contract_columns()` that is not
+declared in any schema yml under `dbt/models/marts/`; any violated frame
+postcondition (empty result, column set/order mismatch, non-ascending or
+non-gapless `week_start`, NaN in a spend column, non-positive `revenue`, NaN in a
+grain column).
+
+**Testing** `tests/unit/test_db.py` — the round trip against the committed
+simulator CSVs (all three layers, within 1e-6), shape and column-order pinning,
+the offline-null preservation on `fct_platform_reported`, `dim_layer`'s shape, the
+read-only write-rejection proof (and that the warehouse is unmodified afterward),
+the unknown-layer message, the missing-warehouse message, and the
+collect-all-raise-once proof (a frame violating two postconditions simultaneously
+raises one message naming both).
+
 ### src/ambo/common/errors.py
 
 **Purpose** The typed exception root for the project and its Phase 1 subclass. Every module
