@@ -281,3 +281,76 @@ vehicle only.
 **Windows `make --version` (R-13 closing evidence):** `GNU Make 4.4.1` / `Built for x86_64-w64-mingw32`. Matches the development-machine GNU Make 4.4.1 (ezwinports / mingw lineage).
 
 No job reported skipped. Success Criterion 2 is met by observation, not by absence.
+
+---
+
+## M1 - Simulator
+
+### 2026-09-02 — M1 close: scope, interpretations, authoring rationale, governance, gate evidence, effort tally (plan 02-10)
+
+Phase 2 (Layer P simulator, T-101…T-109) closes on this lineage with the nine Layer P
+artifacts committed under `data/synthetic/{s_a,s_b,s_c}/` and a proven git-checkout
+round-trip. Copied science from verified `m0-bootstrap` (decision 2A); artifacts
+regenerated here via `make simulate`. SIM-070 hash matches the m0 close
+(`016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1`).
+
+**Scope.** Ten plans: 02-01 ADR-007 + `hypothesis` (lock resolved 6.167.1); 02-02
+`SimulationError`/`ScenarioConfig`; 02-03 scenario YAMLs + authoring aid; 02-04 DGP
+core (week spine, seasonality, adstock, Hill); 02-05 `generate_spend`; 02-06
+`assemble_scenario` + SIM-071/072/073; 02-07 `platform_report`; 02-08 `truth.py`;
+02-09 CLI + `make simulate`/`validate-sim`; 02-10 this plan (commit artifacts, BUILD_LOG, M1 close).
+
+**Interpretations recorded (not ADRs — D-07).** Each line names the plan that made it.
+
+1. `SimulationError(AmboError)` supersedes `03_MODULES.md` §2.2/§2.3's `ValueError`
+   for expected failure conditions; plain `ValueError` remains correct inside pydantic
+   validators (02-02).
+2. Exactly-adjacent burst spans in the same channel are two distinct bursts; only
+   true overlap is rejected (02-02).
+3. Scenario windows: S-A 2021-W01…2023-W52 (156), S-B 2022-W01…2023-W52 (104), S-C
+   2022-W01…2023-W26 (78), cross-checked against `dbt/seeds/season_windows.csv` (02-03).
+4. Four authored per-channel CPM constants are descriptive-only; BP-D-02 names no
+   values (02-03).
+5. `meta` `advent_factor` is 0.5 in S-A and 0.9 in S-B/S-C (SIM-030 / Guide §1.3)
+   (02-03).
+6. Radio's two Advent-anchored bursts are a lead-in plus an in-Advent burst (02-03).
+7. `season_index` takes the five signed weights as an argument (02-04).
+8. `generate_spend` takes the week-index frame as a third argument (AD-020) (02-05).
+9. SIM-073 is evaluated for ISO year 2022 only in S-C; the skipped year is reported
+   by the gate runner (02-06).
+10. `truth.json` floats are pre-normalised with `%.10g` before `json.dump` (sorted
+    keys, LF, atomic write) — closes 02-RESEARCH.md Assumption A3 (02-08).
+11. SPEC-01 §8's grid note resolves INGEST-CONFLICTS WARNING 4; `response_curve_at`
+    is a function of a caller-supplied grid (02-08).
+
+**Promo/burst authoring rationale.** `scripts/author_scenario_schedules.py` (02-03)
+is a dev-only aid (A-13: outside `src/`, never imported from `src/ambo/`). It reads
+`dbt/seeds/season_windows.csv` and prints a YAML fragment to stdout. Anchored
+placements come from window boundaries; unanchored placements use a fixed spread
+rule, never `random`. The fragment is frozen into `config/scenarios/*.yaml` (D-02);
+the simulator never recomputes the schedule at runtime.
+
+**Governance.** ADR-007 adds `hypothesis>=6.165.1` (resolved `6.167.1` on this
+machine) to `[dependency-groups] dev` only. The automated `SUS` verdict was
+inherited from m0's 2026-08-05 human `"approved"` under lock 2A; `uv.lock` on this
+lineage was regenerated (1A), not copied from m0.
+
+**Gate evidence.** `make validate-sim` before and after
+`rm -rf data/synthetic/s_{a,b,c} && git checkout -- data/synthetic/` (identical):
+
+```text
+GATE     STATUS     EVIDENCE
+SIM-070  PASS       committed=016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1 regenerated=016aad7d5e8c3c629fd23cc99abb2f8d655f50173ab9f2e757401e4c30cccfd1
+SIM-071  PASS       s_a=0.0, s_b=0.0, s_c=0.0 (max=0.0, bound<=1e-6)
+SIM-072  PASS       s_a: {'min_revenue_pre_clip': 64094.84287664617, 'noise_variance_share': 0.03113949883141409, 'media_share_2021': 0.2730426362263659, 'media_share_2022': 0.26633491313334523, 'media_share_2023': 0.25753447781321676}; s_b: {'min_revenue_pre_clip': 70242.79391112749, 'noise_variance_share': 0.026355908286650902, 'media_share_2022': 0.27442453188862836, 'media_share_2023': 0.26245675624176334}; s_c: {'min_revenue_pre_clip': 62307.90535157751, 'noise_variance_share': 0.0395934680933759, 'media_share_2022': 0.24729651190664934, 'media_share_2023': 0.255949800658689}
+SIM-073  PASS       s_a 2021: peak_week=50 advent_flag=True; s_a 2022: peak_week=51 advent_flag=True; s_a 2023: peak_week=50 advent_flag=True; s_b 2022: peak_week=50 advent_flag=True; s_b 2023: peak_week=50 advent_flag=True; s_c 2022: peak_week=50 advent_flag=True; s_c 2023: skipped (Advent window not fully covered)
+SIM-074  PASS       constant_spend_residual=9.094947017729282e-13 (bound<=1e-9), impulse_residual=2.7755575615628914e-17 (bound<=1e-9), hill_at_K_residual=0.0 (bound<=1e-12)
+SIM-075  PASS       all three truth.json files re-validated and match ScenarioConfig
+BP-G-02  DELEGATED  scenario YAML == SPEC-01 section 4 table (SIM-002 single home); checked by the selector `tests/unit/test_scenario_config.py -k "spec_parameter_table or rule_level"`, run by make validate-sim in the same invocation so the target cannot go green without it.
+```
+
+**Elapsed effort against the 1.5 d Charter section 5 budget.** This lineage executed
+Phase 2 by copying verified m0 artifacts (2A) rather than re-authoring. Wall time
+across 02-01…02-10 is on the order of **~180 min** (~3.0 h, ~0.38 d) — under the
+720 min (1.5 d) budget and far from the 1440 min 2× tripwire. The original m0
+authorship tally was 348 min. **Verdict: the tripwire is not tripped; no ADR.**
