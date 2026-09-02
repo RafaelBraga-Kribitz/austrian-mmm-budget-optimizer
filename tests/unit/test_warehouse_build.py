@@ -348,3 +348,184 @@ def test_weekly_spine_is_gapless_and_ascending(repo_root: Path) -> None:
                 )
     finally:
         con.close()
+
+
+# --- dim_layer.channels_present (D-13/D-14, plan 03-05) ----------------------------
+#
+# Two Python-side checks, independent of the dbt tests, pinning the Phase 4
+# interface: channels_present is taxonomy-ordered against config/settings.yaml
+# (never a hard-coded literal here), and the absent-versus-ineffective distinction
+# is asserted by name on the one layer where it matters most (P-SC's display_video
+# vs. `other`). A third, fixture-driven test proves the derivation responds to
+# source-row presence rather than being a constant.
+
+
+def test_channels_present_is_taxonomy_ordered_and_source_derived(repo_root: Path) -> None:
+    """For each Layer P row, channels_present splits into exactly six tokens that
+    are a subsequence of load_settings().channels in the same relative order -- the
+    ordering authority is config/settings.yaml, never a literal in this test, so a
+    sanctioned future taxonomy change does not falsely fail this test while a
+    reordering still does -- and `other` is never among them (BP-D-04)."""
+    result = _run_dbt(repo_root)
+    tail = "\n".join(result.stdout.splitlines()[-40:])
+    assert result.returncode == 0, (
+        f"dbt build failed before the channels_present assertion could run. Last 40 "
+        f"lines of stdout:\n{tail}"
+    )
+
+    settings_channels = load_settings().channels
+
+    warehouse_path = load_settings().paths.warehouse
+    con = duckdb.connect(str(warehouse_path), read_only=True)
+    try:
+        rows = con.execute(
+            "select layer, channels_present from dim_layer order by layer"
+        ).fetchall()
+    finally:
+        con.close()
+
+    assert len(rows) == 3, f"expected 3 dim_layer rows, got {len(rows)}: {rows}"
+
+    for layer, channels_present in rows:
+        tokens = channels_present.split(",")
+        assert len(tokens) == 6, (
+            f"layer={layer!r}: expected 6 tokens in channels_present, got "
+            f"{len(tokens)}: {channels_present!r}"
+        )
+        assert "other" not in tokens, (
+            f"layer={layer!r}: 'other' present in channels_present "
+            f"{channels_present!r} -- 'other' is Layer-R-only (BP-D-04)"
+        )
+        last_position = -1
+        for token in tokens:
+            assert token in settings_channels, (
+                f"layer={layer!r}: token {token!r} not present in "
+                f"load_settings().channels {settings_channels!r}"
+            )
+            position = settings_channels.index(token)
+            assert position > last_position, (
+                f"layer={layer!r}: channels_present {channels_present!r} is not a "
+                f"taxonomy-ordered subsequence of load_settings().channels "
+                f"{settings_channels!r}"
+            )
+            last_position = position
+
+
+def test_absent_channel_and_ineffective_channel_are_distinguishable(
+    repo_root: Path,
+) -> None:
+    """P-SC: display_video is present with real spend (present-but-ineffective --
+    zero true effect by VR-304 design) while `other` is absent with spend_other
+    exactly 0.0 on every row (structurally absent). These two states must never be
+    conflated -- MD-040's channel-agnostic priors would otherwise fit a coefficient
+    for a channel with no data at all."""
+    result = _run_dbt(repo_root)
+    tail = "\n".join(result.stdout.splitlines()[-40:])
+    assert result.returncode == 0, (
+        f"dbt build failed before the distinguishability assertion could run. Last "
+        f"40 lines of stdout:\n{tail}"
+    )
+
+    warehouse_path = load_settings().paths.warehouse
+    con = duckdb.connect(str(warehouse_path), read_only=True)
+    try:
+        channels_present = con.execute(
+            "select channels_present from dim_layer where layer = 'P-SC'"
+        ).fetchone()[0]
+        display_video_total, other_total, other_nonzero_count, row_count = con.execute(
+            """
+            select
+                sum(spend_display_video),
+                sum(spend_other),
+                count(*) filter (where spend_other <> 0.0),
+                count(*)
+            from fct_mmm_input
+            where layer = 'P-SC'
+            """
+        ).fetchone()
+    finally:
+        con.close()
+
+    assert row_count == 78, f"expected 78 P-SC rows, got {row_count}"
+
+    tokens = channels_present.split(",")
+    assert "display_video" in tokens, (
+        f"'display_video' not listed in P-SC's channels_present "
+        f"{channels_present!r} -- present-but-ineffective and structurally-absent "
+        "must never be conflated"
+    )
+    assert display_video_total > 0, (
+        f"P-SC spend_display_video total is {display_video_total}, expected > 0 -- "
+        "display_video is present-but-ineffective (VR-304: real spend, zero true "
+        "effect by design), not structurally absent; this total must never be "
+        "conflated with an absent channel's zero"
+    )
+
+    assert "other" not in tokens, (
+        f"'other' listed in P-SC's channels_present {channels_present!r} -- 'other' "
+        "is structurally absent for every Layer P layer (BP-D-04) and must never "
+        "be conflated with a present-but-ineffective channel"
+    )
+    assert other_total == 0.0 and other_nonzero_count == 0, (
+        f"P-SC spend_other total is {other_total} with {other_nonzero_count} "
+        f"nonzero row(s) out of {row_count} -- 'other' is structurally absent and "
+        "must be exactly 0.0 on every row, never conflated with a "
+        "present-but-ineffective channel's real spend"
+    )
+
+
+def test_channels_present_responds_to_source_row_removal(
+    repo_root: Path, tmp_path: Path, synthetic_tree_copy: Path
+) -> None:
+    """Deletes every radio row from the tmp-copied s_a/media_weekly.csv, builds
+    against the poisoned tree, and asserts dim_layer's P-SA row lists five channels
+    without radio and spend_radio is 0.0 on every P-SA fct_mmm_input row --  proving
+    the derivation responds to source-row presence rather than being a constant
+    (D-13)."""
+    env = _dbt_env(tmp_path)
+
+    media_csv = synthetic_tree_copy / "s_a" / "media_weekly.csv"
+    lines = media_csv.read_text(encoding="utf-8").splitlines()
+    header, data_lines = lines[0], lines[1:]
+    filtered = [line for line in data_lines if ",radio," not in line]
+    assert len(filtered) < len(data_lines), (
+        f"{media_csv} had no radio rows to remove -- the synthetic_tree_copy "
+        "fixture itself is broken."
+    )
+    media_csv.write_text("\n".join([header, *filtered]) + "\n", encoding="utf-8", newline="\n")
+
+    result = _run_dbt_on_tree(repo_root, synthetic_tree_copy, env)
+    combined = result.stdout + result.stderr
+    tail = "\n".join(combined.splitlines()[-40:])
+    assert result.returncode == 0, (
+        "radio-removed tree build failed unexpectedly -- no grain constraint "
+        f"depends on radio's presence, so this build should stay green. Last 40 "
+        f"lines of output:\n{tail}"
+    )
+
+    tmp_warehouse = Path(env["AMBO_TEST_WAREHOUSE"])
+    con = duckdb.connect(str(tmp_warehouse), read_only=True)
+    try:
+        channels_present = con.execute(
+            "select channels_present from dim_layer where layer = 'P-SA'"
+        ).fetchone()[0]
+        nonzero_radio_count = con.execute(
+            "select count(*) from fct_mmm_input where layer = 'P-SA' and spend_radio <> 0.0"
+        ).fetchone()[0]
+    finally:
+        con.close()
+
+    tokens = channels_present.split(",")
+    assert len(tokens) == 5, (
+        f"expected 5 channels in P-SA's channels_present after removing every "
+        f"radio source row, got {len(tokens)}: {channels_present!r}"
+    )
+    assert "radio" not in tokens, (
+        f"'radio' still listed in P-SA's channels_present {channels_present!r} "
+        "after every radio source row was removed -- channels_present is not "
+        "responding to source-row presence"
+    )
+    assert nonzero_radio_count == 0, (
+        f"{nonzero_radio_count} P-SA row(s) have nonzero spend_radio after every "
+        "radio source row was removed from the source tree"
+    )
