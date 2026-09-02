@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-09-02T14:40:00Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-09-02T15:00:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "03-03 staging layer + poisoned-fixture proof complete"
+last_activity_desc: "03-04 fct_mmm_input contract complete"
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 28
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 3 of 9 (Warehouse)
-Plan: 03-03 complete; next 03-04
+Plan: 03-04 complete; next 03-05
 Status: executing
-Last activity: 2026-09-02 — staging models, AD-043, poisoned-fixture grain proof
+Last activity: 2026-09-02 — fct_mmm_input enforced contract, AD-040/041/042
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [███░░░░░░░] 33% (3/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [████░░░░░░] 44% (4/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,7 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
-| 03 | 3/9 | - | - |
+| 03 | 4/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -85,6 +85,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
   AST guard (D-09) converts AD-030 into a standing check.
 - [2026-09-02, 03-03]: staging layer applies BP-D-03 renames; AD-043 is a singular
   information_schema test; poisoned fixture proves duplicate grain keys fail dbt build.
+- [2026-09-02, 03-04]: `fct_mmm_input` is the enforced 17-column model-input contract;
+  AD-040 seed-derived spine, AD-041 ranges, AD-042 three-layer reconciliation.
 
 ### Pending Todos
 
@@ -138,9 +140,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T14:40:00Z
-Stopped at: Completed 03-03-PLAN.md
-Resume file: .planning/phases/03-warehouse/03-04-PLAN.md
+Last session: 2026-09-02T15:00:00Z
+Stopped at: Completed 03-04-PLAN.md
+Resume file: .planning/phases/03-warehouse/03-05-PLAN.md
 
-Next: execute **03-04** (`fct_mmm_input` contract), copying from verified
+Next: execute **03-05** (`dim_layer` + `channels_present`), copying from verified
 `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.

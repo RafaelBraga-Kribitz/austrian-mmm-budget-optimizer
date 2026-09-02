@@ -216,7 +216,7 @@ rather than a pile of CSVs it could quietly reshape.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: 3/9 plans executed
+**Plans**: 4/9 plans executed
 
 Plans:
 **Wave 1**
@@ -230,7 +230,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
+- [x] 03-04-PLAN.md — `fct_mmm_input` with its enforced contract, AD-040 seed-derived spine, AD-041 ranges, AD-042 reconciliation across all three Layer P layers (T-203 core)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
