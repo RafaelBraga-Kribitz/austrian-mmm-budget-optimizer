@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: Warehouse
+current_phase: 4
+current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-09-02T16:05:00Z"
+stopped_at: Completed 03-09-PLAN.md
+last_updated: "2026-09-02T16:20:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "03-08 export_marts.py + committed mmm_input_weekly.csv"
+last_activity_desc: "Phase 3 warehouse closed; Task 3 CI deferred (D-19)"
 progress:
   total_phases: 9
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 28
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 3 — Warehouse (P2 / M1→M2 seam)
+**Current focus:** Phase 4 — MMM on S-A (P3 / M2). Not present on `m0-bootstrap`.
 
 ## Current Position
 
-Phase: 3 of 9 (Warehouse)
-Plan: 03-08 complete; next 03-09
+Phase: 4 of 9 (MMM on S-A)
+Plan: Phase 3 complete; Phase 4 not yet planned on this lineage
 Status: executing
-Last activity: 2026-09-02 — export_marts.py + AD-050 committed CSV
+Last activity: 2026-09-02 — warehouse closed (9/9); Task 3 CI deferred D-19
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [████████░░] 89% (8/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 27
+- Total plans completed: 28
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,7 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
-| 03 | 8/9 | - | - |
+| 03 | 9/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -95,6 +95,9 @@ unratified and are candidates for ADR-001+ as they are exercised.
   derived from mart YAML; collect-all-raise-once `DataContractError`.
 - [2026-09-02, 03-08]: `exports/mmm_input_weekly.csv` is registry-written, byte-stable,
   and byte-identical with m0 after local `make export`.
+- [2026-09-02, 03-09]: CI job 3 is a two-leg matrix with export drift gate; job 2
+  builds the warehouse before pytest; ruff format scoped to Python; R-14 added.
+  Task 3 live CI confirmation deferred (D-19).
 
 ### Pending Todos
 
@@ -148,10 +151,10 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T16:05:00Z
-Stopped at: Completed 03-08-PLAN.md
-Resume file: .planning/phases/03-warehouse/03-09-PLAN.md
+Last session: 2026-09-02T16:20:00Z
+Stopped at: Completed 03-09-PLAN.md (Phase 3 warehouse closed; Task 3 CI D-19)
+Resume file: none on m0-bootstrap — Phase 4 plans do not exist there
 
-Next: execute **03-09** (CI warehouse-before-pytest, ruff format scoped to Python,
-M2 BUILD_LOG close), copying from verified `m0-bootstrap` (2A). Do not copy m0
-`uv.lock`.
+Next: plan **Phase 4 (MMM on S-A)** from Charter/SPEC-04, or fill the drop wait
+with intake T-501…T-506 / decide T-701…T-704 / report T-801/T-802. Never invent
+Layer R (A-5). Do not copy m0 `uv.lock`.

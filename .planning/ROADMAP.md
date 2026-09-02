@@ -33,7 +33,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 
 - [x] **Phase 1: Repository Foundation** - Git history, pinned toolchain, six-job CI, and governance scaffolding on an empty-but-honest codebase (P0 / M0)
 - [x] **Phase 2: Ground-Truth Simulator** - Three scenario datasets with disclosed truth files, deterministic to the byte (P1 / M1)
-- [ ] **Phase 3: Warehouse** - DuckDB + dbt marts; `fct_mmm_input` becomes the model's only input contract (P2 / M1→M2 seam)
+- [x] **Phase 3: Warehouse** - DuckDB + dbt marts; `fct_mmm_input` becomes the model's only input contract (P2 / M1→M2 seam)
 - [ ] **Phase 4: MMM on S-A** - Raw-PyMC model fitted on the clean scenario with clean diagnostics (P3 / M2)
 - [ ] **Phase 5: Recovery Suite** - The credibility engine; passing it unlocks all Layer R work by git ancestry (P4 / M3)
 - [ ] **Phase 6: Agency Intake** - Permission gate, anonymized real data in the repo, priors frozen before any fit (P5 / M4)
@@ -218,7 +218,7 @@ own 2x trip point and its own standing-rule-5 ADR obligation; measured effort is
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: 8/9 plans executed
+**Plans**: 9/9 plans executed
 
 Plans:
 **Wave 1**
@@ -252,7 +252,7 @@ Plans:
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
-- [ ] 03-09-PLAN.md — CI job 3 Windows matrix leg and export drift gate, stale-document corrections, M2 build-log close (D-22, D-02)
+- [x] 03-09-PLAN.md — CI job 3 Windows matrix leg and export drift gate, stale-document corrections, M2 build-log close (D-22, D-02)
 
 **WBS tasks**: T-201…T-205
 **Quality gates**: G-DATA-W, G-ARCH (model code demonstrably reads only the mart)
