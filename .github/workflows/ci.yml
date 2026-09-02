@@ -53,6 +53,15 @@ jobs:
   # 2. test -- pytest incl. the CI-only smoke fit, matrixed ubuntu/windows (D-21).
   #    The job NAME stays `test`, so this produces two check runs while remaining
   #    one of EB-060's six jobs -- a matrix leg is not a seventh job.
+  #    Builds the warehouse once (`make transform`) before either pytest
+  #    invocation: Phase 3 added tests that read the mart through `db.py`
+  #    (tests/unit/test_db.py, tests/unit/test_export_marts.py), and a fresh CI
+  #    checkout has no data/warehouse/ambo.duckdb -- unlike a dev machine, where
+  #    the file is typically already on disk from an earlier manual build. One
+  #    build covers both the plain run and the SMOKE=1 run below: neither test
+  #    invocation writes to the warehouse (db.py's connect() defaults
+  #    read_only=True), so there is nothing for the second run to pick up that
+  #    the first didn't already leave in place.
   # ---------------------------------------------------------------------------
   test:
     name: test
@@ -86,6 +95,10 @@ jobs:
           path: ~/.pytensor
           key: pytensor-${{ runner.os }}-${{ hashFiles('uv.lock') }}
       - run: uv sync
+      # Build the warehouse before either pytest invocation -- see the job
+      # header comment. Same `make transform` recipe job 3 (`dbt`) already
+      # proves green on both operating systems.
+      - run: make transform
       - name: Run tests
         run: make test
       # EB-060: the smoke fit (@pytest.mark.smoke) always runs in CI, even though
