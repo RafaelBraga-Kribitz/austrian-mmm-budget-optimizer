@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 01-09-PLAN.md
-last_updated: "2026-09-02T11:15:00Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-02T11:25:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "01-09 complete; M0 CI green; R-13 closed"
+last_activity_desc: "02-01 complete; hypothesis==6.167.1 in dev group"
 progress:
   total_phases: 9
   completed_phases: 1
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 19
+  completed_plans: 10
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 2 of 9 (Ground-Truth Simulator)
-Plan: ready to execute 02-01
-Status: Phase 1 / M0 complete
-Last activity: 2026-09-02 — six-job CI green on PR #11; R-13 closed
+Plan: ready to execute 02-02
+Status: Phase 2 executing (02-01 complete)
+Last activity: 2026-09-02 — hypothesis==6.167.1 installed; ADR-007 back-filled
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 not started on this lineage.
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [█·········] 10% (1/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -47,6 +47,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 not start
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
+| 02 | 1/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -127,10 +128,11 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T11:15:00Z
-Stopped at: Completed 01-09-PLAN.md (M0)
-Resume file: .planning/phases/02-ground-truth-simulator/02-01-PLAN.md
+Last session: 2026-09-02T11:25:00Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-ground-truth-simulator/02-02-PLAN.md
 
-Next: execute **02-01** (ADR-007 + hypothesis dev dependency), copying from
-verified `m0-bootstrap` (2A). Human legitimacy for hypothesis already recorded on
-m0 (`a0330a5`); do not re-open 01-02 lockfile 1A.
+Next: execute **02-02** (`SimulationError`, `ScenarioConfig`), copying from
+verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock` (it contains later
+Phase 2/3 packages). Hypothesis Task 2 approval is inherited; do not
+auto-approve future SUS packages.
