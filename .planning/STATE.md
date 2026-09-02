@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: Warehouse
 status: executing
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-09-02T15:45:00Z"
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-09-02T16:05:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "03-07 ambo.common.db AD-030 data doorway complete"
+last_activity_desc: "03-08 export_marts.py + committed mmm_input_weekly.csv"
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 28
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 3 of 9 (Warehouse)
-Plan: 03-07 complete; next 03-08
+Plan: 03-08 complete; next 03-09
 Status: executing
-Last activity: 2026-09-02 — `ambo.common.db` read-only accessors (AD-030)
+Last activity: 2026-09-02 — export_marts.py + AD-050 committed CSV
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [███████░░░] 78% (7/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [████████░░] 89% (8/9).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -48,7 +48,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
-| 03 | 7/9 | - | - |
+| 03 | 8/9 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -93,6 +93,8 @@ unratified and are candidates for ADR-001+ as they are exercised.
   AD-044 dormant; `layer_r_present` branch executed once against a fake fixture (D-20).
 - [2026-09-02, 03-07]: `ambo.common.db` is the only data doorway; contract columns
   derived from mart YAML; collect-all-raise-once `DataContractError`.
+- [2026-09-02, 03-08]: `exports/mmm_input_weekly.csv` is registry-written, byte-stable,
+  and byte-identical with m0 after local `make export`.
 
 ### Pending Todos
 
@@ -146,9 +148,10 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T15:45:00Z
-Stopped at: Completed 03-07-PLAN.md
-Resume file: .planning/phases/03-warehouse/03-08-PLAN.md
+Last session: 2026-09-02T16:05:00Z
+Stopped at: Completed 03-08-PLAN.md
+Resume file: .planning/phases/03-warehouse/03-09-PLAN.md
 
-Next: execute **03-08** (`export_marts.py` + AD-050 export), copying from verified
-`m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
+Next: execute **03-09** (CI warehouse-before-pytest, ruff format scoped to Python,
+M2 BUILD_LOG close), copying from verified `m0-bootstrap` (2A). Do not copy m0
+`uv.lock`.

@@ -216,7 +216,7 @@ rather than a pile of CSVs it could quietly reshape.
   3. AD-040…043 dbt tests pass, including the AD-042 reconciliation: Layer P-SA total revenue in `fct_mmm_input` equals the simulator CSV sum within 1e-6.
   4. `exports/mmm_input_weekly.csv` is contract-tested, and duplicate grain keys FAIL rather than being silently deduplicated.
 
-**Plans**: 7/9 plans executed
+**Plans**: 8/9 plans executed
 
 Plans:
 **Wave 1**
@@ -246,7 +246,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 03-08-PLAN.md — `scripts/export_marts.py` registry writer, the committed `exports/mmm_input_weekly.csv`, and its AD-050 contract test (T-205)
+- [x] 03-08-PLAN.md — `scripts/export_marts.py` registry writer, the committed `exports/mmm_input_weekly.csv`, and its AD-050 contract test (T-205)
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
