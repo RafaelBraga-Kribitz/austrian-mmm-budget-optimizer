@@ -32,7 +32,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Repository Foundation** - Git history, pinned toolchain, six-job CI, and governance scaffolding on an empty-but-honest codebase (P0 / M0)
-- [ ] **Phase 2: Ground-Truth Simulator** - Three scenario datasets with disclosed truth files, deterministic to the byte (P1 / M1) — 02-01…02-08 complete on this lineage
+- [ ] **Phase 2: Ground-Truth Simulator** - Three scenario datasets with disclosed truth files, deterministic to the byte (P1 / M1) — 02-01…02-09 complete on this lineage
 - [ ] **Phase 3: Warehouse** - DuckDB + dbt marts; `fct_mmm_input` becomes the model's only input contract (P2 / M1→M2 seam)
 - [ ] **Phase 4: MMM on S-A** - Raw-PyMC model fitted on the clean scenario with clean diagnostics (P3 / M2)
 - [ ] **Phase 5: Recovery Suite** - The credibility engine; passing it unlocks all Layer R work by git ancestry (P4 / M3)
@@ -169,7 +169,7 @@ Plans:
 
 **Wave 8** *(blocked on Wave 7)*
 
-- [ ] 02-09-PLAN.md — CLI, gate runner, real `make simulate`/`validate-sim`, SIM-070 (T-108) (wave 8)
+- [x] 02-09-PLAN.md — CLI, gate runner, real `make simulate`/`validate-sim`, SIM-070 (T-108) (wave 8)
 
 **Wave 9** *(blocked on Wave 8)*
 
@@ -443,7 +443,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
-| 2. Ground-Truth Simulator | M1 | 8/10 | In Progress | - |
+| 2. Ground-Truth Simulator | M1 | 9/10 | In Progress | - |
 | 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
 | 4. MMM on S-A | M2 | 0/TBD | Not started | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |

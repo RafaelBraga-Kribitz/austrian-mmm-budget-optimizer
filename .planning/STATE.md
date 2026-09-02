@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Ground-Truth Simulator
 status: executing
-stopped_at: Completed 02-08-PLAN.md
-last_updated: "2026-09-02T13:20:00Z"
+stopped_at: Completed 02-09-PLAN.md
+last_updated: "2026-09-02T13:35:00Z"
 last_activity: 2026-09-02
-last_activity_desc: "02-08 complete; TruthFile + byte-stable JSON"
+last_activity_desc: "02-09 complete; make simulate CLI"
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 2 of 9 (Ground-Truth Simulator)
-Plan: ready to execute 02-09
-Status: Phase 2 executing (02-08 complete)
-Last activity: 2026-09-02 — TruthFile + SIM-075 tests
+Plan: ready to execute 02-10
+Status: Phase 2 executing (02-09 complete)
+Last activity: 2026-09-02 — simulate CLI + SIM-070 tests
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [████████··] 80% (8/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [█████████·] 90% (9/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -47,7 +47,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 9/9 | - | - |
-| 02 | 8/10 | - | - |
+| 02 | 9/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -128,9 +128,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T13:20:00Z
-Stopped at: Completed 02-08-PLAN.md
-Resume file: .planning/phases/02-ground-truth-simulator/02-09-PLAN.md
+Last session: 2026-09-02T13:35:00Z
+Stopped at: Completed 02-09-PLAN.md
+Resume file: .planning/phases/02-ground-truth-simulator/02-10-PLAN.md
 
-Next: execute **02-09** (CLI, `make simulate`/`validate-sim`, SIM-070),
+Next: execute **02-10** (commit synthetic artifacts, BUILD_LOG M1, sign-off),
 copying from verified `m0-bootstrap` (2A). Do not copy m0 `uv.lock`.
