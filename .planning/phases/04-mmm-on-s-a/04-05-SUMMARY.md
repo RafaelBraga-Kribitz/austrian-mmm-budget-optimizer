@@ -19,7 +19,7 @@ status: complete
 2. **Task 1: save/load + tests + contract** — `0c2c5b4` (feat)
 3. **NetCDF engine + basename guard** — `603eb5e` (fix)
 4. **mypy InferenceData access + extra tests** — `7c247e4` (fix)
-5. **BUILD_LOG / ROADMAP / STATE** — (this commit)
+5. **BUILD_LOG / ROADMAP / STATE** — `1de52bf` (docs)
 
 ## Accomplishments
 
