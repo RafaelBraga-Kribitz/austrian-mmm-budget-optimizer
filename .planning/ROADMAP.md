@@ -356,7 +356,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 05-03-PLAN.md — T-403 holdout VR-401 (wave 3)
+- [x] 05-03-PLAN.md — T-403 holdout VR-401 (wave 3)
 
 **Wave 4** *(blocked on Wave 2)*
 

@@ -37,7 +37,7 @@ created: 2026-09-03
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | T-401 | 05-01 | 1 | REQ-q1-truth-recovery | P1/P2/P3 | Fixture ROAS/HDI/gates match known answers; YAML=§3 | unit | `uv run pytest tests/unit/test_recovery.py -q` | ✅ | ✅ |
 | T-402 | 05-02 | 2 | REQ-q1-truth-recovery | P13 | P-SB/P-SC MD-071/072 green; parquets committed | make | inspect `diag_P-SB.md` `diag_P-SC.md` | ✅ | ✅ |
-| T-403 | 05-03 | 3 | REQ-q1-truth-recovery | P8 | Beat naive MAPE on S-A/S-B; coverage column present | unit+make | holdout tests + CSVs | ⬜ | ⬜ |
+| T-403 | 05-03 | 3 | REQ-q1-truth-recovery | P8 | Beat naive MAPE on S-A/S-B; coverage column present | unit+make | holdout tests + CSVs | ✅ | ✅ |
 | T-404 | 05-04 | 4 | REQ-q1-truth-recovery | P11 | OLS+HC1 vs textbook 1e-8; no statsmodels | unit | `uv run pytest tests/unit/test_baseline_ols.py -q` | ⬜ | ⬜ |
 | T-405 | 05-05 | 5 | REQ-q1-truth-recovery | P12 | mapping doc + confinement guard; correlation reported | unit+art | crosscheck tests | ⬜ | ⬜ |
 | T-406 | 05-06 | 6 | REQ-dl2-recovery-report | P9 | §8 order test; closing ≥500 chars; no sample() | unit | `uv run pytest tests/unit/test_recovery_report.py -q` | ⬜ | ⬜ |
@@ -55,7 +55,7 @@ created: 2026-09-03
 - [x] `check_layer_order.py` / `check_ssot_consistency.py` + CI (Phase 1)
 - [x] `src/ambo/validate/recovery.py` — 05-01
 - [x] P-SB / P-SC posteriors — 05-02
-- [ ] holdout CSVs — 05-03
+- [x] holdout CSVs — 05-03
 - [ ] OLS table — 05-04
 - [ ] crosscheck mapping — 05-05
 - [ ] `RECOVERY_REPORT.md` — 05-06

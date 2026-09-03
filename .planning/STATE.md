@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 5
 current_phase_name: Recovery Suite
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-09-03T11:40:00Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-09-03T12:26:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "05-02 complete; T-402 P-SB/P-SC fits"
+last_activity_desc: "05-03 complete; T-403 holdout VR-401"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 46
-  completed_plans: 38
+  completed_plans: 39
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 5 of 9 (Recovery Suite)
-Plan: 05-03 (T-403 holdout VR-401) next
+Plan: 05-04 (T-404 OLS+HC1) next
 Status: executing
-Last activity: 2026-09-03 — 05-02 complete (T-402)
+Last activity: 2026-09-03 — 05-03 complete (T-403)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [██········] 20% (2/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [███·······] 30% (3/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 39
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -50,7 +50,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
 | 04 | 8/8 | - | - |
-| 05 | 2/10 | - | - |
+| 05 | 3/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -133,9 +133,12 @@ unratified and are candidates for ADR-001+ as they are exercised.
   not a gate widening). Combined three-layer ladder wall ~38.9 min; each fit
   ≤ 35 min. No Layer R.
 
+- [2026-09-03, 05-03]: Holdout VR-401. Train T−13, scale on slice, predict last
+  13 with actual spend. P-SA/P-SB beat naive MAPE. Holdout parquets gitignored.
+
 ### Pending Todos
 
-- Execute 05-03…05-10 (T-403…T-410). Drop-independent. Never invent Layer R.
+- Execute 05-04…05-10 (T-404…T-410). Drop-independent. Never invent Layer R.
 
 ### Blockers/Concerns
 
@@ -185,10 +188,10 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T11:40:00Z
-Stopped at: Completed 05-02-PLAN.md
-Resume file: .planning/phases/05-recovery-suite/05-03-PLAN.md
+Last session: 2026-09-03T12:26:00Z
+Stopped at: Completed 05-03-PLAN.md
+Resume file: .planning/phases/05-recovery-suite/05-04-PLAN.md
 
-Next: execute 05-03 (holdout VR-401). Never invent Layer R (A-5). Do not copy
+Next: execute 05-04 (OLS+HC1). Never invent Layer R (A-5). Do not copy
 m0 `uv.lock`. Do not create priors_real.yaml or PRIOR_ELICITATION.md. Do not
 commit `{layer}__holdout` parquets.

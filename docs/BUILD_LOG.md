@@ -756,3 +756,28 @@ profile all-green), `ppc_P-SB.png`, `ppc_P-SC.png`. Energy PNGs omitted
 coverage. Live CI vs main still D-19.
 
 **Not in this plan.** Holdout variant (05-03). No Layer R.
+
+### 2026-09-03 — T-403 holdout VR-401 (05-03)
+
+`--variant holdout` fits the first T−13 weeks with scale factors on that slice
+(RK-M2-4) and writes `{layer}__holdout` parquet locally (gitignored). 
+`ambo.validate.holdout` predicts the last 13 weeks with actual spend, adstock
+on the full scaled series, trend/Fourier at `t / n_train`, and 90% HDI of the
+posterior predictive (A-7). Naive baseline is `revenue_{t-52}` (T ≥ 65).
+
+All three holdout fits all-green at ADR-011 `target_accept` 0.99:
+
+| Layer | Wall | Train weeks | model MAPE | naive MAPE | 90% coverage | Beat naive |
+|-------|------|-------------|------------|------------|--------------|------------|
+| P-SA | 862 s | 143 | 0.0281 | 0.0390 | 1.000 | yes |
+| P-SB | 667 s | 91 | 0.0334 | 0.0586 | 1.000 | yes |
+| P-SC | 577 s | 65 | 0.0569 | 0.0911 | 0.692 | yes (reported; not gated) |
+
+Committed: `reports/model/holdout_P-SA.csv`, `holdout_P-SB.csv`, `holdout_P-SC.csv`.
+Holdout parquets and `diag_*__holdout*` are gitignored (D-19). No Layer R.
+
+**Verification.** `uv run pytest tests/unit/test_holdout.py -q` green (including
+committed-CSV gate). `make lint && make test` — **401 passed**, 1 deselected
+(smoke), 90% coverage. Live CI vs main still D-19.
+
+**Not in this plan.** OLS+HC1 (05-04).
