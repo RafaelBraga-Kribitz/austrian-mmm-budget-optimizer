@@ -218,6 +218,7 @@ def design_frame(frame: pd.DataFrame, channels: list[str]) -> pd.DataFrame:
     out["t_over_t"] = week_index / float(n_weeks)
     for order in range(FOURIER_ORDER):
         out[f"sin_{order + 1}"] = sin_feat[:, order]
+    for order in range(FOURIER_ORDER):
         out[f"cos_{order + 1}"] = cos_feat[:, order]
     for flag in ("promo_flag", "advent_flag", "jan_dip_flag"):
         if flag not in frame.columns:
