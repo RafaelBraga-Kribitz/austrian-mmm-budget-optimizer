@@ -352,7 +352,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 05-02-PLAN.md — T-402 full P-SB and P-SC fits; `make fit-synthetic` three layers (wave 2)
+- [x] 05-02-PLAN.md — T-402 full P-SB and P-SC fits; `make fit-synthetic` three layers (wave 2)
 
 **Wave 3** *(blocked on Wave 2)*
 

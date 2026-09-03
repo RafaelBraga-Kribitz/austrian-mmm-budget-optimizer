@@ -702,3 +702,57 @@ Phase 5 planning corpus committed (D-01…D-26; 05-01…05-10). T-401 lands
 **Verification.** `uv run pytest tests/unit/test_recovery.py tests/unit/test_repo_layout.py
 tests/unit/test_import_independence.py -q` green. `make lint && make test` — **390 passed**,
 1 deselected (smoke), 91% coverage.
+
+### 2026-09-03 — T-402 P-SB and P-SC full fits (05-02)
+
+`make fit-synthetic` now runs P-SA, P-SB, and P-SC sequentially (D-18; no skip-if-exists).
+Both new layers needed the MD-073 rung-1 ladder and finished all-green at ADR-011
+`target_accept` 0.99. `Settings.sampler` and `priors_synthetic.yaml` are unchanged.
+MD-071 was not loosened.
+
+**P-SB** (778 s wall, START 2026-09-03T10:57:35Z):
+
+| Attempt | Change | target_accept | Divergences | Wall (sample) |
+|---------|--------|---------------|-------------|---------------|
+| 1 | ADR-005 Fourier (standing) | 0.9 | 31 | 167 s |
+| 2 | rung 1 | 0.95 | 4 | 234 s |
+| 3 | ADR-011 | 0.99 | **0** | 352 s |
+
+Committed green attempt: R-hat 1.004, ESS bulk/tail 1385/1407, divergences 0,
+BFMI 0.7484, PPC 95.19%.
+
+**P-SC.** A first CLI run at `target_accept` 0.9 had 66 divergences **and** ESS_tail
+317.5 (R-hat, ESS_bulk, BFMI, PPC green). The old retry predicate required
+`failed == {divergences}`, so the ladder aborted. That ESS_tail failure is a
+companion of the divergences (mixing diagnostic poisoned by divergences), still a
+step-size problem — D-07 interpretation of MD-073 rung 1 / ADR-011, **not** a gate
+widening and **not** a new parameterization. `_rung1_retry_eligible` now accepts
+`failed ⊆ {divergences, ESS_tail}` with divergences present. Unit-tested.
+
+Re-fit after that change (597 s wall, START 2026-09-03T11:26:11Z):
+
+| Attempt | Change | target_accept | Divergences | Wall (sample) |
+|---------|--------|---------------|-------------|---------------|
+| 1 | ADR-005 Fourier (standing) | 0.9 | 66 | 141 s |
+| 2 | rung 1 | 0.95 | 3 | 164 s |
+| 3 | ADR-011 | 0.99 | **0** | 268 s |
+
+Committed green attempt: R-hat 1.003, ESS bulk/tail 2170/1673, divergences 0,
+BFMI 0.7788, PPC 96.15%.
+
+PyTensor: `cxx=/usr/bin/g++`, BLAS not linked, 4 chains in 2 jobs. Each layer is
+under `max_fit_minutes` 35 (P-SB 13.0 min, P-SC 10.0 min). Combined sequential
+wall vs P-SA's 960 s (04-07): 960 + 778 + 597 = **2335 s (~38.9 min)** for three
+full ladders on this 4-core box (BP-D-18 ledger).
+
+Artifacts: `data/posteriors/P-SB.parquet`, `data/posteriors/P-SC.parquet`
+(1000 thinned draws), `reports/model/diag_P-SB.md`, `diag_P-SC.md` (standard
+profile all-green), `ppc_P-SB.png`, `ppc_P-SC.png`. Energy PNGs omitted
+(divergences = 0 on the committed attempts). NetCDF companions gitignored.
+`load_posterior('P-SB')` and `load_posterior('P-SC')` succeed.
+
+**Verification.** `uv run pytest tests/unit/test_fit_cli.py tests/unit/test_repo_layout.py
+-q` green. `make lint && make test` — **393 passed**, 1 deselected (smoke), 91%
+coverage. Live CI vs main still D-19.
+
+**Not in this plan.** Holdout variant (05-03). No Layer R.
