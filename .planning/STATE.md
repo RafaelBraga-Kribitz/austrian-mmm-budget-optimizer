@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 5
 current_phase_name: Recovery Suite
 status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-09-03T12:26:00Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-09-03T12:34:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "05-03 complete; T-403 holdout VR-401"
+last_activity_desc: "05-04 complete; T-404 OLS+HC1"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 46
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 5 of 9 (Recovery Suite)
-Plan: 05-04 (T-404 OLS+HC1) next
+Plan: 05-05 (T-405 pymc-marketing cross-check) next
 Status: executing
-Last activity: 2026-09-03 — 05-03 complete (T-403)
+Last activity: 2026-09-03 — 05-04 complete (T-404)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [███·······] 30% (3/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [████······] 40% (4/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 39
+- Total plans completed: 40
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -50,7 +50,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
 | 04 | 8/8 | - | - |
-| 05 | 3/10 | - | - |
+| 05 | 4/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -136,9 +136,12 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [2026-09-03, 05-03]: Holdout VR-401. Train T−13, scale on slice, predict last
   13 with actual spend. P-SA/P-SB beat naive MAPE. Holdout parquets gitignored.
 
+- [2026-09-03, 05-04]: OLS+HC1 (VR-601) without statsmodels. P-SB search_brand
+  OLS sign disagrees with Bayesian ROAS; pinv for collinear X'X.
+
 ### Pending Todos
 
-- Execute 05-04…05-10 (T-404…T-410). Drop-independent. Never invent Layer R.
+- Execute 05-05…05-10 (T-405…T-410). Drop-independent. Never invent Layer R.
 
 ### Blockers/Concerns
 
@@ -188,10 +191,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T12:26:00Z
-Stopped at: Completed 05-03-PLAN.md
-Resume file: .planning/phases/05-recovery-suite/05-04-PLAN.md
+Last session: 2026-09-03T12:34:00Z
+Stopped at: Completed 05-04-PLAN.md
+Resume file: .planning/phases/05-recovery-suite/05-05-PLAN.md
 
-Next: execute 05-04 (OLS+HC1). Never invent Layer R (A-5). Do not copy
-m0 `uv.lock`. Do not create priors_real.yaml or PRIOR_ELICITATION.md. Do not
-commit `{layer}__holdout` parquets.
+Next: execute 05-05 (pymc-marketing 0.19.4 cross-check). Never invent Layer R.

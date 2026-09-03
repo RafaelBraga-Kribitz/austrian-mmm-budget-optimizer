@@ -781,3 +781,23 @@ committed-CSV gate). `make lint && make test` — **401 passed**, 1 deselected
 (smoke), 90% coverage. Live CI vs main still D-19.
 
 **Not in this plan.** OLS+HC1 (05-04).
+
+### 2026-09-03 — T-404 OLS+HC1 baseline (05-04)
+
+`ambo.validate.baseline_ols`: revenue ~ intercept, t/T, Fourier-4, promo/advent/jan
+flags, and model-side adstock at prior-mode λ (Beta(2,4) mode = 0.25). No Hill.
+HC1 with n/(n−k); (X'X)^+ via `pinv` because the calendar+media design is
+rank-deficient on Layer P — that collinearity is the VR-601 point, not a bug.
+No statsmodels.
+
+`reports/recovery/ols_P-SB.json`: n=104, k=19. Five of six media coefficients
+share the Bayesian median-ROAS sign; `search_brand` OLS coef is −3.69 (HC1 se
+8.89) against Bayesian ROAS +3.23 — brand search as demand, T-7.
+
+Textbook 2-regressor HC1 matches frozen expected values to 1e-8.
+
+**Verification.** `uv run pytest tests/unit/test_baseline_ols.py
+tests/unit/test_repo_layout.py tests/unit/test_import_independence.py -q` green.
+`make lint && make test` — **405 passed**, 1 deselected (smoke), 90% coverage.
+
+**Not in this plan.** pymc-marketing cross-check (05-05).

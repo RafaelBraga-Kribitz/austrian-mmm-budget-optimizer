@@ -774,6 +774,30 @@ outside (0, 1).
 1e-8; HDI miss fails VR-301; YAML cells match SPEC-05 §3; zero-effect MAE is
 `None`; half-life ranking; JSON round-trip; no `simulate.dgp` import.
 
+### src/ambo/validate/baseline_ols.py
+
+**Purpose** VR-601 OLS + HC1 baseline: same controls as the MMM, adstock at
+prior-mode λ, no Hill. numpy/scipy only. Signs ship as they are.
+
+**Public API**
+- `beta_mode(a, b) -> float` — Beta mode when a,b > 1.
+- `ols_hc1(design, y) -> (coef, se)` — HC1 with n/(n−k) finite-sample factor.
+- `prior_mode_lambdas(priors, channels) -> dict`
+- `fit_ols_baseline(...) -> OLSResult`
+- `run_ols(layer, *, frame=None, bayesian_roas=None, output_dir=None) -> Path` —
+  writes `reports/recovery/ols_<layer>.json`.
+- `class OLSResult` — frozen: coef, se_hc1, sign_stable vs Bayesian median ROAS.
+
+**Invariants** Does not import `statsmodels`. Does not import `ambo.simulate.dgp`.
+Does not call `pm.sample`. Adstock uses model `adstock_convolve` (no Hill).
+`ols_hc1` uses `pinv` for (X'X)^+ so a rank-deficient calendar/media design
+(the VR-601 point) still yields a finite table.
+
+**Failure modes** `ValidationError`: n ≤ k; no spend channels.
+
+**Testing** `tests/unit/test_baseline_ols.py` — textbook 2-regressor to 1e-8;
+no statsmodels in src; injected-frame JSON round-trip.
+
 ### src/ambo/validate/holdout.py
 
 **Purpose** VR-401 conditional holdout: MAPE and 90% HDI coverage of the last 13

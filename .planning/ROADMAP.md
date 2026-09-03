@@ -360,7 +360,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 2)*
 
-- [ ] 05-04-PLAN.md — T-404 OLS+HC1 baseline VR-601 (wave 4)
+- [x] 05-04-PLAN.md — T-404 OLS+HC1 baseline VR-601 (wave 4)
 
 **Wave 5** *(blocked on Wave 2)*
 
