@@ -1,6 +1,6 @@
 """The only legal `pm.sample` home (D-11 / MD-050) and the fit CLI.
 
-Implements: MD-050, MD-051, MD-071, MD-072, EB-050
+Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050
 
 Sampler kwargs come from `Settings.sampler`. This module does not restate
 MD-050 literals. `channels_present` is parsed here, not in `mmm.py`.
@@ -19,14 +19,19 @@ import arviz as az
 import pandas as pd
 import pymc as pm
 
-from ambo.common.config import load_settings, repo_root
+from ambo.common.config import SPEC_CHANNEL_ORDER, load_settings, repo_root
 from ambo.common.db import read_dim_layer, read_mmm_input
 from ambo.common.errors import FitError
 from ambo.common.logging import get_logger
 from ambo.model.diagnostics import DiagGates, DiagResult, run_diagnostics, write_diag_report
 from ambo.model.mmm import build_model
 from ambo.model.posterior_io import save_posterior
-from ambo.model.priors import SYNTHETIC_PRIORS_RELATIVE, load_priors
+from ambo.model.priors import (
+    SYNTHETIC_PRIORS_RELATIVE,
+    PriorConfig,
+    TruncGammaParams,
+    load_priors,
+)
 from ambo.model.transforms import ScaleFactors, compute_scale_factors, to_model_scale
 
 LOGGER = get_logger(__name__)
@@ -34,6 +39,16 @@ LOGGER = get_logger(__name__)
 _VARIANT_RE = re.compile(r"^(flat|nopromo|holdout|loco-[a-z][a-z0-9_]*)$")
 # MD-073 rung 1. Not an MD-050 setting. Leaving this rung requires ADR-005.
 MD073_RUNG1_TARGET_ACCEPT = 0.95
+# MD-073 rung 3. YAML on disk stays MD-040 (ADR-009).
+MD073_RUNG3_S = TruncGammaParams(shape=4.0, rate=3.0, lower=0.5, upper=2.5)
+_RUNG1_NOTE = (
+    "MD-073 rung 1 applied: target_accept raised to 0.95 "
+    "(Settings.sampler unchanged; not an MD-050 edit)."
+)
+_RUNG3_NOTE = (
+    "MD-073 rung 3 applied: s_c prior tightened to Gamma(4, 3) trunc [0.5, 2.5] "
+    "via PriorConfig.model_copy (config/priors_synthetic.yaml unchanged; ADR-009)."
+)
 
 
 def sample_model(
@@ -90,10 +105,22 @@ def channels_present_for_layer(layer: str) -> list[str]:
     return tokens
 
 
+def tighten_s_c_prior(priors: PriorConfig) -> PriorConfig:
+    """MD-073 rung 3: Gamma(4, 3) trunc [0.5, 2.5]. YAML on disk is unchanged.
+
+    Implements: MD-073
+    """
+    channels = {
+        name: priors.channels[name].model_copy(update={"s": MD073_RUNG3_S})
+        for name in SPEC_CHANNEL_ORDER
+    }
+    return priors.model_copy(update={"channels": channels})
+
+
 def run_fit(layer: str, *, variant: str | None = None) -> Path:
     """Mart → scale → build → sample → posterior_io → diag report.
 
-    Implements: MD-050, MD-051, MD-071, MD-072, EB-050
+    Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050
     """
     settings = load_settings()
     LOGGER.info(
@@ -108,32 +135,96 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
     priors = load_priors(priors_path)
     scale_factors = compute_scale_factors(frame, channels)
     scaled = to_model_scale(frame, scale_factors)
-    model = build_model(scaled, channels, priors)
-    idata = _draw_posterior(model, sampler, target_accept=sampler.target_accept)
-    dest, result, report = _persist(idata, scale_factors, layer, frame, priors_path, notes=())
-    if result.all_green:
-        LOGGER.info("fit %s all-green; posterior %s", layer, dest)
-        return dest
-    if _only_divergences_failed(result):
-        LOGGER.warning("MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)")
-        # Rebuild: a second pm.sample on the same Model instance fails (logp None).
-        model = build_model(scaled, channels, priors)
-        idata = _draw_posterior(model, sampler, target_accept=MD073_RUNG1_TARGET_ACCEPT)
-        dest, result, report = _persist(
-            idata,
+    return _run_md073_ladder(
+        layer=layer,
+        scaled=scaled,
+        channels=channels,
+        priors=priors,
+        sampler=sampler,
+        scale_factors=scale_factors,
+        frame=frame,
+        priors_path=priors_path,
+    )
+
+
+def _run_md073_ladder(
+    *,
+    layer: str,
+    scaled: pd.DataFrame,
+    channels: list[str],
+    priors: PriorConfig,
+    sampler: Any,
+    scale_factors: ScaleFactors,
+    frame: pd.DataFrame,
+    priors_path: Path,
+) -> Path:
+    """MD-050 sample, then MD-073 rungs 1 and 3 if only divergences fail.
+
+    Rebuild the PyMC model each attempt: a second `pm.sample` on the same
+    instance fails (`logp` is None). Rung 2 is already the `build_model`
+    parameterization (ADR-005).
+    """
+    attempts: tuple[tuple[PriorConfig, float, tuple[str, ...], str | None, str], ...] = (
+        (priors, sampler.target_accept, (), None, "fit %s all-green; posterior %s"),
+        (
+            priors,
+            MD073_RUNG1_TARGET_ACCEPT,
+            (_RUNG1_NOTE,),
+            "MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)",
+            "fit %s all-green after MD-073 rung 1; posterior %s",
+        ),
+        (
+            tighten_s_c_prior(priors),
+            MD073_RUNG1_TARGET_ACCEPT,
+            (_RUNG1_NOTE, _RUNG3_NOTE),
+            "MD-071 red on divergences only; MD-073 rung 3 retry (tightened s_c)",
+            "fit %s all-green after MD-073 rung 3; posterior %s",
+        ),
+    )
+    report = Path()
+    for i, (attempt_priors, target_accept, notes, warning, ok_fmt) in enumerate(attempts):
+        if warning is not None:
+            LOGGER.warning(warning)
+        dest, result, report = _try_fit(
+            scaled,
+            channels,
+            attempt_priors,
+            sampler,
+            target_accept,
             scale_factors,
             layer,
             frame,
             priors_path,
-            notes=(
-                "MD-073 rung 1 applied: target_accept raised to 0.95 "
-                "(Settings.sampler unchanged; not an MD-050 edit).",
-            ),
+            notes=notes,
         )
         if result.all_green:
-            LOGGER.info("fit %s all-green after MD-073 rung 1; posterior %s", layer, dest)
+            LOGGER.info(ok_fmt, layer, dest)
             return dest
+        if i < len(attempts) - 1:
+            _require_divergences_only(result, layer, report)
     raise FitError(f"MD-071/072 red for {layer}; see {report}")
+
+
+def _try_fit(
+    scaled: pd.DataFrame,
+    channels: list[str],
+    priors: PriorConfig,
+    sampler: Any,
+    target_accept: float,
+    scale_factors: ScaleFactors,
+    layer: str,
+    frame: pd.DataFrame,
+    priors_path: Path,
+    notes: tuple[str, ...],
+) -> tuple[Path, DiagResult, Path]:
+    model = build_model(scaled, channels, priors)
+    idata = _draw_posterior(model, sampler, target_accept=target_accept)
+    return _persist(idata, scale_factors, layer, frame, priors_path, notes=notes)
+
+
+def _require_divergences_only(result: DiagResult, layer: str, report: Path) -> None:
+    if not _only_divergences_failed(result):
+        raise FitError(f"MD-071/072 red for {layer}; see {report}")
 
 
 def _draw_posterior(model: pm.Model, sampler: Any, *, target_accept: float) -> az.InferenceData:
