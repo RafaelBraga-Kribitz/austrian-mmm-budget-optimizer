@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 5
 current_phase_name: Recovery Suite
 status: executing
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-09-03T12:34:00Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-09-03T13:15:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "05-04 complete; T-404 OLS+HC1"
+last_activity_desc: "05-05 complete; T-405 pymc-marketing VR-602"
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 46
-  completed_plans: 40
+  completed_plans: 41
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 5 of 9 (Recovery Suite)
-Plan: 05-05 (T-405 pymc-marketing cross-check) next
+Plan: 05-06 (T-406 RECOVERY_REPORT + make recover) next
 Status: executing
-Last activity: 2026-09-03 — 05-04 complete (T-404)
+Last activity: 2026-09-03 — 05-05 complete (T-405)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [████······] 40% (4/10).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [█████·····] 50% (5/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 40
+- Total plans completed: 41
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -50,7 +50,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
 | 04 | 8/8 | - | - |
-| 05 | 4/10 | - | - |
+| 05 | 5/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -139,9 +139,13 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [2026-09-03, 05-04]: OLS+HC1 (VR-601) without statsmodels. P-SB search_brand
   OLS sign disagrees with Bayesian ROAS; pinv for collinear X'X.
 
+- [2026-09-03, 05-05]: pymc-marketing 0.19.4 VR-602 on P-SB. Pearson 0.9648 /
+  Spearman 0.8857. adapt_diag (jitter trips alpha check). 3050 divergences
+  reported, not MD-071. No Layer R.
+
 ### Pending Todos
 
-- Execute 05-05…05-10 (T-405…T-410). Drop-independent. Never invent Layer R.
+- Execute 05-06…05-10 (T-406…T-410). Drop-independent. Never invent Layer R.
 
 ### Blockers/Concerns
 
@@ -191,8 +195,8 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T12:34:00Z
-Stopped at: Completed 05-04-PLAN.md
-Resume file: .planning/phases/05-recovery-suite/05-05-PLAN.md
+Last session: 2026-09-03T13:15:00Z
+Stopped at: Completed 05-05-PLAN.md
+Resume file: .planning/phases/05-recovery-suite/05-06-PLAN.md
 
-Next: execute 05-05 (pymc-marketing 0.19.4 cross-check). Never invent Layer R.
+Next: execute 05-06 (RECOVERY_REPORT.md + make recover). Never invent Layer R.

@@ -801,3 +801,25 @@ tests/unit/test_repo_layout.py tests/unit/test_import_independence.py -q` green.
 `make lint && make test` — **405 passed**, 1 deselected (smoke), 90% coverage.
 
 **Not in this plan.** pymc-marketing cross-check (05-05).
+
+### 2026-09-03 — T-405 pymc-marketing cross-check (05-05)
+
+`ambo.validate.crosscheck`: pymc-marketing **0.19.4** `MMM` on P-SB.
+GeometricAdstock (L=8, normalized) + HillSaturation; FixedScaling from MD-030
+`ScaleFactors`; SPEC-04 Fourier and t/T injected as controls. Sampling is
+`MMM.fit` only (MD-003).
+
+Gate (channel posterior-median ROAS vs raw-PyMC): Pearson **0.9648**, Spearman
+**0.8857**, both ≥ 0.8. Wall **65.1 s**. Their NUTS reported **3050**
+divergences at `target_accept=0.9` / `init=adapt_diag` — not MD-071; raising
+accept to 0.99 did not clear divergences and dropped Spearman below the gate,
+so the 0.9 run is what we ship.
+
+Unmatched (mapping doc): s truncation, yearly-Fourier period 52.18 vs 365.25,
+jitter+adapt_diag.
+
+**Verification.** `uv run pytest tests/unit/test_crosscheck.py
+tests/unit/test_import_independence.py tests/unit/test_repo_layout.py -q` green.
+`make lint && make test` — **416 passed**, 1 deselected (smoke), 90% coverage.
+
+**Not in this plan.** `RECOVERY_REPORT.md` (05-06).

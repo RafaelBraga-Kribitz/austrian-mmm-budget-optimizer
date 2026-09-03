@@ -364,7 +364,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 2)*
 
-- [ ] 05-05-PLAN.md — T-405 pymc-marketing cross-check VR-602 (wave 5)
+- [x] 05-05-PLAN.md — T-405 pymc-marketing cross-check VR-602 (wave 5)
 
 **Wave 6** *(blocked on Waves 1, 3–5)*
 
