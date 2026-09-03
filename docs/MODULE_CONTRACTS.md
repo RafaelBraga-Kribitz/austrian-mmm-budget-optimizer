@@ -589,14 +589,27 @@ literals.
 
 **Public API**
 - `sample_model(model, *, draws, tune, chains, target_accept, random_seed, init, **kwargs) -> az.InferenceData`
+- `add_posterior_predictive(model, idata, *, random_seed) -> az.InferenceData` —
+  `pm.sample_posterior_predictive` (not `pm.sample`) so MD-072 has a PPC group.
+- `channels_present_for_layer(layer) -> list[str]` — parses the comma-joined
+  `dim_layer.channels_present` varchar (taxonomy order). Lives here, not in
+  `mmm.py`.
+- `run_fit(layer, *, variant=None) -> Path` — mart → scale → build → sample →
+  save_posterior → write_diag_report. Logs `max_fit_minutes` first (EB-050).
+  Variants `flat|nopromo|holdout|loco-<ch>` are parsed and then refused as
+  unwired (T-402 / Phase 6).
+- `main(argv=None) -> int` — `python -m ambo.model.fit --layer P-SA`
 
 **Invariants** AST-confined: no other `src/ambo/` module calls `pm.sample` /
 `pymc.sample`. Full-budget fits are a make target, never default `make test`.
+Does not restate MD-050 literals. Does not import `ambo.simulate`.
 
-**Failure modes** Sampler exceptions propagate; later plans wrap them as `FitError`.
+**Failure modes** `FitError`: unknown layer or empty `channels_present`; unknown
+or unwired variant; MD-071/072 red after the fit. Sampler exceptions propagate.
 
-**Testing** `tests/unit/test_smoke_fit.py` (`@pytest.mark.smoke`) plus the
-`pm.sample` confinement AST guard.
+**Testing** `tests/unit/test_smoke_fit.py` (`@pytest.mark.smoke`),
+`tests/unit/test_fit_cli.py` (channel parse, unwired variant, `make -n`), plus
+the `pm.sample` confinement AST guard.
 
 ### src/ambo/model/diagnostics.py
 

@@ -37,7 +37,7 @@ endef
 # EB-050: sampling targets print their expected runtime before anything else, ahead of
 # the stub message — encoded now as variables so later phases fill in the behavior, not
 # the contract. Ceiling is the SPEC-08 section 5 / MD-050 normative figure, 4 cores.
-FIT_SYNTHETIC_RUNTIME := expected runtime: 3 fits (S-A, S-B, S-C), <=35 min/fit at MD-050 on 4 cores (SPEC-08 section 5)
+FIT_SYNTHETIC_RUNTIME := expected runtime: 1 fit (P-SA), <=35 min/fit at MD-050 on 4 cores (Settings.max_fit_minutes; S-B/S-C are T-402)
 FIT_REAL_RUNTIME      := expected runtime: 1 fit (Layer R, frozen priors), <=35 min/fit at MD-050 on 4 cores (SPEC-08 section 5)
 SENSITIVITY_RUNTIME   := expected runtime: VR-501..504 sensitivity refits, <=35 min/fit each at MD-050 on 4 cores (SPEC-08 section 5)
 
@@ -93,11 +93,12 @@ transform:
 	uv run dbt build --project-dir dbt --profiles-dir dbt
 
 # -----------------------------------------------------------------------------
-# fit-synthetic — stub (Phase 4), sampling target
+# fit-synthetic — P-SA only this phase (D-20 / T-307). S-B/S-C arrive in T-402.
+# Sampling target: print expected runtime first (EB-050), then run NUTS.
 # -----------------------------------------------------------------------------
 fit-synthetic:
 	@echo "$(FIT_SYNTHETIC_RUNTIME)"
-	$(call STUB,4)
+	uv run python -m ambo.model.fit --layer P-SA
 
 # -----------------------------------------------------------------------------
 # fit-real — stub (Phase 7), sampling target
