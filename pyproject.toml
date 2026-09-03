@@ -39,6 +39,15 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ambo"]
 
+# Lock-only compatibility pin (Phase 4 D-02). SPEC-08 §3's declared range remains
+# numpy>=1.26,<3 in [project] dependencies. NumPy 2.4 removed numpy.trapz; NumPy
+# 2.5 removed numpy.row_stack. Capping below 2.4, then upgrading the PyMC
+# cluster (`uv lock --upgrade-package pymc` and siblings), resolved to numpy
+# 2.3.5 + numba 0.65.1 + pymc 5.28.5, which imports. Numba stays transitive.
+# Not a new package and not a SPEC-08 bound widening.
+[tool.uv]
+constraint-dependencies = ["numpy>=1.26,<2.4"]
+
 [tool.ruff]
 line-length = 100
 
