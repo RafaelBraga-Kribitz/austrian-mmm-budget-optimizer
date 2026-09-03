@@ -174,11 +174,21 @@ def test_missing_settings_file_raises_config_error_naming_the_path(
         load_settings()
 
 
-def test_sampler_keys_appear_nowhere_else_in_src_ambo() -> None:
-    """The single-config-home rule (EB-040 / 09_ANTI_PATTERNS A-2), as a test rather
-    than a manual grep. Key names come from `SamplerConfig` itself so this test
-    cannot drift from the config it is protecting."""
-    sampler_keys = list(SamplerConfig.model_fields.keys())
+def test_sampler_md050_literals_are_not_restated_in_src_ambo() -> None:
+    """D-05: forbid restated MD-050 literals assigned as sampling args.
+
+    Attribute access on `SamplerConfig` / parameter names (`draws`, `tune`, …)
+    is allowed. The numeric/string literals themselves live only in
+    `config/settings.yaml` and `common/config.py` defaults/docs.
+    """
+    patterns = [
+        re.compile(r"\bchains\s*=\s*4\b"),
+        re.compile(r"\btune\s*=\s*1000\b"),
+        re.compile(r"\bdraws\s*=\s*1000\b"),
+        re.compile(r"\btarget_accept\s*=\s*0\.9\b"),
+        re.compile(r"\brandom_seed\s*=\s*42\b"),
+        re.compile(r"""\binit\s*=\s*['"]jitter\+adapt_diag['"]"""),
+    ]
     src_root = repo_root() / "src" / "ambo"
     config_module = src_root / "common" / "config.py"
 
@@ -187,10 +197,10 @@ def test_sampler_keys_appear_nowhere_else_in_src_ambo() -> None:
         if py_file == config_module:
             continue
         text = py_file.read_text(encoding="utf-8")
-        for key in sampler_keys:
-            if re.search(rf"\b{re.escape(key)}\b", text):
-                offenders.append(f"{py_file}: {key}")
+        for pattern in patterns:
+            if pattern.search(text):
+                offenders.append(f"{py_file.relative_to(repo_root())}: {pattern.pattern}")
 
-    assert not offenders, "MD-050 sampler key(s) found outside common/config.py: " + ", ".join(
+    assert not offenders, "MD-050 sampling literal(s) restated outside config.py: " + ", ".join(
         offenders
     )

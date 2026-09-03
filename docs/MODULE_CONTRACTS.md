@@ -558,6 +558,46 @@ validation (unknown key, missing channel, non-positive hyperparameters).
 **Testing** `tests/unit/test_priors.py` — load synthetic YAML; seven channels
 value-equal; globals match SPEC-04 §4; extra keys fail; `priors_real.yaml` absent.
 
+### src/ambo/model/mmm.py
+
+**Purpose** The single raw-PyMC model definition (SPEC-04 §2, MD-002). Additive in
+revenue level. Channel list + `PriorConfig` drive media terms; no scenario branches.
+
+**Public API**
+- `FOURIER_PERIOD_WEEKS = 52.18` / `FOURIER_ORDER = 4` — SPEC-04 §2 named constants
+  (D-12), not Settings.
+- `build_model(df, channels, priors) -> pm.Model` — `df` is already scaled.
+  Coords: `channel`, `week`, `fourier`. Free RVs: `alpha`, `tau`, `gamma_sin`,
+  `gamma_cos`, `delta_promo`, `delta_advent`, `delta_jan`, `lam`, `k`, `s`,
+  `beta`, `sigma`. Observed: `y`.
+
+**Invariants** Does not import `ambo.simulate` or `ambo.common.db`. Does not contain
+`P-SA` / `S-A` / `layer` literals. Does not call `pm.sample`. Does not log-transform
+revenue (MD-001).
+
+**Failure modes** `FitError`: empty channel list or frame; missing `revenue` /
+dummy / `spend_<channel>` column; channel absent from `PriorConfig`.
+
+**Testing** `tests/unit/test_mmm.py` — free-RV name set; grep for scenario literals;
+missing spend column; prior-predictive mean in [0.2, 5]× observed mean.
+
+### src/ambo/model/fit.py
+
+**Purpose** The only legal `pm.sample` call site (D-11). Sampler kwargs are passed
+in by the caller from `Settings.sampler` — this file does not restate MD-050
+literals.
+
+**Public API**
+- `sample_model(model, *, draws, tune, chains, target_accept, random_seed, init, **kwargs) -> az.InferenceData`
+
+**Invariants** AST-confined: no other `src/ambo/` module calls `pm.sample` /
+`pymc.sample`. Full-budget fits are a make target, never default `make test`.
+
+**Failure modes** Sampler exceptions propagate; later plans wrap them as `FitError`.
+
+**Testing** `tests/unit/test_smoke_fit.py` (`@pytest.mark.smoke`) plus the
+`pm.sample` confinement AST guard.
+
 ### src/ambo/model/transforms.py
 
 **Purpose** Model-side geometric adstock (normalized finite convolution), Hill

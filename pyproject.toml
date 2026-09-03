@@ -63,7 +63,7 @@ files = ["src/ambo"]
 # ignore_missing_imports is scoped to the untyped third-party packages named in
 # 02_WBS.md T-002, not applied globally — the rest of src/ambo stays fully strict.
 [[tool.mypy.overrides]]
-module = ["pymc.*", "arviz.*", "pytensor.*", "pymc_marketing.*", "duckdb.*", "holidays.*"]
+module = ["pymc", "pymc.*", "arviz", "arviz.*", "pytensor", "pytensor.*", "pymc_marketing", "pymc_marketing.*", "duckdb", "duckdb.*", "holidays", "holidays.*"]
 ignore_missing_imports = true
 
 # `yaml` (PyYAML) ships no py.typed marker and no bundled stubs; it is a pinned
