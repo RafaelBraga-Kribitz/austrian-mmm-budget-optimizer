@@ -798,6 +798,37 @@ Does not call `pm.sample`. Adstock uses model `adstock_convolve` (no Hill).
 **Testing** `tests/unit/test_baseline_ols.py` — textbook 2-regressor to 1e-8;
 no statsmodels in src; injected-frame JSON round-trip.
 
+### src/ambo/validate/crosscheck.py
+
+**Purpose** VR-602 pymc-marketing cross-check on S-B: fit their `MMM` class with
+transforms and priors matched as closely as 0.19.4's API allows; report
+channel-ROAS median correlation vs the raw-PyMC model.
+
+**Public API**
+- `EXPECTED_PYMC_MARKETING_VERSION = "0.19.4"` / `CORRELATION_GATE = 0.8`.
+- `installed_version() -> str` / `require_pinned_version() -> str`.
+- `mapping_table() -> tuple[MappingRow, ...]` — matched and unmatched rows.
+- `design_frame(frame, channels) -> DataFrame` — date, spend, t/T, Fourier-4, flags.
+- `build_crosscheck_mmm(channels, scale_factors, length)` — constructs `MMM`; no sampling.
+- `channel_roas_medians(idata, spend_totals) -> dict` — Σ contribution / Σ spend.
+- `median_correlations(ambo, marketing) -> (pearson, spearman)`.
+- `run_crosscheck(layer, *, frame=None, bayesian_roas=None, idata=None, output_dir=None)
+  -> Path` — writes `crosscheck_<layer>.json` and `crosscheck_mapping.md`. Inject `idata`
+  to skip `MMM.fit`.
+- `class CrosscheckResult` / `class MappingRow` — frozen JSON payload.
+
+**Invariants** `pymc_marketing` is imported only in this module (MD-003). Does not
+call `pm.sample` (their `MMM.fit` may). Does not import `ambo.simulate.dgp`.
+Sampling, when it happens, is MD-050 kwargs through marketing's API. Gate is both
+Pearson and Spearman of per-channel posterior-median ROAS ≥ 0.8 on S-B.
+
+**Failure modes** `ValidationError`: version ≠ 0.19.4; no spend channels; fewer than
+two shared channels; non-finite correlation; missing original-scale contribution.
+
+**Testing** `tests/unit/test_crosscheck.py` — pin; mapping rows; constructed-idata
+ROAS; injected-idata JSON/markdown; `MMM.fit` is the sampler; confinement guard
+in `test_import_independence.py`.
+
 ### src/ambo/validate/holdout.py
 
 **Purpose** VR-401 conditional holdout: MAPE and 90% HDI coverage of the last 13
