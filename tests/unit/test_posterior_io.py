@@ -189,8 +189,24 @@ def test_path_separator_in_name_raises(tmp_path: Path) -> None:
             thin=1,
             directory=tmp_path,
         )
+
+
+def test_thin_less_than_one_raises(tmp_path: Path) -> None:
     with pytest.raises(FitError, match="thin must be"):
         _save(tmp_path, _idata(n_chains=1, n_draws=8), thin=0)
+
+
+def test_missing_posterior_group_raises(tmp_path: Path) -> None:
+    with pytest.raises(FitError, match="no posterior"):
+        save_posterior(
+            az.InferenceData(),
+            _scale_factors(),
+            "P-SA",
+            data_hash=_DATA_HASH,
+            prior_sha256=_PRIOR_SHA,
+            thin=1,
+            directory=tmp_path,
+        )
 
 
 def test_missing_parquet_raises(tmp_path: Path) -> None:

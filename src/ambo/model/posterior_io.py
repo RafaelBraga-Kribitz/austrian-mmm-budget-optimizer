@@ -85,7 +85,10 @@ def save_posterior(
     _validate_artifact_name(name)
     dest = _resolve_parquet_path(name, directory)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    draws = _flatten_posterior(idata.posterior, thin=thin)
+    posterior = getattr(idata, "posterior", None)
+    if posterior is None:
+        raise FitError("InferenceData has no posterior group")
+    draws = _flatten_posterior(posterior, thin=thin)
     payload = _build_metadata(
         sf=sf,
         name=name,
@@ -216,7 +219,7 @@ def _atomic_write_parquet(table: pa.Table, dest: Path) -> None:
 def _try_write_netcdf(idata: az.InferenceData, path: Path) -> None:
     """Local full-idata companion. Default engine is arviz's h5netcdf."""
     try:
-        idata.to_netcdf(path)
+        idata.to_netcdf(os.fspath(path))
     except Exception:
         LOGGER.warning("NetCDF debug write failed for %s", path, exc_info=True)
 
