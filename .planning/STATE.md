@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-current_phase_name: MMM on S-A
-status: executing
-stopped_at: Completed 04-07-PLAN.md
-last_updated: "2026-09-03T10:42:00Z"
+current_phase: 5
+current_phase_name: Recovery Suite
+status: planning
+stopped_at: Completed 04-08-PLAN.md
+last_updated: "2026-09-03T11:00:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-07 complete (P-SA MD-071/072 green)"
+last_activity_desc: "04-08 complete; Phase 4 / M2 model work closed"
 progress:
   total_phases: 9
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 36
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A reviewer can verify from git history alone that the model recovered known truth before it touched real data, and that the priors preceded the results.
-**Current focus:** Phase 4 — MMM on S-A (P3 / M2). Not present on `m0-bootstrap`.
+**Current focus:** Phase 5 — Recovery Suite (P4 / M3). Drop-independent. No Layer R fits.
 
 ## Current Position
 
-Phase: 4 of 9 (MMM on S-A)
-Plan: 04-08 next (T-308)
-Status: executing
-Last activity: 2026-09-03 — 04-07 complete (P-SA MD-071/072 green)
+Phase: 5 of 9 (Recovery Suite)
+Plan: Phase 5 not yet planned
+Status: planning
+Last activity: 2026-09-03 — 04-08 complete; Phase 4 / M2 model work closed
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [█████████·] 88% (7/8).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [··········] 0%.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 35
+- Total plans completed: 36
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,7 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
-| 04 | 7/8 | - | - |
+| 04 | 8/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -120,10 +120,13 @@ unratified and are candidates for ADR-001+ as they are exercised.
   (`target_accept` 0.99). ADR-005 non-centered Fourier; ADR-010 (s=1) superseded.
   `P-SA.parquet` + `diag_P-SA.md` + `ppc_P-SA.png` committed. Wall time of the
   green attempt 443 s (7.4 min), well under 35 min.
+- [2026-09-03, 04-08]: `elicit.py` converters (MD-060) without inventing
+  `PRIOR_ELICITATION.md` or `priors_real.yaml`. Phase 4 closed. Live CI vs
+  main still D-19 — do not invent `"Approved"`.
 
 ### Pending Todos
 
-- T-308 elicit.py + Phase 4 close (04-08)
+- Plan Phase 5 (recovery suite, T-401…) from SPEC-05. Drop-independent.
 
 ### Blockers/Concerns
 
@@ -173,9 +176,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T10:42:00Z
-Stopped at: Completed 04-07-PLAN.md
-Resume file: .planning/phases/04-mmm-on-s-a/04-08-PLAN.md
+Last session: 2026-09-03T11:00:00Z
+Stopped at: Completed 04-08-PLAN.md
+Resume file: .planning/phases/05-recovery-suite/ (not planned yet)
 
-Next: stacked 04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
-Do not create priors_real.yaml or PRIOR_ELICITATION.md.
+Next: plan Phase 5 recovery from SPEC-05. Never invent Layer R (A-5). Do not copy
+m0 `uv.lock`. Do not create priors_real.yaml or PRIOR_ELICITATION.md.

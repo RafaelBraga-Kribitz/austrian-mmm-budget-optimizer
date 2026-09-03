@@ -34,7 +34,7 @@ Layer P, and all reporting infrastructure can be built during the wait.
 - [x] **Phase 1: Repository Foundation** - Git history, pinned toolchain, six-job CI, and governance scaffolding on an empty-but-honest codebase (P0 / M0)
 - [x] **Phase 2: Ground-Truth Simulator** - Three scenario datasets with disclosed truth files, deterministic to the byte (P1 / M1)
 - [x] **Phase 3: Warehouse** - DuckDB + dbt marts; `fct_mmm_input` becomes the model's only input contract (P2 / M1→M2 seam)
-- [ ] **Phase 4: MMM on S-A** - Raw-PyMC model fitted on the clean scenario with clean diagnostics (P3 / M2)
+- [x] **Phase 4: MMM on S-A** - Raw-PyMC model fitted on the clean scenario with clean diagnostics (P3 / M2)
 - [ ] **Phase 5: Recovery Suite** - The credibility engine; passing it unlocks all Layer R work by git ancestry (P4 / M3)
 - [ ] **Phase 6: Agency Intake** - Permission gate, anonymized real data in the repo, priors frozen before any fit (P5 / M4)
 - [ ] **Phase 7: Layer R Fit & Sensitivity** - The real answer with honest uncertainty and the prior-influence artifact (P6 / M5)
@@ -271,7 +271,7 @@ that ADR. It is not an open decision to accept or override at task time.
 recovery failure can be attributed to the science rather than to the machinery.
 **Blueprint phase**: P3
 **Milestone**: M2
-**Effort budget**: 2 d including Phase 3 (>2× ⇒ stop + ADR)
+**Effort budget**: 1 d (D-17; Phase 3 took the other 1 d of M2's 2 d). >2× ⇒ stop + ADR.
 **Drop-blocked**: No
 **Depends on**: Phase 3
 **Requirements**: REQ-q1-truth-recovery (contributing), REQ-q2-real-incremental-roas (contributing — one model definition serves all layers), REQ-dl6-priors-as-deliverable (contributing — `elicit.py` built here at T-308, ahead of its M4 use)
@@ -316,16 +316,13 @@ Plans:
 
 **Wave 8** *(blocked on Wave 7)*
 
-- [ ] 04-08-PLAN.md — T-308 elicit.py converters + Phase 4 / M2 model close (wave 8)
+- [x] 04-08-PLAN.md — T-308 elicit.py converters + Phase 4 / M2 model close (wave 8)
 
 **WBS tasks**: T-301…T-308
 **Quality gates**: G-SCI-2 (sampler health), G-ENG
-**Rollback**: An MD-071 failure triggers the MD-073 reparameterization ladder **in order**, one rung per attempt; leaving rung 1 requires ADR-005. Rung 4 (fixing s = 1) is a model-class change and forces all of Phase 5 to be re-run. Two failed root-cause attempts ⇒ stop and ask the human.
+**Rollback**: An MD-071 failure triggers the MD-073 reparameterization ladder **in order**, one rung per attempt; leaving rung 1 requires ADR-005. ADR-011 extends rung 1 to `target_accept` 0.99. Rung 4 (fixing s = 1) was attempted (ADR-010) and superseded; it would force all of Phase 5 to be re-run. Two failed root-cause attempts ⇒ stop and ask the human.
 
-**W6 runtime ceiling:** closed at ingest (single home: 07_QUALITY_STANDARDS Part A, ≤ 35 min/fit).
-ADR-006 deferred the *published* home to Phase 4; CONTEXT D-01 / plan 04-02 write
-`max_fit_minutes: 35` into `config/settings.yaml`. The paragraph that treated W6 as an
-open Phase-4 research item is stale and is removed at 04-08 close.
+**Plans**: 8/8 plans executed
 
 ---
 
@@ -515,7 +512,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
 | 2. Ground-Truth Simulator | M1 | 10/10 | Complete | 2026-09-02 |
 | 3. Warehouse | M1→M2 | 9/9 | Complete (CI vs main deferred D-19) | 2026-09-02 |
-| 4. MMM on S-A | M2 | 7/8 | Executing 04-08 | - |
+| 4. MMM on S-A | M2 | 8/8 | Complete (CI vs main deferred D-19) | 2026-09-03 |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
 | 6. Agency Intake | M4 | 0/TBD | Not started | - |
 | 7. Layer R Fit & Sensitivity | M5 | 0/TBD | Not started | - |

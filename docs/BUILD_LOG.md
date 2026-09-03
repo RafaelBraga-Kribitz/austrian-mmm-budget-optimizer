@@ -660,3 +660,32 @@ Energy PNG omitted (divergences = 0). NetCDF companion gitignored.
 Live CI vs main still D-19.
 
 **Not in this plan.** `elicit.py` (04-08).
+
+### 2026-09-03 — T-308 elicit.py and Phase 4 / M2 model close (04-08)
+
+`src/ambo/model/elicit.py`: `lambda_from_halflife` / `halflife_from_lambda`
+(`λ = 2**(-1/weeks)`), `beta_params_from_halflife_range`, `gamma_params_from_k_range`,
+`sigma_beta_from_max_effect_share`. Beta/Gamma concentrations are brentq-solved
+so ~90% mass sits in the elicited range, mode at the midpoint. HalfNormal σ is
+the 95th-percentile match to the elicited max-effect share (mean scaled y = 1).
+`docs/PRIOR_ELICITATION.md` and `config/priors_real.yaml` were not created.
+
+**M2 model close (Phase 4, 8/8).** Effort vs D-17's 1 d budget: no shed, no 2×
+ADR. Evidence index:
+
+| Gate | Evidence |
+|------|----------|
+| MD-070 | `tests/unit/test_transform_sanity.py` (04-03) |
+| Smoke | `tests/unit/test_smoke_fit.py` (04-04); live CI vs main still D-19 |
+| MD-071/072 | `reports/model/diag_P-SA.md` all-green (04-07, ADR-011) |
+| Parquet | `data/posteriors/P-SA.parquet` with scale-factor metadata (04-07) |
+| MD-040 | `tests/unit/test_priors.py` channel-agnostic YAML |
+| MD-060 converters | `tests/unit/test_elicit.py` (this plan) |
+
+Live CI against `main` is still D-19-deferred. This close does **not** invent an
+`"Approved"` token. Stale W6 open-item paragraph removed from ROADMAP (ceiling
+lives on `Settings.max_fit_minutes`). ROADMAP Phase 4 effort line set to 1 d.
+
+**Verification.** `uv run pytest tests/unit/test_elicit.py tests/unit/test_repo_layout.py
+-q` green. `make lint && make test` — **382 passed**, 1 deselected (smoke), 90%
+coverage.
