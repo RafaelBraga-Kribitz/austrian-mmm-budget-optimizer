@@ -23,15 +23,17 @@ from ambo.common.config import load_settings, repo_root
 from ambo.common.db import read_dim_layer, read_mmm_input
 from ambo.common.errors import FitError
 from ambo.common.logging import get_logger
-from ambo.model.diagnostics import DiagGates, run_diagnostics, write_diag_report
+from ambo.model.diagnostics import DiagGates, DiagResult, run_diagnostics, write_diag_report
 from ambo.model.mmm import build_model
 from ambo.model.posterior_io import save_posterior
 from ambo.model.priors import SYNTHETIC_PRIORS_RELATIVE, load_priors
-from ambo.model.transforms import compute_scale_factors, to_model_scale
+from ambo.model.transforms import ScaleFactors, compute_scale_factors, to_model_scale
 
 LOGGER = get_logger(__name__)
 
 _VARIANT_RE = re.compile(r"^(flat|nopromo|holdout|loco-[a-z][a-z0-9_]*)$")
+# MD-073 rung 1. Not an MD-050 setting. Leaving this rung requires ADR-005.
+MD073_RUNG1_TARGET_ACCEPT = 0.95
 
 
 def sample_model(
@@ -106,16 +108,52 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
     priors = load_priors(priors_path)
     scale_factors = compute_scale_factors(frame, channels)
     model = build_model(to_model_scale(frame, scale_factors), channels, priors)
+    idata = _draw_posterior(model, sampler, target_accept=sampler.target_accept)
+    dest, result, report = _persist(idata, scale_factors, layer, frame, priors_path, notes=())
+    if result.all_green:
+        LOGGER.info("fit %s all-green; posterior %s", layer, dest)
+        return dest
+    if _only_divergences_failed(result):
+        LOGGER.warning("MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)")
+        idata = _draw_posterior(model, sampler, target_accept=MD073_RUNG1_TARGET_ACCEPT)
+        dest, result, report = _persist(
+            idata,
+            scale_factors,
+            layer,
+            frame,
+            priors_path,
+            notes=(
+                "MD-073 rung 1 applied: target_accept raised to 0.95 "
+                "(Settings.sampler unchanged; not an MD-050 edit).",
+            ),
+        )
+        if result.all_green:
+            LOGGER.info("fit %s all-green after MD-073 rung 1; posterior %s", layer, dest)
+            return dest
+    raise FitError(f"MD-071/072 red for {layer}; see {report}")
+
+
+def _draw_posterior(model: pm.Model, sampler: Any, *, target_accept: float) -> az.InferenceData:
     idata = sample_model(
         model,
         draws=sampler.draws,
         tune=sampler.tune,
         chains=sampler.chains,
-        target_accept=sampler.target_accept,
+        target_accept=target_accept,
         random_seed=sampler.random_seed,
         init=sampler.init,
     )
-    add_posterior_predictive(model, idata, random_seed=sampler.random_seed)
+    return add_posterior_predictive(model, idata, random_seed=sampler.random_seed)
+
+
+def _persist(
+    idata: az.InferenceData,
+    scale_factors: ScaleFactors,
+    layer: str,
+    frame: pd.DataFrame,
+    priors_path: Path,
+    notes: tuple[str, ...],
+) -> tuple[Path, DiagResult, Path]:
     dest = save_posterior(
         idata,
         scale_factors,
@@ -124,11 +162,13 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
         prior_sha256=_sha256_file(priors_path),
     )
     result = run_diagnostics(idata, DiagGates.standard())
-    report = write_diag_report(result, layer, idata=idata)
-    if not result.all_green:
-        raise FitError(f"MD-071/072 red for {layer}; see {report}")
-    LOGGER.info("fit %s all-green; posterior %s", layer, dest)
-    return dest
+    report = write_diag_report(result, layer, idata=idata, notes=notes)
+    return dest, result, report
+
+
+def _only_divergences_failed(result: DiagResult) -> bool:
+    failed = [check.name for check in result.checks if not check.passed]
+    return failed == ["divergences"]
 
 
 def main(argv: list[str] | None = None) -> int:

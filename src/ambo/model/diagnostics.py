@@ -144,6 +144,7 @@ def write_diag_report(
     *,
     idata: az.InferenceData,
     directory: Path | None = None,
+    notes: tuple[str, ...] = (),
 ) -> Path:
     """Write `diag_<layer>.md` plus PPC PNG; energy PNG when divergences > 0.
 
@@ -156,12 +157,15 @@ def write_diag_report(
     out_dir.mkdir(parents=True, exist_ok=True)
     ppc_path = out_dir / f"ppc_{layer}.png"
     _write_ppc_plot(idata, ppc_path)
-    energy_path: Path | None = None
+    energy_path = out_dir / f"energy_{layer}.png"
+    energy_written: Path | None = None
     if res.n_divergences > 0:
-        energy_path = out_dir / f"energy_{layer}.png"
         _write_energy_plot(idata, energy_path)
+        energy_written = energy_path
+    elif energy_path.exists():
+        energy_path.unlink()
     dest = out_dir / f"diag_{layer}.md"
-    _atomic_write_text(_render_markdown(res, layer, ppc_path, energy_path), dest)
+    _atomic_write_text(_render_markdown(res, layer, ppc_path, energy_written, notes), dest)
     LOGGER.info("Wrote diag report %s (all_green=%s)", dest, res.all_green)
     return dest
 
@@ -295,7 +299,13 @@ def _write_energy_plot(idata: az.InferenceData, path: Path) -> None:
     plt.close()
 
 
-def _render_markdown(res: DiagResult, layer: str, ppc_path: Path, energy_path: Path | None) -> str:
+def _render_markdown(
+    res: DiagResult,
+    layer: str,
+    ppc_path: Path,
+    energy_path: Path | None,
+    notes: tuple[str, ...] = (),
+) -> str:
     rows = [
         "| Gate | Threshold | Statistic | Result |",
         "|------|-----------|-----------|--------|",
@@ -310,10 +320,15 @@ def _render_markdown(res: DiagResult, layer: str, ppc_path: Path, energy_path: P
             f"\nEnergy plot (divergences={res.n_divergences}): `{energy_path.name}`.\n"
             "MD-074 funnel review of pair plots is a human note, not auto-generated.\n"
         )
+    notes_block = ""
+    if notes:
+        notes_block = "\n" + "\n".join(f"- {item}" for item in notes) + "\n"
     verdict = "all-green" if res.all_green else "RED"
     return (
         f"# Diagnostics — {layer}\n\n"
-        f"Profile: `{res.profile}` ({verdict}).\n\n"
+        f"Profile: `{res.profile}` ({verdict}).\n"
+        + notes_block
+        + "\n"
         + "\n".join(rows)
         + f"\n\nPPC plot: `{ppc_path.name}`.\n"
         + energy_note
