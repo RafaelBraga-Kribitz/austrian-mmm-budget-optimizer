@@ -494,3 +494,50 @@ D-16 strict AD-043, CWD-relative `profiles.yml` path (RESEARCH Pitfall 1).
 runs on push/PR against `main` (D-19). Stacked warehouse PRs have empty checks.
 Same pattern as M0 (#11) and M1. Do not invent an `"Approved"` token. A main-based
 D-19 vehicle after the stack merges is what confirms job 3 on both OS legs.
+
+---
+
+## M2 - MMM on S-A (Phase 4)
+
+### 2026-09-03 — Phase 4 open + T-301 transforms (04-01)
+
+Phase 4 (P3 / M2 remaining 1 d, D-17) opens on this lineage. Science is **not**
+on `origin/m0-bootstrap`; plans 04-01…04-08 were authored from SPEC-04 /
+03_MODULES §4 / WBS T-301…T-308. Locked 1A 2A 3A 4B still apply. No Layer R
+data, no `priors_real.yaml`, no `PRIOR_ELICITATION.md`. Do not copy m0
+`uv.lock`. No history rewrite (EB-082).
+
+**D-02 (numpy / PyMC import).** SPEC-08 §3's declared range stays
+`numpy>=1.26,<3` in `[project]`. Lock-only `[tool.uv] constraint-dependencies =
+["numpy>=1.26,<2.4"]` (tighter than the CONTEXT D-02 `<2.5` sketch: NumPy 2.4
+removed `numpy.trapz`, which the previously locked Numba still overloaded).
+`uv lock --upgrade-package pymc` (and pytensor / pymc-marketing / arviz) then
+resolved to an importable set:
+
+- numpy **2.3.5**
+- numba **0.65.1** (transitive; non-beta)
+- pymc **5.28.5**
+- pytensor **2.38.3** (`cxx=/usr/bin/g++` on this machine)
+- arviz 0.23.4, pymc-marketing 0.19.4
+
+`uv run python -c "import pymc, arviz"` succeeds. Numba is not a direct
+dependency. Not a SPEC-08 bound widening — no ADR.
+
+**T-301.** `FitError(AmboError)` in `src/ambo/common/errors.py`.
+`src/ambo/model/transforms.py`: normalized geometric adstock (unrolled causal
+sum, no `np.convolve` in `src/`), Hill, MD-030 `ScaleFactors` +
+`to_model_scale` / `from_model_scale` pair. `L` is an argument (D-15). Tests
+force `pytensor.config.cxx = ""` so unit tests do not need `Python.h`;
+production sampling may still use C. Hypothesis round-trip uses rtol=atol=1e-12
+because large revenues fail a pure-atol check.
+
+**Verification.** `make lint && make test` — **332 passed**, 92% coverage
+(was 316 / 93%; transforms added statements). Lint/mypy clean.
+
+**Effort budget reminder.** Phase 4's own 1 d (480 min) D-17 budget and 2 d
+(960 min) tripwire start here. T-301 wall-clock on this lineage is well under
+the 480 min budget. **Verdict: the tripwire is not tripped.**
+
+**Not in this plan.** `max_fit_minutes` (04-02 / D-01), MD-070 (04-03),
+`build_model` / smoke (04-04), posterior_io / diagnostics / full S-A fit /
+`elicit.py` (04-05…04-08).

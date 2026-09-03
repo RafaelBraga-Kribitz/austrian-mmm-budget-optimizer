@@ -288,7 +288,7 @@ recovery failure can be attributed to the science rather than to the machinery.
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — T-301 transforms (adstock, Hill, scaling), FitError, `numpy<2.5` lock constraint (D-02)
+- [x] 04-01-PLAN.md — T-301 transforms (adstock, Hill, scaling), FitError, `numpy<2.4` lock constraint (D-02)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -515,7 +515,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
 | 2. Ground-Truth Simulator | M1 | 10/10 | Complete | 2026-09-02 |
 | 3. Warehouse | M1→M2 | 9/9 | Complete (CI vs main deferred D-19) | 2026-09-02 |
-| 4. MMM on S-A | M2 | 0/8 | Planned; executing 04-01 | - |
+| 4. MMM on S-A | M2 | 1/8 | Executing 04-02 | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
 | 6. Agency Intake | M4 | 0/TBD | Not started | - |
 | 7. Layer R Fit & Sensitivity | M5 | 0/TBD | Not started | - |

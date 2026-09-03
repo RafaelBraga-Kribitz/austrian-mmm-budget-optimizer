@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-09-03T08:00:00Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-09-03T09:00:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "Phase 4 planned (04-01…04-08); executing T-301 transforms"
+last_activity_desc: "04-01 complete (T-301 transforms + D-02 numpy pin)"
 progress:
   total_phases: 9
   completed_phases: 3
-  total_plans: 28
-  completed_plans: 28
+  total_plans: 36
+  completed_plans: 29
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: 04-01 in progress (T-301)
+Plan: 04-02 next (T-303)
 Status: executing
-Last activity: 2026-09-03 — Phase 4 planned from SPEC-04 (not on m0-bootstrap)
+Last activity: 2026-09-03 — 04-01 complete (transforms, FitError, numpy pin)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [█·········] 12% (1/8).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 28
+- Total plans completed: 29
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,6 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
+| 04 | 1/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -98,10 +99,12 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [2026-09-02, 03-09]: CI job 3 is a two-leg matrix with export drift gate; job 2
   builds the warehouse before pytest; ruff format scoped to Python; R-14 added.
   Task 3 live CI confirmation deferred (D-19).
+- [2026-09-03, 04-01]: D-02 lock-only numpy `<2.4` (numpy 2.3.5, numba 0.65.1
+  transitive, pymc 5.28.5). T-301 transforms are pytensor graphs; L is an
+  argument; `FitError` is the model-package `AmboError`.
 
 ### Pending Todos
 
-- T-301 transforms + D-02 numpy pin (04-01)
 - T-303 PriorConfig + D-01 max_fit_minutes (04-02)
 - T-302 MD-070 (04-03)
 - T-304 build_model + smoke (04-04)
@@ -158,9 +161,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T08:00:00Z
-Stopped at: Phase 4 planning complete; 04-01 execution in progress
-Resume file: .planning/phases/04-mmm-on-s-a/04-01-PLAN.md
+Last session: 2026-09-03T09:00:00Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-mmm-on-s-a/04-02-PLAN.md
 
-Next: finish 04-01 (numpy pin, FitError, transforms), then stacked 04-02…04-08.
-Never invent Layer R (A-5). Do not copy m0 `uv.lock`. Do not create priors_real.yaml.
+Next: stacked 04-02…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
+Do not create priors_real.yaml.
