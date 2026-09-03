@@ -66,6 +66,7 @@ def test_yaml_round_trip_reproduces_every_value() -> None:
 
     assert list(settings.channels) == raw["channels"]
     assert settings.adstock_length == raw["adstock_length"]
+    assert settings.max_fit_minutes == raw["max_fit_minutes"]
     assert settings.sampler.chains == raw["sampler"]["chains"]
     assert settings.sampler.tune == raw["sampler"]["tune"]
     assert settings.sampler.draws == raw["sampler"]["draws"]
@@ -87,6 +88,21 @@ def test_adstock_length_is_eight() -> None:
     assert load_settings().adstock_length == 8
 
 
+def test_max_fit_minutes_is_thirty_five() -> None:
+    """D-01 / ADR-006: the 35 min ceiling lives on Settings, not SamplerConfig."""
+    settings = load_settings()
+    assert settings.max_fit_minutes == 35
+    assert "max_fit_minutes" not in SamplerConfig.model_fields
+    assert list(SamplerConfig.model_fields) == [
+        "chains",
+        "tune",
+        "draws",
+        "target_accept",
+        "random_seed",
+        "init",
+    ]
+
+
 def test_load_settings_is_cached_and_idempotent() -> None:
     first = load_settings()
     second = load_settings()
@@ -105,6 +121,25 @@ def test_set_private_drop_resolves_to_a_path(
     settings = load_settings()
     assert settings.private_drop == Path(FAKE_PRIVATE_DROP).resolve()
     assert settings.private_drop.is_absolute()
+
+
+def test_non_positive_max_fit_minutes_raises_config_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    real_settings_path = repo_root() / "config" / "settings.yaml"
+    data = yaml.safe_load(real_settings_path.read_text(encoding="utf-8"))
+    data["max_fit_minutes"] = 0
+
+    (tmp_path / "pyproject.toml").write_text("", encoding="utf-8")
+    fake_config_dir = tmp_path / "config"
+    fake_config_dir.mkdir()
+    (fake_config_dir / "settings.yaml").write_text(yaml.safe_dump(data), encoding="utf-8")
+
+    monkeypatch.setattr("ambo.common.config.repo_root", lambda: tmp_path)
+    monkeypatch.delenv("AMBO_PRIVATE_DROP", raising=False)
+
+    with pytest.raises(ConfigError, match="max_fit_minutes"):
+        load_settings()
 
 
 def test_unknown_key_raises_config_error_naming_the_key(

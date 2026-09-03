@@ -1,6 +1,6 @@
 """Typed, validated, single-read configuration (EB-040).
 
-Implements: EB-040, EB-041, AG-020, MD-050
+Implements: EB-040, EB-041, AG-020, MD-050, ADR-006
 
 The only module that reads `config/settings.yaml` and `AMBO_PRIVATE_DROP` directly;
 every other module reads settings via `load_settings()`.
@@ -99,6 +99,7 @@ class Settings(BaseModel):
 
     channels: tuple[str, ...]
     adstock_length: int
+    max_fit_minutes: int
     paths: PathsConfig
     sampler: SamplerConfig
     scenarios: dict[str, ScenarioConfig]
@@ -112,6 +113,13 @@ class Settings(BaseModel):
             raise ValueError(
                 f"channels must equal {SPEC_CHANNEL_ORDER!r} in that exact order, got {value!r}"
             )
+        return value
+
+    @field_validator("max_fit_minutes")
+    @classmethod
+    def _validate_max_fit_minutes(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError(f"max_fit_minutes must be > 0, got {value!r}")
         return value
 
 

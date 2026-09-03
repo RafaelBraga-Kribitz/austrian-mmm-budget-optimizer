@@ -43,7 +43,9 @@ entries are equally valid and reordering this file is never itself a contract ch
   the scenario YAML). Phase 1 declares the schema only; full simulate-layer parameters live in
   the scenario YAML itself once `src/ambo/simulate/` ships, never duplicated here.
 - `class Settings(BaseModel)` — fields: `channels: tuple[str, ...]` (7, SPEC-02 §5.2 taxonomy
-  order), `adstock_length: int` (=8), `paths: PathsConfig`, `sampler: SamplerConfig`,
+  order), `adstock_length: int` (=8), `max_fit_minutes: int` (=35, D-01 / ADR-006; top-level
+  operational ceiling, not a `SamplerConfig` field), `paths: PathsConfig`,
+  `sampler: SamplerConfig`,
   `scenarios: dict[str, ScenarioConfig]`, `private_drop: Path | None` (from
   `AMBO_PRIVATE_DROP`). `BaseModel`, not `BaseSettings`: `BaseSettings` moved to the separate
   `pydantic-settings` distribution in pydantic v2, which is not in the SPEC-08 §3 dependency

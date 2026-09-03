@@ -3,15 +3,13 @@
 # Every non-secret constant the project knows about lives here, and nowhere else in
 # src/ (09_ANTI_PATTERNS §A-2 — magic numbers are a defect). `Settings` in
 # `src/ambo/common/config.py` parses this file with `extra='forbid'`, so an unknown
-# key here is a load-time failure, not a silently ignored setting. Exactly five
-# top-level blocks are declared below; do not add a sixth without a matching field on
+# key here is a load-time failure, not a silently ignored setting. Exactly six
+# top-level keys are declared below (channels, adstock_length, max_fit_minutes,
+# paths, sampler, scenarios); do not add a seventh without a matching field on
 # `Settings`.
 #
-# Two values that belong in this file eventually are deliberately absent, per D-04:
-#   - The normative per-fit ceiling (07_QUALITY_STANDARDS Part A, <= 35 min/fit at
-#     MD-050 on 4 cores) moves here in Phase 4.
-#   - `config/priors_synthetic.yaml` and `config/priors_real.yaml` are authored by
-#     Phases 4 and 6 respectively; their contents never belong in this file.
+# `config/priors_synthetic.yaml` is authored in Phase 4; `config/priors_real.yaml`
+# is authored at M4. Their contents never belong in this file.
 
 # The fixed seven-channel taxonomy (SPEC-02 section 5.2). Order matters: dbt pivots
 # over this list, so a reordering silently changes every downstream mart column
@@ -28,6 +26,11 @@ channels:
 
 # L, the adstock length in weeks (SPEC-04).
 adstock_length: 8
+
+# Per-fit wall-clock ceiling in minutes at MD-050 on 4 cores (07_QUALITY_STANDARDS
+# Part A; ADR-006's published home). Operational budget, not a NUTS hyperparameter
+# — SamplerConfig stays exactly MD-050 (D-01).
+max_fit_minutes: 35
 
 # Repository-relative paths, resolved against repo_root() by load_settings() so they
 # are independent of the caller's working directory (SPEC-08 section 2).
