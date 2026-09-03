@@ -43,7 +43,7 @@ created: 2026-09-03
 | T-304 | 04-04 | 4 | REQ-q2-real-incremental-roas | MD-002 | free-RV name set; no S-A/layer literals in mmm.py | unit | `uv run pytest tests/unit/test_mmm.py -q` | ✅ | ✅ |
 | T-304 | 04-04 | 4 | REQ-dl8-quality | EB-060 | smoke fit completes; R-hat finite | smoke | `make test SMOKE=1` | ✅ | ✅ |
 | T-305 | 04-05 | 5 | REQ-dl1-reproducible-pipeline | T-1 | save/load round-trip; refuse missing scale factors; atomic | unit | `uv run pytest tests/unit/test_posterior_io.py -q` | ✅ | ✅ |
-| T-306 | 04-06 | 6 | REQ-q1-truth-recovery | MD-071 | synthetic idata with injected divergences fails the gate | unit | `uv run pytest tests/unit/test_diagnostics.py -q` | ⬜ | ⬜ |
+| T-306 | 04-06 | 6 | REQ-q1-truth-recovery | MD-071 | synthetic idata with injected divergences fails the gate | unit | `uv run pytest tests/unit/test_diagnostics.py -q` | ✅ | ✅ |
 | T-307 | 04-07 | 7 | REQ-q1-truth-recovery | MD-071/072 | full S-A fit; diag report all-green; parquet committed | make | `make fit-synthetic` then inspect diag | ⬜ | ⬜ |
 | T-308 | 04-08 | 8 | REQ-dl6-priors-as-deliverable | MD-060 | converter round-trips; no PRIOR_ELICITATION.md invented | unit | `uv run pytest tests/unit/test_elicit.py -q` | ⬜ | ⬜ |
 
@@ -58,7 +58,7 @@ created: 2026-09-03
 - [x] `test_transform_sanity.py` — 04-03
 - [x] `mmm.py` + `fit.sample_model` + smoke — 04-04
 - [x] `posterior_io.py` — 04-05
-- [ ] `diagnostics.py` — 04-06
+- [x] `diagnostics.py` — 04-06
 - [ ] `data/posteriors/P-SA.parquet` + `reports/model/diag_P-SA.md` — 04-07
 - [ ] `elicit.py` — 04-08
 

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 04-05-PLAN.md
+stopped_at: Completed 04-06-PLAN.md
 last_updated: "2026-09-03T12:00:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-05 complete (posterior_io + ADR-008)"
+last_activity_desc: "04-06 complete (diagnostics gates)"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 36
-  completed_plans: 33
+  completed_plans: 34
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: 04-06 next (T-306)
+Plan: 04-07 next (T-307)
 Status: executing
-Last activity: 2026-09-03 — 04-05 complete (posterior_io, ADR-008)
+Last activity: 2026-09-03 — 04-06 complete (DiagGates + diag report writer)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████····] 63% (5/8).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [████████··] 75% (6/8).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 33
+- Total plans completed: 34
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,7 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
-| 04 | 5/8 | - | - |
+| 04 | 6/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -114,9 +114,11 @@ unratified and are candidates for ADR-001+ as they are exercised.
   embeds ScaleFactors in parquet schema metadata, refuses files without them.
   NetCDF uses ArviZ default h5netcdf (already transitive).
 
+- [2026-09-03, 04-06]: DiagGates.standard vs layer_r are explicit constructors.
+  Injected divergences fail standard and pass layer_r. Missing PPC fails MD-072.
+
 ### Pending Todos
 
-- T-306 diagnostics (04-06)
 - T-307 full S-A fit (04-07)
 - T-308 elicit.py + Phase 4 close (04-08)
 
@@ -169,8 +171,8 @@ corrected. What remains:
 ## Session Continuity
 
 Last session: 2026-09-03T12:00:00Z
-Stopped at: Completed 04-05-PLAN.md
-Resume file: .planning/phases/04-mmm-on-s-a/04-06-PLAN.md
+Stopped at: Completed 04-06-PLAN.md
+Resume file: .planning/phases/04-mmm-on-s-a/04-07-PLAN.md
 
-Next: stacked 04-06…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
+Next: stacked 04-07…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
 Do not create priors_real.yaml.

@@ -610,3 +610,19 @@ passed**, 1 deselected (smoke), 93% coverage. Live CI vs main still D-19.
 
 **Not in this plan.** Diagnostics (04-06), full S-A fit / committed
 `P-SA.parquet` (04-07), `elicit.py` (04-08).
+
+### 2026-09-03 — T-306 diagnostics (04-06)
+
+`DiagGates.standard()` is MD-071 (R-hat < 1.01, ESS > 400, divergences = 0,
+BFMI > 0.3) plus PPC ≥ 85%. `layer_r()` is MD-074 (ESS > 300, divergences
+≤ 5) with the other thresholds unchanged. `run_diagnostics` is pure and
+does not construct either profile itself. A missing posterior predictive
+fails MD-072 rather than skipping it. `write_diag_report` writes
+`reports/model/diag_<layer>.md` and a PPC PNG; an energy PNG when
+divergences > 0. `reports/model/.gitkeep` added (D-17).
+
+**Verification.** `uv run pytest tests/unit/test_diagnostics.py
+tests/unit/test_repo_layout.py -q` green. `make lint && make test` — **367
+passed**, 1 deselected (smoke), 93% coverage. Live CI vs main still D-19.
+
+**Not in this plan.** Full S-A MD-050 fit (04-07), `elicit.py` (04-08).
