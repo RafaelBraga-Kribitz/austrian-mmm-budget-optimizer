@@ -854,6 +854,31 @@ holdout revenue (MAPE).
 guarded in `holdout_train_slice`; constructed posterior beats naive MAPE;
 committed P-SA/P-SB CSVs beat naive when present.
 
+### src/ambo/validate/report.py
+
+**Purpose** Generate `reports/recovery/RECOVERY_REPORT.md` in SPEC-05 §8 order
+from committed thinned posteriors and JSON/CSV side-files (VR-703). Verdict and
+closing are templates with slots.
+
+**Public API**
+- `SECTION_HEADINGS` — the eight mandatory level-2 headings, in order.
+- `VERDICT_TEMPLATE` / `CLOSING_TEMPLATE` — slot-filled prose; closing ≥ 500 chars.
+- `generate_recovery_report(*, output_dir=None) -> Path` — writes the markdown
+  plus `roas_<layer>.png` and `curves_<layer>.png`. Calls `compute_recovery` /
+  `evaluate_gates` (no sampling).
+- `section_headings_in(markdown) -> list[str]` — test helper.
+- `main(argv=None) -> int` — `python -m ambo.validate.report`.
+
+**Invariants** Does not import `ambo.model.fit.sample_model`. Does not call
+`pm.sample`. Does not import `ambo.simulate.dgp`. Local matplotlib rc (D-14).
+Missing P-SA/P-SB/P-SC parquet names `make fit-synthetic`.
+
+**Failure modes** `ValidationError`: missing parquet/holdout/OLS/crosscheck;
+heading order mismatch; closing < 500 characters.
+
+**Testing** `tests/unit/test_recovery_report.py` — §8 order; closing length and
+MD-020 / lift-test keywords; Makefile `recover` is not a stub; no `pm.sample`.
+
 ---
 
 ### scripts/export_marts.py

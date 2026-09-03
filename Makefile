@@ -113,7 +113,7 @@ fit-real:
 # recover — stub (Phase 5)
 # -----------------------------------------------------------------------------
 recover:
-	$(call STUB,5)
+	uv run python -m ambo.validate.report
 
 # -----------------------------------------------------------------------------
 # sensitivity — stub (Phase 7), sampling target
