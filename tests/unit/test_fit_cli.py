@@ -6,13 +6,46 @@ Implements: MD-050, MD-073, EB-050, D-18
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from ambo.common.config import repo_root
 from ambo.common.errors import FitError
-from ambo.model.fit import channels_present_for_layer, main, run_fit, tighten_s_c_prior
+from ambo.model.diagnostics import DiagGates, DiagResult, GateCheck
+from ambo.model.fit import (
+    _require_rung1_retry_eligible,
+    _rung1_retry_eligible,
+    channels_present_for_layer,
+    main,
+    run_fit,
+    tighten_s_c_prior,
+)
 from ambo.model.priors import SYNTHETIC_PRIORS_RELATIVE, load_priors
+
+_GATE_NAMES = ("R-hat", "ESS_bulk", "ESS_tail", "divergences", "BFMI", "PPC_90")
+
+
+def _diag_result(*failed: str) -> DiagResult:
+    failed_set = set(failed)
+    checks = tuple(
+        GateCheck(
+            name=name,
+            passed=name not in failed_set,
+            statistic=None,
+            threshold="",
+            detail="",
+        )
+        for name in _GATE_NAMES
+    )
+    return DiagResult(
+        profile="standard",
+        gates=DiagGates.standard(),
+        checks=checks,
+        all_green=not failed_set,
+        n_divergences=int("divergences" in failed_set),
+        ppc_coverage=0.9,
+    )
 
 
 def test_channels_present_for_p_sa_are_taxonomy_ordered() -> None:
@@ -60,6 +93,29 @@ def test_make_n_fit_synthetic_runs_three_layers() -> None:
 def test_cli_requires_layer() -> None:
     with pytest.raises(SystemExit):
         main([])
+
+
+def test_rung1_retry_allows_divergences_with_or_without_ess_tail() -> None:
+    assert _rung1_retry_eligible(_diag_result("divergences"))
+    assert _rung1_retry_eligible(_diag_result("divergences", "ESS_tail"))
+
+
+def test_rung1_retry_refuses_ess_tail_alone_or_other_red_gates() -> None:
+    assert not _rung1_retry_eligible(_diag_result())
+    assert not _rung1_retry_eligible(_diag_result("ESS_tail"))
+    assert not _rung1_retry_eligible(_diag_result("divergences", "R-hat"))
+    assert not _rung1_retry_eligible(_diag_result("divergences", "ESS_bulk"))
+    assert not _rung1_retry_eligible(_diag_result("divergences", "BFMI"))
+    assert not _rung1_retry_eligible(_diag_result("divergences", "PPC_90"))
+
+
+def test_require_rung1_retry_eligible_raises_when_rhat_is_red() -> None:
+    with pytest.raises(FitError, match="MD-071/072 red"):
+        _require_rung1_retry_eligible(
+            _diag_result("divergences", "R-hat"),
+            "P-SC",
+            Path("reports/model/diag_P-SC.md"),
+        )
 
 
 def test_tighten_s_c_prior_is_md073_rung3_and_does_not_edit_yaml() -> None:

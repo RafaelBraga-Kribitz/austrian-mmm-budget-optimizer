@@ -628,10 +628,11 @@ literals.
   (Gamma(4, 3) trunc [0.5, 2.5]; YAML on disk unchanged; ADR-009).
 - `run_fit(layer, *, variant=None) -> Path` — mart → scale → build → sample →
   save_posterior → write_diag_report. Logs `max_fit_minutes` first (EB-050).
-  If MD-071 fails on divergences only, retries MD-073 rung 1 (`target_accept`
-  0.95) then ADR-011 (`target_accept` 0.99). Rung 2 lives in `build_model`
-  (ADR-005). Variants `flat|nopromo|holdout|loco-<ch>` are parsed and then
-  refused as unwired (T-402 / Phase 6).
+  If MD-071 fails on divergences, optionally with ESS_tail, retries MD-073
+  rung 1 (`target_accept` 0.95) then ADR-011 (`target_accept` 0.99). Other
+  red gates abort the ladder. Rung 2 lives in `build_model` (ADR-005).
+  Variants `flat|nopromo|holdout|loco-<ch>` are parsed and then refused as
+  unwired (T-402 / Phase 6).
 - `main(argv=None) -> int` — `python -m ambo.model.fit --layer P-SA`
 
 **Invariants** AST-confined: no other `src/ambo/` module calls `pm.sample` /

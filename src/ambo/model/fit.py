@@ -163,11 +163,13 @@ def _run_md073_ladder(
     frame: pd.DataFrame,
     priors_path: Path,
 ) -> Path:
-    """MD-050 sample, then MD-073 rung 1 (0.95, then 0.99) if only divergences fail.
+    """MD-050 sample, then MD-073 rung 1 (0.95, then 0.99) if eligible.
 
     Rebuild the PyMC model each attempt: a second `pm.sample` on the same
     instance fails (`logp` is None). Rung 2 is already the `build_model`
     parameterization (ADR-005). ADR-010 (s=1) is superseded; s is sampled.
+    Rung 1 retries when divergences fail, optionally with ESS_tail (S-C;
+    D-07 interpretation of MD-073 — not a gate widening).
     """
     attempts: tuple[tuple[PriorConfig, float, tuple[str, ...], str | None, str], ...] = (
         (
@@ -181,14 +183,16 @@ def _run_md073_ladder(
             priors,
             MD073_RUNG1_TARGET_ACCEPT,
             (*_MODEL_NOTES, _RUNG1_NOTE),
-            "MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)",
+            "MD-071 red on divergences (ESS_tail may fail with them); "
+            "MD-073 rung 1 retry (raised target_accept)",
             "fit %s all-green after MD-073 rung 1; posterior %s",
         ),
         (
             priors,
             MD073_RUNG1B_TARGET_ACCEPT,
             (*_MODEL_NOTES, _RUNG1_NOTE, _RUNG1B_NOTE),
-            "MD-071 red on divergences only; ADR-011 retry (target_accept 0.99)",
+            "MD-071 red on divergences (ESS_tail may fail with them); "
+            "ADR-011 retry (target_accept 0.99)",
             "fit %s all-green after ADR-011 target_accept 0.99; posterior %s",
         ),
     )
@@ -212,7 +216,7 @@ def _run_md073_ladder(
             LOGGER.info(ok_fmt, layer, dest)
             return dest
         if i < len(attempts) - 1:
-            _require_divergences_only(result, layer, report)
+            _require_rung1_retry_eligible(result, layer, report)
     raise FitError(f"MD-071/072 red for {layer}; see {report}")
 
 
@@ -233,8 +237,8 @@ def _try_fit(
     return _persist(idata, scale_factors, layer, frame, priors_path, notes=notes)
 
 
-def _require_divergences_only(result: DiagResult, layer: str, report: Path) -> None:
-    if not _only_divergences_failed(result):
+def _require_rung1_retry_eligible(result: DiagResult, layer: str, report: Path) -> None:
+    if not _rung1_retry_eligible(result):
         raise FitError(f"MD-071/072 red for {layer}; see {report}")
 
 
@@ -271,9 +275,19 @@ def _persist(
     return dest, result, report
 
 
-def _only_divergences_failed(result: DiagResult) -> bool:
-    failed = [check.name for check in result.checks if not check.passed]
-    return failed == ["divergences"]
+_RUNG1_RETRY_GATES = frozenset({"divergences", "ESS_tail"})
+
+
+def _rung1_retry_eligible(result: DiagResult) -> bool:
+    """True when rung-1 `target_accept` retries are still the right move.
+
+    Divergences may poison ESS_tail (S-C: 66 divergences, ESS_tail 317.5) while
+    R-hat, ESS_bulk, BFMI, and PPC stay green. That pair is still a sampler
+    step-size problem, not a new parameterization. Any other red gate stops
+    the ladder.
+    """
+    failed = {check.name for check in result.checks if not check.passed}
+    return "divergences" in failed and failed <= _RUNG1_RETRY_GATES
 
 
 def main(argv: list[str] | None = None) -> int:
