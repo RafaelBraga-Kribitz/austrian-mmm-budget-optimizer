@@ -22,6 +22,9 @@ from ambo.common.config import load_settings
 from ambo.common.errors import FitError
 from ambo.common.logging import get_logger
 
+# arviz is untyped; numeric results are checked in tests (T-306).
+# mypy: disable-error-code="no-untyped-call"
+
 LOGGER = get_logger(__name__)
 
 _PPC_MASS = 0.90
@@ -229,7 +232,7 @@ def _n_divergences(idata: az.InferenceData) -> int:
 
 def _bfmi_min(idata: az.InferenceData) -> float:
     try:
-        values = np.asarray(az.bfmi(idata), dtype=float).ravel()
+        values = np.asarray(az.bfmi(idata), dtype=np.float64).ravel()
     except (TypeError, ValueError, KeyError) as exc:
         raise FitError("InferenceData sample_stats.energy is required for MD-071") from exc
     if values.size == 0:
