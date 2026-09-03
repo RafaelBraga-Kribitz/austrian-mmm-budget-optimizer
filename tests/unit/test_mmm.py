@@ -1,6 +1,6 @@
 """Tests for `ambo.model.mmm` (T-304).
 
-Implements: MD-001, MD-002, MD-073
+Implements: MD-001, MD-002
 """
 
 from __future__ import annotations
@@ -32,6 +32,7 @@ _FREE_RV_NAMES = frozenset(
         "delta_jan",
         "lam",
         "k",
+        "s",
         "beta",
         "sigma",
     }
@@ -67,16 +68,6 @@ def test_free_rv_names_match_d06() -> None:
     model = build_model(_tiny_scaled_frame(), ["meta", "radio"], _priors())
     names = {rv.name for rv in model.free_RVs}
     assert names == _FREE_RV_NAMES
-
-
-def test_s_is_fixed_at_one() -> None:
-    """MD-073 rung 4 / ADR-010: logistic saturation, not a free RV."""
-    model = build_model(_tiny_scaled_frame(), ["meta", "radio"], _priors())
-    assert "s" not in {rv.name for rv in model.free_RVs}
-    assert "s" in {var.name for var in model.deterministics}
-    with model:
-        drawn = pm.draw(model["s"], draws=1, random_seed=1)
-    assert np.allclose(np.asarray(drawn), np.ones(2))
 
 
 def test_mmm_source_has_no_scenario_or_layer_literals() -> None:

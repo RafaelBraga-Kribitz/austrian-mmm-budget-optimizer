@@ -1,6 +1,6 @@
 # ADR-010 — MD-073 rung 4: fix Hill slope `s_c = 1`
 
-- **Status:** Ratified
+- **Status:** Superseded by [ADR-011](ADR-011_md073-rung1-target-accept-099.md)
 - **Date:** 2026-09-03
 - **Deciders:** —
 - **Supersedes:** —

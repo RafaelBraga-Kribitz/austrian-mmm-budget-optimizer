@@ -39,15 +39,20 @@ LOGGER = get_logger(__name__)
 _VARIANT_RE = re.compile(r"^(flat|nopromo|holdout|loco-[a-z][a-z0-9_]*)$")
 # MD-073 rung 1. Not an MD-050 setting. Leaving this rung requires ADR-005.
 MD073_RUNG1_TARGET_ACCEPT = 0.95
+# ADR-011: same rung-1 mechanism after 0.95 still diverges. Not an MD-050 edit.
+MD073_RUNG1B_TARGET_ACCEPT = 0.99
 # MD-073 rung 3. YAML on disk stays MD-040 (ADR-009).
 MD073_RUNG3_S = TruncGammaParams(shape=4.0, rate=3.0, lower=0.5, upper=2.5)
 _RUNG1_NOTE = (
     "MD-073 rung 1 applied: target_accept raised to 0.95 "
     "(Settings.sampler unchanged; not an MD-050 edit)."
 )
+_RUNG1B_NOTE = (
+    "MD-073 rung 1 extended (ADR-011): target_accept raised to 0.99 after 0.95 "
+    "still left divergences (Settings.sampler unchanged; ADR-010 superseded)."
+)
 _MODEL_NOTES = (
     "MD-073 rung 2 (ADR-005): non-centered Fourier; reported names gamma_sin/gamma_cos.",
-    "MD-073 rung 4 (ADR-010): s_c fixed at 1 (logistic saturation). YAML s prior is not sampled.",
 )
 
 
@@ -158,12 +163,11 @@ def _run_md073_ladder(
     frame: pd.DataFrame,
     priors_path: Path,
 ) -> Path:
-    """MD-050 sample, then MD-073 rung 1 if only divergences fail.
+    """MD-050 sample, then MD-073 rung 1 (0.95, then 0.99) if only divergences fail.
 
     Rebuild the PyMC model each attempt: a second `pm.sample` on the same
-    instance fails (`logp` is None). Rungs 2 and 4 are already the
-    `build_model` parameterization (ADR-005, ADR-010). Rung 3's s-prior copy
-    is not applied because s is not sampled.
+    instance fails (`logp` is None). Rung 2 is already the `build_model`
+    parameterization (ADR-005). ADR-010 (s=1) is superseded; s is sampled.
     """
     attempts: tuple[tuple[PriorConfig, float, tuple[str, ...], str | None, str], ...] = (
         (
@@ -179,6 +183,13 @@ def _run_md073_ladder(
             (*_MODEL_NOTES, _RUNG1_NOTE),
             "MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)",
             "fit %s all-green after MD-073 rung 1; posterior %s",
+        ),
+        (
+            priors,
+            MD073_RUNG1B_TARGET_ACCEPT,
+            (*_MODEL_NOTES, _RUNG1_NOTE, _RUNG1B_NOTE),
+            "MD-071 red on divergences only; ADR-011 retry (target_accept 0.99)",
+            "fit %s all-green after ADR-011 target_accept 0.99; posterior %s",
         ),
     )
     report = Path()
