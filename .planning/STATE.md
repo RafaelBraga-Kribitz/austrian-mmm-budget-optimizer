@@ -4,11 +4,11 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 5
 current_phase_name: Recovery Suite
-status: planning
-stopped_at: Completed 04-08-PLAN.md
-last_updated: "2026-09-03T11:00:00Z"
+status: executing
+stopped_at: Executing 05-01-PLAN.md
+last_updated: "2026-09-03T11:05:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-08 complete; Phase 4 / M2 model work closed"
+last_activity_desc: "Phase 5 planned (05-01…05-10); executing T-401"
 progress:
   total_phases: 9
   completed_phases: 4
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 5 of 9 (Recovery Suite)
-Plan: Phase 5 not yet planned
-Status: planning
-Last activity: 2026-09-03 — 04-08 complete; Phase 4 / M2 model work closed
+Plan: 05-01 (T-401 recovery metrics)
+Status: executing
+Last activity: 2026-09-03 — Phase 5 planned; executing 05-01
 
 Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [··········] 0%.
 
@@ -126,7 +126,7 @@ unratified and are candidates for ADR-001+ as they are exercised.
 
 ### Pending Todos
 
-- Plan Phase 5 (recovery suite, T-401…) from SPEC-05. Drop-independent.
+- Execute 05-01…05-10 (T-401…T-410). Drop-independent. Never invent Layer R.
 
 ### Blockers/Concerns
 
@@ -178,7 +178,7 @@ corrected. What remains:
 
 Last session: 2026-09-03T11:00:00Z
 Stopped at: Completed 04-08-PLAN.md
-Resume file: .planning/phases/05-recovery-suite/ (not planned yet)
+Resume file: .planning/phases/05-recovery-suite/05-01-PLAN.md
 
-Next: plan Phase 5 recovery from SPEC-05. Never invent Layer R (A-5). Do not copy
+Next: execute 05-01 Task 2 (recovery.py). Never invent Layer R (A-5). Do not copy
 m0 `uv.lock`. Do not create priors_real.yaml or PRIOR_ELICITATION.md.

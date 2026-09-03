@@ -344,7 +344,48 @@ makes that proof unfalsifiable for every result that follows.
   4. `make report` regenerates every recovery artifact from the committed thinned posteriors with **zero sampling** (VR-703), and golden tolerance bands live in `tests/golden/` with their generator script.
   5. `scripts/check_layer_order.py` and `scripts/check_ssot_consistency.py` are wired into CI and green — from this point, Layer R work is unlocked, and the unlock is a checked fact rather than a promise (Charter E-2).
 
-**Plans**: TBD
+**Plans**: 10 plans across 10 waves
+Plans:
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — T-401 `validate/recovery.py` VR-301…306 metrics engine (wave 1)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 05-02-PLAN.md — T-402 full P-SB and P-SC fits; `make fit-synthetic` three layers (wave 2)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 05-03-PLAN.md — T-403 holdout VR-401 (wave 3)
+
+**Wave 4** *(blocked on Wave 2)*
+
+- [ ] 05-04-PLAN.md — T-404 OLS+HC1 baseline VR-601 (wave 4)
+
+**Wave 5** *(blocked on Wave 2)*
+
+- [ ] 05-05-PLAN.md — T-405 pymc-marketing cross-check VR-602 (wave 5)
+
+**Wave 6** *(blocked on Waves 1, 3–5)*
+
+- [ ] 05-06-PLAN.md — T-406 `RECOVERY_REPORT.md` generator + `make recover` (wave 6)
+
+**Wave 7** *(blocked on Wave 2)*
+
+- [ ] 05-07-PLAN.md — T-407 golden tolerance bands (wave 7)
+
+**Wave 8** *(blocked on Waves 1, 6)*
+
+- [ ] 05-08-PLAN.md — T-408 SSOT generator (wave 8)
+
+**Wave 9** *(blocked on Wave 8)*
+
+- [ ] 05-09-PLAN.md — T-409 layer-order failure-mode tests (wave 9)
+
+**Wave 10** *(blocked on Waves 1–9)*
+
+- [ ] 05-10-PLAN.md — T-410 M3 close (wave 10)
+
 **WBS tasks**: T-401…T-410
 **Quality gates**: G-SCI-3 (recovery), G-DATA, G-ENG, G-GOV (SSOT + layer-order mechanisms live)
 **Rollback**: A red VR-3xx gate is a **stop condition**, not a tune-the-gate condition. Debug in VR-310 order: transforms (MD-070) → scaling round-trip → data joins → sampler health. Widening any gate requires an ADR that names the suspected structural cause. Two failed focused attempts ⇒ human.
