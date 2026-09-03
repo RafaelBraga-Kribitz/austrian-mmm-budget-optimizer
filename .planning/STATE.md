@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 04-06-PLAN.md
-last_updated: "2026-09-03T12:00:00Z"
+stopped_at: Completed 04-07-PLAN.md
+last_updated: "2026-09-03T10:42:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-06 complete (diagnostics gates)"
+last_activity_desc: "04-07 complete (P-SA MD-071/072 green)"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 36
-  completed_plans: 34
+  completed_plans: 35
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: 04-07 next (T-307)
+Plan: 04-08 next (T-308)
 Status: executing
-Last activity: 2026-09-03 — 04-06 complete (DiagGates + diag report writer)
+Last activity: 2026-09-03 — 04-07 complete (P-SA MD-071/072 green)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [████████··] 75% (6/8).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [█████████·] 88% (7/8).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 34
+- Total plans completed: 35
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,7 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
-| 04 | 6/8 | - | - |
+| 04 | 7/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -116,10 +116,13 @@ unratified and are candidates for ADR-001+ as they are exercised.
 
 - [2026-09-03, 04-06]: DiagGates.standard vs layer_r are explicit constructors.
   Injected divergences fail standard and pass layer_r. Missing PPC fails MD-072.
+- [2026-09-03, 04-07]: P-SA MD-050 fit is MD-071/072 green after ADR-011
+  (`target_accept` 0.99). ADR-005 non-centered Fourier; ADR-010 (s=1) superseded.
+  `P-SA.parquet` + `diag_P-SA.md` + `ppc_P-SA.png` committed. Wall time of the
+  green attempt 443 s (7.4 min), well under 35 min.
 
 ### Pending Todos
 
-- T-307 full S-A fit (04-07)
 - T-308 elicit.py + Phase 4 close (04-08)
 
 ### Blockers/Concerns
@@ -170,9 +173,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T12:00:00Z
-Stopped at: Completed 04-06-PLAN.md
-Resume file: .planning/phases/04-mmm-on-s-a/04-07-PLAN.md
+Last session: 2026-09-03T10:42:00Z
+Stopped at: Completed 04-07-PLAN.md
+Resume file: .planning/phases/04-mmm-on-s-a/04-08-PLAN.md
 
-Next: stacked 04-07…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
-Do not create priors_real.yaml.
+Next: stacked 04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
+Do not create priors_real.yaml or PRIOR_ELICITATION.md.

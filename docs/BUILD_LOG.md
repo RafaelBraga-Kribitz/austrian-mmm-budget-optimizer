@@ -626,3 +626,37 @@ tests/unit/test_repo_layout.py -q` green. `make lint && make test` — **367
 passed**, 1 deselected (smoke), 93% coverage. Live CI vs main still D-19.
 
 **Not in this plan.** Full S-A MD-050 fit (04-07), `elicit.py` (04-08).
+
+### 2026-09-03 — T-307 full S-A fit (04-07)
+
+`python -m ambo.model.fit --layer P-SA` and `make fit-synthetic` (P-SA only;
+S-B/S-C remain T-402). MD-050 at Settings.sampler (`target_accept` 0.9) produced
+32 divergences with every other MD-071/072 gate green. MD-073 ladder:
+
+| Attempt | Change | target_accept | Divergences | Wall (sample) |
+|---------|--------|---------------|-------------|---------------|
+| 1 | ADR-005 Fourier (standing) | 0.9 | 32 | 209 s |
+| 2 | rung 1 | 0.95 | 3 | 284 s |
+| 3 | ADR-011 | 0.99 | **0** | 443 s |
+
+Committed green attempt (ADR-011): R-hat 1.003, ESS bulk/tail 1966/1503,
+divergences 0, BFMI 0.7635, PPC 92.95%. `make fit-synthetic` wall **960 s**
+(16.0 min) including the two red retries; the green NUTS run **7.4 min**,
+under `max_fit_minutes` 35. PyTensor: `cxx=/usr/bin/g++`, BLAS not linked,
+4 chains in 2 jobs.
+
+ADR-005: non-centered Fourier (`gamma_sin`/`gamma_cos` Deterministic). ADR-009:
+fit-time `s` copy helper (YAML unchanged). ADR-010: `s=1` was tried, still 2
+divergences plus NaN R-hat on a constant `s`, **superseded**. ADR-011: free `s`
+restored; one extra `target_accept` 0.99 retry. `Settings.sampler` is still
+MD-050; parquet provenance records those settings (0.9); the diag notes record
+the 0.99 attempt.
+
+Artifacts: `data/posteriors/P-SA.parquet` (1000 thinned draws, scale factors in
+schema metadata), `reports/model/diag_P-SA.md` (all-green), `ppc_P-SA.png`.
+Energy PNG omitted (divergences = 0). NetCDF companion gitignored.
+
+`make lint && make test` — **373 passed**, 1 deselected (smoke), 90% coverage.
+Live CI vs main still D-19.
+
+**Not in this plan.** `elicit.py` (04-08).
