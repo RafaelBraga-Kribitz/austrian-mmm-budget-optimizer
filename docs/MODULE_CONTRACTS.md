@@ -52,7 +52,7 @@ entries are equally valid and reordering this file is never itself a contract ch
   table, and EB-030 makes adding it an ADR event; `BaseModel` plus `load_settings()`'s own
   `functools.lru_cache` already satisfies EB-040's pydantic-validated single-read requirement.
   Invariants: `extra='forbid'`; `channels` exactly SPEC-02 §5.2's seven entries in order; lists
-  become tuples after validation (immutable).
+  become tuples after validation (immutable). `max_fit_minutes` must be `> 0`.
 - `load_settings() -> Settings` — cached; idempotent; raises `ConfigError` naming the failing
   key path on invalid YAML.
 - `repo_root() -> Path` — resolves the repository root independent of the caller's working
@@ -528,6 +528,35 @@ rendering, no-CR-bytes, the ISO-date/gapless-spine check, media row ordering
 missing artifact.
 
 ---
+
+### src/ambo/model/priors.py
+
+**Purpose** Pydantic prior tree loaded from YAML (SPEC-04 §4). The only object
+`build_model` reads for prior hyperparameters. Layer P YAML is channel-agnostic
+(MD-040); Layer R YAML is not authored here.
+
+**Public API**
+- `class BetaParams` — `a`, `b` (> 0).
+- `class GammaParams` — `shape`, `rate` (> 0).
+- `class TruncGammaParams` — `shape`, `rate`, `lower`, `upper` (`lower < upper`).
+- `class HalfNormalParams` — `sigma` (> 0).
+- `class NormalParams` — `mu` (finite), `sigma` (> 0).
+- `class ChannelPrior` — `lam`, `K`, `s`, `beta`.
+- `class GlobalPriors` — `alpha`, `tau`, `gamma`, `delta_promo`, `delta_advent`,
+  `delta_jan`, `sigma`.
+- `class PriorConfig` — `channels: dict[str, ChannelPrior]` (explicit SPEC-02 §5.2
+  keys in order), `globals: GlobalPriors`. `extra='forbid'`, frozen.
+- `load_priors(path: Path) -> PriorConfig`
+- `SYNTHETIC_PRIORS_RELATIVE` — `config/priors_synthetic.yaml`
+
+**Invariants** This module does not import `ambo.simulate` or PyMC. It does not
+author or load `priors_real.yaml`. MD-040 equality is a test, not schema identity.
+
+**Failure modes** `FitError`: missing file; YAML not a mapping; pydantic
+validation (unknown key, missing channel, non-positive hyperparameters).
+
+**Testing** `tests/unit/test_priors.py` — load synthetic YAML; seven channels
+value-equal; globals match SPEC-04 §4; extra keys fail; `priors_real.yaml` absent.
 
 ### src/ambo/model/transforms.py
 

@@ -292,7 +292,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 04-02-PLAN.md — T-303 PriorConfig + priors_synthetic.yaml + D-01 `max_fit_minutes` (wave 2)
+- [x] 04-02-PLAN.md — T-303 PriorConfig + priors_synthetic.yaml + D-01 `max_fit_minutes` (wave 2)
 
 **Wave 3** *(blocked on Wave 1)*
 
@@ -515,7 +515,7 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
 | 2. Ground-Truth Simulator | M1 | 10/10 | Complete | 2026-09-02 |
 | 3. Warehouse | M1→M2 | 9/9 | Complete (CI vs main deferred D-19) | 2026-09-02 |
-| 4. MMM on S-A | M2 | 1/8 | Executing 04-02 | - |
+| 4. MMM on S-A | M2 | 2/8 | Executing 04-03 | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
 | 6. Agency Intake | M4 | 0/TBD | Not started | - |
 | 7. Layer R Fit & Sensitivity | M5 | 0/TBD | Not started | - |

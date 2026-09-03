@@ -37,8 +37,8 @@ created: 2026-09-03
 | T-301 | 04-01 | 1 | REQ-q1-truth-recovery | T-2 convolution | Causal impulse; pytensor=numpy 1e-10; L is an argument | unit | `uv run pytest tests/unit/test_transforms.py -q` | ✅ | ✅ |
 | T-301 | 04-01 | 1 | REQ-q1-truth-recovery | T-1 scaling | `from(to(x))==x` to 1e-12; all-zero → FitError | property | same | ✅ | ✅ |
 | T-301 | 04-01 | 1 | REQ-dl8-quality | Pitfall 1 | `import pymc` succeeds after numpy constraint | smoke-import | `uv run python -c "import pymc, arviz"` | ✅ | ✅ |
-| T-303 | 04-02 | 2 | REQ-q1-truth-recovery | MD-040 | synthetic priors channel-agnostic; extra=forbid | unit | `uv run pytest tests/unit/test_priors.py -q` | ⬜ | ⬜ |
-| T-303 | 04-02 | 2 | ADR-006 deferral | W6 | `max_fit_minutes==35` on Settings | unit | `uv run pytest tests/unit/test_config.py -q` | ⬜ | ⬜ |
+| T-303 | 04-02 | 2 | REQ-q1-truth-recovery | MD-040 | synthetic priors channel-agnostic; extra=forbid | unit | `uv run pytest tests/unit/test_priors.py -q` | ✅ | ✅ |
+| T-303 | 04-02 | 2 | ADR-006 deferral | W6 | `max_fit_minutes==35` on Settings | unit | `uv run pytest tests/unit/test_config.py -q` | ✅ | ✅ |
 | T-302 | 04-03 | 3 | REQ-q1-truth-recovery | T-2/T-3 | r>0.95 per S-A channel; test imports both packages | unit | `uv run pytest tests/unit/test_transform_sanity.py -q` | ⬜ | ⬜ |
 | T-304 | 04-04 | 4 | REQ-q2-real-incremental-roas | MD-002 | free-RV name set; no S-A/layer literals in mmm.py | unit | `uv run pytest tests/unit/test_mmm.py -q` | ⬜ | ⬜ |
 | T-304 | 04-04 | 4 | REQ-dl8-quality | EB-060 | smoke fit completes; R-hat finite | smoke | `make test SMOKE=1` | ⬜ | ⬜ |
@@ -54,7 +54,7 @@ created: 2026-09-03
 - [x] `src/ambo/model/transforms.py` — 04-01
 - [x] `FitError` — 04-01
 - [x] numpy lock constraint — 04-01
-- [ ] `priors.py` + `priors_synthetic.yaml` — 04-02
+- [x] `priors.py` + `priors_synthetic.yaml` — 04-02
 - [ ] `test_transform_sanity.py` — 04-03
 - [ ] `mmm.py` + `fit.sample_model` + smoke — 04-04
 - [ ] `posterior_io.py` — 04-05

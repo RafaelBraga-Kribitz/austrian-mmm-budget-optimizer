@@ -541,3 +541,22 @@ the 480 min budget. **Verdict: the tripwire is not tripped.**
 **Not in this plan.** `max_fit_minutes` (04-02 / D-01), MD-070 (04-03),
 `build_model` / smoke (04-04), posterior_io / diagnostics / full S-A fit /
 `elicit.py` (04-05…04-08).
+
+### 2026-09-03 — T-303 PriorConfig + D-01 max_fit_minutes (04-02)
+
+ADR-006's published home is now `config/settings.yaml`: top-level
+`max_fit_minutes: 35`, sibling of `adstock_length`, not a `SamplerConfig` field
+(D-01). Header no longer says the ceiling is "deliberately absent". Validator
+requires `> 0`. `SamplerConfig` field set is still exactly MD-050.
+
+**MD-040.** `src/ambo/model/priors.py` pydantic tree (`BetaParams`,
+`GammaParams`, `TruncGammaParams`, `HalfNormalParams`, `NormalParams`,
+`ChannelPrior`, `GlobalPriors`, `PriorConfig`) with `extra='forbid'`, frozen.
+`config/priors_synthetic.yaml` lists all seven SPEC-02 §5.2 channels with
+identical values: λ Beta(2,4), K Gamma(2, 1.3) in scaled spend units, s
+truncated Gamma(3,2) on [0.3, 3.0], β HalfNormal(0.15). Globals match SPEC-04
+§4 exactly. `config/priors_real.yaml` was not created.
+
+**Verification.** `uv run pytest tests/unit/test_priors.py tests/unit/test_config.py
+tests/unit/test_repo_layout.py -q` green. Full `make lint && make test` recorded
+after this plan's remaining checks.
