@@ -1,6 +1,6 @@
 """CLI and orchestration tests for `ambo.model.fit` (T-307). Does not run NUTS.
 
-Implements: MD-050, MD-073, EB-050, D-20
+Implements: MD-050, MD-073, EB-050, D-18
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ def test_unwired_variant_is_refused_before_sampling() -> None:
         run_fit("P-SA", variant="not-a-variant")
 
 
-def test_make_n_fit_synthetic_is_the_p_sa_cli() -> None:
+def test_make_n_fit_synthetic_runs_three_layers() -> None:
     result = subprocess.run(
         ["make", "-n", "fit-synthetic"],
         cwd=repo_root(),
@@ -53,6 +53,8 @@ def test_make_n_fit_synthetic_is_the_p_sa_cli() -> None:
     assert "NOT IMPLEMENTED" not in combined
     assert "ambo.model.fit" in combined
     assert "--layer P-SA" in combined
+    assert "--layer P-SB" in combined
+    assert "--layer P-SC" in combined
 
 
 def test_cli_requires_layer() -> None:
