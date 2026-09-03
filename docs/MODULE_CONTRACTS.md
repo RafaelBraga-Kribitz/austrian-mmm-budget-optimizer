@@ -567,9 +567,11 @@ revenue level. Channel list + `PriorConfig` drive media terms; no scenario branc
 - `FOURIER_PERIOD_WEEKS = 52.18` / `FOURIER_ORDER = 4` — SPEC-04 §2 named constants
   (D-12), not Settings.
 - `build_model(df, channels, priors) -> pm.Model` — `df` is already scaled.
-  Coords: `channel`, `week`, `fourier`. Free RVs: `alpha`, `tau`, `gamma_sin`,
-  `gamma_cos`, `delta_promo`, `delta_advent`, `delta_jan`, `lam`, `k`, `s`,
-  `beta`, `sigma`. Observed: `y`.
+  Coords: `channel`, `week`, `fourier`. Free RVs: `alpha`, `tau`,
+  `gamma_sin_offset`, `gamma_cos_offset`, `delta_promo`, `delta_advent`,
+  `delta_jan`, `lam`, `k`, `s`, `beta`, `sigma`. Deterministic (D-06 names):
+  `gamma_sin`, `gamma_cos` = μ + σ · offset (MD-073 rung 2 / ADR-005).
+  Observed: `y`.
 
 **Invariants** Does not import `ambo.simulate` or `ambo.common.db`. Does not contain
 `P-SA` / `S-A` / `layer` literals. Does not call `pm.sample`. Does not log-transform

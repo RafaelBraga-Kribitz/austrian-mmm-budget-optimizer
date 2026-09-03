@@ -25,8 +25,8 @@ _FREE_RV_NAMES = frozenset(
     {
         "alpha",
         "tau",
-        "gamma_sin",
-        "gamma_cos",
+        "gamma_sin_offset",
+        "gamma_cos_offset",
         "delta_promo",
         "delta_advent",
         "delta_jan",

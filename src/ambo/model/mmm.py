@@ -1,6 +1,6 @@
 """Raw PyMC MMM builder (SPEC-04 §2).
 
-Implements: MD-001, MD-002
+Implements: MD-001, MD-002, MD-073, ADR-005
 
 One definition serves every dataset: the channel list and the prior YAML are the
 only knobs. Additive in revenue *level*, not log (T-9). Fourier period 52.18 and
@@ -172,19 +172,30 @@ def _register_nodes(
         "alpha", mu=globals_.alpha.mu, sigma=globals_.alpha.sigma, initval=globals_.alpha.mu
     )
     tau = pm.Normal("tau", mu=globals_.tau.mu, sigma=globals_.tau.sigma, initval=0.0)
-    gamma_sin = pm.Normal(
-        "gamma_sin",
-        mu=globals_.gamma.mu,
-        sigma=globals_.gamma.sigma,
+    gamma_sin_offset = pm.Normal(
+        "gamma_sin_offset",
+        mu=0.0,
+        sigma=1.0,
         dims="fourier",
         initval=np.zeros(FOURIER_ORDER),
     )
-    gamma_cos = pm.Normal(
-        "gamma_cos",
-        mu=globals_.gamma.mu,
-        sigma=globals_.gamma.sigma,
+    gamma_cos_offset = pm.Normal(
+        "gamma_cos_offset",
+        mu=0.0,
+        sigma=1.0,
         dims="fourier",
         initval=np.zeros(FOURIER_ORDER),
+    )
+    # MD-073 rung 2 / ADR-005: reported names stay gamma_sin / gamma_cos (D-06).
+    gamma_sin = pm.Deterministic(
+        "gamma_sin",
+        globals_.gamma.mu + globals_.gamma.sigma * gamma_sin_offset,
+        dims="fourier",
+    )
+    gamma_cos = pm.Deterministic(
+        "gamma_cos",
+        globals_.gamma.mu + globals_.gamma.sigma * gamma_cos_offset,
+        dims="fourier",
     )
     delta_promo = pm.Normal(
         "delta_promo",
