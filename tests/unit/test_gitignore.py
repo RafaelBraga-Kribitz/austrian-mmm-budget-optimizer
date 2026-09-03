@@ -69,6 +69,8 @@ def test_remaining_eb081_ignore_rules_by_path(repo_root: Path) -> None:
         "src/ambo/__pycache__/probe.pyc",
         "dbt/target/manifest.json",
         ".env",
+        "data/posteriors/P-SA__holdout.parquet",
+        "reports/model/diag_P-SA__holdout.md",
     ]
     for rel in ignored_paths:
         assert _is_ignored(repo_root, rel), f"{rel} should be ignored per EB-081 but is not"

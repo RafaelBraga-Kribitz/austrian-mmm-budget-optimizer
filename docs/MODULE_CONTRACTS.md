@@ -594,6 +594,10 @@ revenue level. Channel list + `PriorConfig` drive media terms; no scenario branc
 **Public API**
 - `FOURIER_PERIOD_WEEKS = 52.18` / `FOURIER_ORDER = 4` — SPEC-04 §2 named constants
   (D-12), not Settings.
+- `fourier_features_for_weeks(week_index) -> (sin, cos)` — shape (T, 4), 1-based
+  week index. `build_model` uses t = 1…T.
+- `control_mean_scaled(...) -> ndarray` — intercept + trend + Fourier + flags,
+  shape (D, T). Holdout (VR-401) adds media separately with train-window `t/T`.
 - `build_model(df, channels, priors) -> pm.Model` — `df` is already scaled.
   Coords: `channel`, `week`, `fourier`. Free RVs: `alpha`, `tau`,
   `gamma_sin_offset`, `gamma_cos_offset`, `delta_promo`, `delta_advent`,
@@ -631,9 +635,12 @@ literals.
   If MD-071 fails on divergences, optionally with ESS_tail, retries MD-073
   rung 1 (`target_accept` 0.95) then ADR-011 (`target_accept` 0.99). Other
   red gates abort the ladder. Rung 2 lives in `build_model` (ADR-005).
-  Variants `flat|nopromo|holdout|loco-<ch>` are parsed and then refused as
-  unwired (T-402 / Phase 6).
-- `main(argv=None) -> int` — `python -m ambo.model.fit --layer P-SA`
+  `variant="holdout"` fits first T−13 weeks (scale on that slice; artifact
+  `{layer}__holdout`). Other variants `flat|nopromo|loco-<ch>` are parsed and
+  then refused as unwired (Phase 6).
+- `holdout_train_slice(frame) -> pd.DataFrame` — first T−13; `FitError` if T<65.
+- `HOLDOUT_HORIZON = 13`, `HOLDOUT_MIN_WEEKS = 65` (VR-401).
+- `main(argv=None) -> int` — `python -m ambo.model.fit --layer P-SA [--variant holdout]`
 
 **Invariants** AST-confined: no other `src/ambo/` module calls `pm.sample` /
 `pymc.sample`. Full-budget fits are a make target, never default `make test`.
@@ -684,8 +691,9 @@ schema metadata, and writes a gitignored NetCDF companion for local debug.
   prior_sha256: str, thin: int = 4, directory: Path | None = None) -> Path` —
   atomic parquet under `directory` or `Settings.paths.posteriors`; NetCDF beside
   it. Columns `<var>` or `<var>__<coord>`. `name` is a BP-D-06 basename
-  (`P-SA`, `P-SB`, `P-SC`, `R`, `R__flat`, `R__nopromo`, `P-SB__flat`,
-  `R__loco-<channel>`).
+  (`P-SA`, `P-SB`, `P-SC`, `P-SA__holdout`, `P-SB__holdout`, `P-SC__holdout`,
+  `R`, `R__flat`, `R__nopromo`, `P-SB__flat`, `R__loco-<channel>`). Holdout
+  parquets are gitignored (D-19); they may be written locally.
 - `load_posterior(name: str, *, directory: Path | None = None) -> PosteriorBundle`
 - `class PosteriorBundle` — frozen: `draws: pd.DataFrame`, `metadata: dict`,
   `scale_factors: ScaleFactors`, `path: Path`.
@@ -766,6 +774,31 @@ outside (0, 1).
 1e-8; HDI miss fails VR-301; YAML cells match SPEC-05 §3; zero-effect MAE is
 `None`; half-life ranking; JSON round-trip; no `simulate.dgp` import.
 
+### src/ambo/validate/holdout.py
+
+**Purpose** VR-401 conditional holdout: MAPE and 90% HDI coverage of the last 13
+weeks vs seasonal-naive `revenue_{t-52}`. Does not call `pm.sample`.
+
+**Public API**
+- `HOLDOUT_HORIZON = 13` / `HOLDOUT_MIN_WEEKS = 65` — equal to `ambo.model.fit`.
+- `CSV_COLUMNS` — week_start, revenue, yhat_median, hdi_low, hdi_high, naive,
+  covered, model_mape, naive_mape, coverage_90.
+- `run_holdout(layer, *, bundle=None, frame=None, output_dir=None) -> Path` —
+  writes `reports/model/holdout_<layer>.csv`. Injections for tests (D-25 style).
+  Adstock on the full scaled series; trend/Fourier continue from train `t/n_train`.
+- `main(argv=None) -> int` — optional `run_fit(..., variant="holdout")` then CSV.
+
+**Invariants** Does not import `ambo.simulate.dgp`. Does not call `pm.sample`
+at module level. Holdout parquets are not committed. A-7: every weekly row has
+HDI bounds; MAPE is never written without `coverage_90`.
+
+**Failure modes** `ValidationError`: T < 65; missing posterior columns; zero
+holdout revenue (MAPE).
+
+**Testing** `tests/unit/test_holdout.py` — schema; T<65; train-scale leak
+guarded in `holdout_train_slice`; constructed posterior beats naive MAPE;
+committed P-SA/P-SB CSVs beat naive when present.
+
 ---
 
 ### scripts/export_marts.py
@@ -839,7 +872,7 @@ opening the gitignored blueprint.
 simulate  →  (nothing in ambo except common)
 intake    →  common
 model     →  common
-validate  →  common, model (posterior_io/transforms), simulate.truth
+validate  →  common, model (posterior_io/transforms/mmm), simulate.truth
             (`response_curve_at` / `TruthFile` only; never `simulate.dgp`)
 decide    →  common, model.posterior_io/transforms (read-only)
 report    →  common, exports/SSOT side-files, model.posterior_io (read-only)

@@ -1,6 +1,6 @@
 """The only legal `pm.sample` home (D-11 / MD-050) and the fit CLI.
 
-Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050
+Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050, VR-401
 
 Sampler kwargs come from `Settings.sampler`. This module does not restate
 MD-050 literals. `channels_present` is parsed here, not in `mmm.py`.
@@ -37,6 +37,9 @@ from ambo.model.transforms import ScaleFactors, compute_scale_factors, to_model_
 LOGGER = get_logger(__name__)
 
 _VARIANT_RE = re.compile(r"^(flat|nopromo|holdout|loco-[a-z][a-z0-9_]*)$")
+# VR-401: last 13 weeks held out; naive baseline needs t−52 ⇒ T ≥ 65.
+HOLDOUT_HORIZON = 13
+HOLDOUT_MIN_WEEKS = 65
 # MD-073 rung 1. Not an MD-050 setting. Leaving this rung requires ADR-005.
 MD073_RUNG1_TARGET_ACCEPT = 0.95
 # ADR-011: same rung-1 mechanism after 0.95 still diverges. Not an MD-050 edit.
@@ -122,10 +125,23 @@ def tighten_s_c_prior(priors: PriorConfig) -> PriorConfig:
     return priors.model_copy(update={"channels": channels})
 
 
+def holdout_train_slice(frame: pd.DataFrame) -> pd.DataFrame:
+    """First T−13 rows. Scale factors must be computed on this slice (RK-M2-4).
+
+    Implements: VR-401
+    """
+    n_weeks = len(frame)
+    if n_weeks < HOLDOUT_MIN_WEEKS:
+        raise FitError(
+            f"holdout requires T >= {HOLDOUT_MIN_WEEKS} weeks (VR-401 naive t-52); got {n_weeks}"
+        )
+    return frame.iloc[:-HOLDOUT_HORIZON].copy()
+
+
 def run_fit(layer: str, *, variant: str | None = None) -> Path:
     """Mart → scale → build → sample → posterior_io → diag report.
 
-    Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050
+    Implements: MD-050, MD-051, MD-071, MD-072, MD-073, EB-050, VR-401
     """
     settings = load_settings()
     LOGGER.info(
@@ -136,12 +152,17 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
     sampler = settings.sampler
     frame = read_mmm_input(layer)
     channels = channels_present_for_layer(layer)
+    artifact_name = layer
+    if variant == "holdout":
+        frame = holdout_train_slice(frame)
+        artifact_name = f"{layer}__holdout"
     priors_path = repo_root() / SYNTHETIC_PRIORS_RELATIVE
     priors = load_priors(priors_path)
     scale_factors = compute_scale_factors(frame, channels)
     scaled = to_model_scale(frame, scale_factors)
     return _run_md073_ladder(
         layer=layer,
+        artifact_name=artifact_name,
         scaled=scaled,
         channels=channels,
         priors=priors,
@@ -155,6 +176,7 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
 def _run_md073_ladder(
     *,
     layer: str,
+    artifact_name: str,
     scaled: pd.DataFrame,
     channels: list[str],
     priors: PriorConfig,
@@ -171,6 +193,7 @@ def _run_md073_ladder(
     Rung 1 retries when divergences fail, optionally with ESS_tail (S-C;
     D-07 interpretation of MD-073 — not a gate widening).
     """
+    LOGGER.info("MD-073 ladder: layer=%s artifact=%s", layer, artifact_name)
     attempts: tuple[tuple[PriorConfig, float, tuple[str, ...], str | None, str], ...] = (
         (
             priors,
@@ -207,17 +230,17 @@ def _run_md073_ladder(
             sampler,
             target_accept,
             scale_factors,
-            layer,
+            artifact_name,
             frame,
             priors_path,
             notes=notes,
         )
         if result.all_green:
-            LOGGER.info(ok_fmt, layer, dest)
+            LOGGER.info(ok_fmt, artifact_name, dest)
             return dest
         if i < len(attempts) - 1:
-            _require_rung1_retry_eligible(result, layer, report)
-    raise FitError(f"MD-071/072 red for {layer}; see {report}")
+            _require_rung1_retry_eligible(result, artifact_name, report)
+    raise FitError(f"MD-071/072 red for {artifact_name}; see {report}")
 
 
 def _try_fit(
@@ -227,14 +250,14 @@ def _try_fit(
     sampler: Any,
     target_accept: float,
     scale_factors: ScaleFactors,
-    layer: str,
+    artifact_name: str,
     frame: pd.DataFrame,
     priors_path: Path,
     notes: tuple[str, ...],
 ) -> tuple[Path, DiagResult, Path]:
     model = build_model(scaled, channels, priors)
     idata = _draw_posterior(model, sampler, target_accept=target_accept)
-    return _persist(idata, scale_factors, layer, frame, priors_path, notes=notes)
+    return _persist(idata, scale_factors, artifact_name, frame, priors_path, notes=notes)
 
 
 def _require_rung1_retry_eligible(result: DiagResult, layer: str, report: Path) -> None:
@@ -258,7 +281,7 @@ def _draw_posterior(model: pm.Model, sampler: Any, *, target_accept: float) -> a
 def _persist(
     idata: az.InferenceData,
     scale_factors: ScaleFactors,
-    layer: str,
+    artifact_name: str,
     frame: pd.DataFrame,
     priors_path: Path,
     notes: tuple[str, ...],
@@ -266,12 +289,12 @@ def _persist(
     dest = save_posterior(
         idata,
         scale_factors,
-        layer,
+        artifact_name,
         data_hash=_sha256_frame(frame),
         prior_sha256=_sha256_file(priors_path),
     )
     result = run_diagnostics(idata, DiagGates.standard())
-    report = write_diag_report(result, layer, idata=idata, notes=notes)
+    report = write_diag_report(result, artifact_name, idata=idata, notes=notes)
     return dest, result, report
 
 
@@ -307,17 +330,17 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--variant",
         default=None,
-        help="flat|nopromo|holdout|loco-<channel> (parsed now; wired later)",
+        help="holdout (VR-401) or flat|nopromo|loco-<channel> (parsed; wired later)",
     )
     return parser.parse_args(argv)
 
 
 def _reject_unwired_variant(variant: str | None) -> None:
-    if variant is None:
+    if variant is None or variant == "holdout":
         return
     if _VARIANT_RE.fullmatch(variant) is None:
         raise FitError(f"unknown fit variant {variant!r}")
-    raise FitError(f"fit variant {variant!r} is parsed but not wired until T-402 / Phase 6")
+    raise FitError(f"fit variant {variant!r} is parsed but not wired until Phase 6")
 
 
 def _sha256_file(path: Path) -> str:

@@ -21,7 +21,7 @@ from ambo.common.errors import FitError
 from ambo.model.priors import GlobalPriors, PriorConfig
 from ambo.model.transforms import adstock_convolve, hill_saturation
 
-# mypy: disable-error-code="no-untyped-call"
+# mypy: disable-error-code="no-untyped-call,no-any-return"
 
 # SPEC-04 §2 — yearly Fourier, order 4, ISO-week period. Not Settings.
 FOURIER_PERIOD_WEEKS = 52.18
@@ -44,12 +44,19 @@ def _require_media_frame(df: pd.DataFrame, channels: list[str]) -> None:
             raise FitError(f"build_model(): missing column {spend_col}")
 
 
-def _fourier_features(n_weeks: int) -> tuple[np.ndarray, np.ndarray]:
-    """sin/cos design matrices, shape (T, 4), t = 1…T (SPEC-04 §2)."""
-    t = np.arange(1, n_weeks + 1, dtype=np.float64)
+def fourier_features_for_weeks(week_index: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """sin/cos design matrices, shape (T, 4), 1-based week index (SPEC-04 §2)."""
+    t = np.asarray(week_index, dtype=np.float64)
+    if t.ndim != 1:
+        raise FitError("fourier_features_for_weeks(): week_index must be 1-d")
     orders = np.arange(1, FOURIER_ORDER + 1, dtype=np.float64)
     angle = 2.0 * np.pi * np.outer(t, orders) / FOURIER_PERIOD_WEEKS
     return np.sin(angle), np.cos(angle)
+
+
+def _fourier_features(n_weeks: int) -> tuple[np.ndarray, np.ndarray]:
+    """sin/cos design matrices, shape (T, 4), t = 1…T (SPEC-04 §2)."""
+    return fourier_features_for_weeks(np.arange(1, n_weeks + 1, dtype=np.float64))
 
 
 def _stack_channel_params(channels: list[str], priors: PriorConfig) -> dict[str, np.ndarray]:
@@ -113,6 +120,37 @@ def _linear_predictor(
         + delta_advent * advent
         + delta_jan * jan
         + media
+    )
+
+
+def control_mean_scaled(
+    *,
+    alpha: np.ndarray,
+    tau: np.ndarray,
+    t_over_t: np.ndarray,
+    gamma_sin: np.ndarray,
+    gamma_cos: np.ndarray,
+    sin_feat: np.ndarray,
+    cos_feat: np.ndarray,
+    delta_promo: np.ndarray,
+    promo: np.ndarray,
+    delta_advent: np.ndarray,
+    advent: np.ndarray,
+    delta_jan: np.ndarray,
+    jan: np.ndarray,
+) -> np.ndarray:
+    """Numpy evaluation of intercept + trend + Fourier + flags. Shape (D, T).
+
+    Implements: MD-001
+    """
+    fourier = gamma_sin @ sin_feat.T + gamma_cos @ cos_feat.T
+    return (
+        alpha[:, None]
+        + tau[:, None] * t_over_t[None, :]
+        + fourier
+        + delta_promo[:, None] * promo[None, :]
+        + delta_advent[:, None] * advent[None, :]
+        + delta_jan[:, None] * jan[None, :]
     )
 
 

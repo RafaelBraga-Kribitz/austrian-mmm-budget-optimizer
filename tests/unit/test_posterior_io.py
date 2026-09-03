@@ -159,6 +159,9 @@ def test_bp_d_06_names_and_rejects_unknown(tmp_path: Path) -> None:
     path = _save(tmp_path, name="R__flat")
     assert path.name == "R__flat.parquet"
     load_posterior("R__flat", directory=tmp_path)
+    holdout = _save(tmp_path, name="P-SA__holdout")
+    assert holdout.name == "P-SA__holdout.parquet"
+    load_posterior("P-SA__holdout", directory=tmp_path)
 
     with pytest.raises(FitError, match="BP-D-06"):
         save_posterior(

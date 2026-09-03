@@ -22,6 +22,9 @@ __pycache__/
 data/warehouse/*
 data/cache/*
 *.nc
+# D-19 / BP-D-06: holdout debug posteriors and diag are local-only.
+data/posteriors/*__holdout.parquet
+reports/model/*__holdout*
 
 # --- dbt ---
 dbt/target/*

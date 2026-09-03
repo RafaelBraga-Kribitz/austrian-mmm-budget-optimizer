@@ -8,6 +8,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from ambo.common.config import repo_root
@@ -17,6 +19,7 @@ from ambo.model.fit import (
     _require_rung1_retry_eligible,
     _rung1_retry_eligible,
     channels_present_for_layer,
+    holdout_train_slice,
     main,
     run_fit,
     tighten_s_c_prior,
@@ -72,6 +75,25 @@ def test_unwired_variant_is_refused_before_sampling() -> None:
         run_fit("P-SA", variant="flat")
     with pytest.raises(FitError, match="unknown fit variant"):
         run_fit("P-SA", variant="not-a-variant")
+
+
+def test_holdout_train_slice_requires_65_and_drops_last_13() -> None:
+    train = holdout_train_slice(pd.DataFrame({"x": range(65)}))
+    assert len(train) == 52
+    with pytest.raises(FitError, match="T >= 65"):
+        holdout_train_slice(pd.DataFrame({"x": range(64)}))
+
+
+def test_holdout_train_slice_keeps_scale_factors_off_holdout_spend() -> None:
+    spend = np.ones(65)
+    spend[-13:] = 1000.0
+    frame = pd.DataFrame({"revenue": np.ones(65), "spend_meta": spend})
+    from ambo.model.transforms import compute_scale_factors
+
+    train_mean = compute_scale_factors(holdout_train_slice(frame), ["meta"]).spend_means["meta"]
+    full_mean = compute_scale_factors(frame, ["meta"]).spend_means["meta"]
+    assert train_mean == pytest.approx(1.0)
+    assert full_mean > 10.0
 
 
 def test_make_n_fit_synthetic_runs_three_layers() -> None:
