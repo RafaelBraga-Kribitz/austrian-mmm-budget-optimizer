@@ -107,7 +107,8 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
     priors_path = repo_root() / SYNTHETIC_PRIORS_RELATIVE
     priors = load_priors(priors_path)
     scale_factors = compute_scale_factors(frame, channels)
-    model = build_model(to_model_scale(frame, scale_factors), channels, priors)
+    scaled = to_model_scale(frame, scale_factors)
+    model = build_model(scaled, channels, priors)
     idata = _draw_posterior(model, sampler, target_accept=sampler.target_accept)
     dest, result, report = _persist(idata, scale_factors, layer, frame, priors_path, notes=())
     if result.all_green:
@@ -115,6 +116,8 @@ def run_fit(layer: str, *, variant: str | None = None) -> Path:
         return dest
     if _only_divergences_failed(result):
         LOGGER.warning("MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)")
+        # Rebuild: a second pm.sample on the same Model instance fails (logp None).
+        model = build_model(scaled, channels, priors)
         idata = _draw_posterior(model, sampler, target_accept=MD073_RUNG1_TARGET_ACCEPT)
         dest, result, report = _persist(
             idata,
