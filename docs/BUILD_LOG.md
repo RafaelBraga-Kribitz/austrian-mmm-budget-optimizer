@@ -586,3 +586,27 @@ split of the single chain because rank-R-hat requires two chains.
 
 `make lint && make test` — **347 passed**, 1 deselected (smoke), 92%
 coverage. `make test SMOKE=1` green locally. Live CI vs main still D-19.
+
+### 2026-09-03 — T-305 posterior_io (04-05)
+
+ADR-008 adds `pyarrow>=14,<23` (locked **22.0.0**) so MD-051 parquet is
+possible: pandas 2.3 has no parquet engine. SPEC-08 §3 is extended by the ADR,
+not edited in place.
+
+`src/ambo/model/posterior_io.py`: `save_posterior` / `load_posterior` /
+`PosteriorBundle`. Thin every 4th stacked `(chain, draw)` sample (4000→1000 at
+full MD-050). Columns `<var>` / `<var>__<coord>`. Provenance lives in parquet
+schema metadata key `ambo_posterior` (scale factors, data hash, prior sha256,
+sampler settings from `Settings.sampler`, git commit, seed). Loader `FitError`
+if scale factors are missing (T-1). Atomic write is temp-sibling + `os.replace`.
+BP-D-06 names only. Gitignored NetCDF companion uses ArviZ's default
+`h5netcdf` engine (already transitive via arviz; scipy netCDF3 cannot write
+grouped InferenceData files). `pq.read_table` is avoided because the AD-030
+AST guard treats any `.read_table(` as a warehouse read.
+
+**Verification.** `uv run pytest tests/unit/test_posterior_io.py
+tests/unit/test_repo_layout.py -q` green. `make lint && make test` — **359
+passed**, 1 deselected (smoke), 93% coverage. Live CI vs main still D-19.
+
+**Not in this plan.** Diagnostics (04-06), full S-A fit / committed
+`P-SA.parquet` (04-07), `elicit.py` (04-08).
