@@ -202,7 +202,7 @@ def mapping_table() -> tuple[MappingRow, ...]:
             ambo="jitter+adapt_diag (MD-050)",
             marketing="adapt_diag",
             status="unmatched",
-            note="jitter+adapt_diag trips GeometricAdstock CheckParameterValue 0<alpha<=1.",
+            note="jitter+adapt_diag trips 0<alpha<=1. Accept 0.9→0.95→0.99 if divergences remain.",
         ),
         MappingRow(
             element="MMM class",
@@ -453,26 +453,43 @@ def _require_control_prior_len() -> None:
 def _fit_marketing(frame: pd.DataFrame, channels: list[str]) -> tuple[Any, float, int]:
     settings = load_settings()
     scale_factors = compute_scale_factors(frame, channels)
-    mmm = build_crosscheck_mmm(channels, scale_factors, settings.adstock_length)
     x_design = design_frame(frame, channels)
     y = frame["revenue"].to_numpy(dtype=np.float64)
-    sampler = settings.sampler
     started = time.perf_counter()
-    idata = mmm.fit(
-        x_design,
-        y,
-        draws=sampler.draws,
-        tune=sampler.tune,
-        chains=sampler.chains,
-        target_accept=sampler.target_accept,
-        random_seed=sampler.random_seed,
-        # MD-050 is jitter+adapt_diag; that init violates their alpha check.
-        init="adapt_diag",
-    )
+    idata, n_div = _sample_accept_ladder(channels, scale_factors, x_design, y, settings)
     wall = time.perf_counter() - started
-    n_div = _count_divergences(idata)
     LOGGER.info("pymc-marketing fit wall %.1fs, divergences=%s", wall, n_div)
     return idata, wall, n_div
+
+
+def _sample_accept_ladder(
+    channels: list[str],
+    scale_factors: ScaleFactors,
+    x_design: pd.DataFrame,
+    y: np.ndarray,
+    settings: Any,
+) -> tuple[Any, int]:
+    """Raise target_accept if their NUTS diverges. Not MD-073 (ambo Settings unchanged)."""
+    sampler = settings.sampler
+    idata: Any = None
+    n_div = 0
+    for target_accept in (float(sampler.target_accept), 0.95, 0.99):
+        mmm = build_crosscheck_mmm(channels, scale_factors, settings.adstock_length)
+        idata = mmm.fit(
+            x_design,
+            y,
+            draws=sampler.draws,
+            tune=sampler.tune,
+            chains=sampler.chains,
+            target_accept=target_accept,
+            random_seed=sampler.random_seed,
+            init="adapt_diag",
+        )
+        n_div = _count_divergences(idata)
+        LOGGER.info("target_accept=%s divergences=%s", target_accept, n_div)
+        if n_div == 0:
+            break
+    return idata, n_div
 
 
 def _count_divergences(idata: Any) -> int:
