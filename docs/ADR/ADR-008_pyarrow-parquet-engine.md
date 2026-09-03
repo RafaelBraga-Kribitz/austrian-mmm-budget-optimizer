@@ -29,8 +29,10 @@ scale-factor metadata is refused at load time (T-1).
 
 `ambo.model.posterior_io` can write and read MD-051 parquet atomically. The runtime
 closure grows by pyarrow and its transitive pins in `uv.lock` (resolved **pyarrow
-22.0.0**). NetCDF remains gitignored (`*.nc`) as the local full-idata companion;
-the writer uses ArviZ's scipy engine so this ADR does not also add netcdf4/h5netcdf.
+22.0.0**). NetCDF remains gitignored (`*.nc`) as the local full-idata companion.
+ArviZ already depends on `h5netcdf` (its default `InferenceData.to_netcdf`
+engine). The scipy netCDF3 engine cannot write grouped files, so no extra
+netcdf package is added here.
 
 ## Spec deviations
 

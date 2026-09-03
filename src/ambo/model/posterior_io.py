@@ -76,9 +76,9 @@ def save_posterior(
 ) -> Path:
     """Thin, flatten, and atomically write ``name.parquet`` (MD-051).
 
-    Also writes ``name.nc`` beside the parquet (scipy netCDF3 engine so the
-    write does not need a new netcdf4/h5netcdf dependency). The destination
-    directory is created if missing.
+    Also writes ``name.nc`` beside the parquet (ArviZ default ``h5netcdf``,
+    already transitive via arviz). The destination directory is created if
+    missing.
 
     Implements: MD-051
     """
@@ -214,9 +214,9 @@ def _atomic_write_parquet(table: pa.Table, dest: Path) -> None:
 
 
 def _try_write_netcdf(idata: az.InferenceData, path: Path) -> None:
-    """Local full-idata companion. scipy engine: already a SPEC-08 dependency."""
+    """Local full-idata companion. Default engine is arviz's h5netcdf."""
     try:
-        idata.to_netcdf(path, engine="scipy")
+        idata.to_netcdf(path)
     except Exception:
         LOGGER.warning("NetCDF debug write failed for %s", path, exc_info=True)
 

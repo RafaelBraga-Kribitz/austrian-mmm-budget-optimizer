@@ -619,8 +619,9 @@ schema metadata, and writes a gitignored NetCDF companion for local debug.
 settings in metadata are read from `Settings.sampler`, never restated MD-050
 literals. Atomic write is temp-sibling + `os.replace`; a crash before replace
 leaves no file at the final path. Does not import `ambo.simulate`. Does not call
-`pandas.read_parquet` / `pq.read_table` (AD-030 AST guard). NetCDF uses the
-scipy engine (already a SPEC-08 dependency).
+`pandas.read_parquet` / `pq.read_table` (AD-030 AST guard). NetCDF uses ArviZ's
+default `h5netcdf` engine (already transitive via arviz; scipy cannot write the
+grouped InferenceData file).
 
 **Failure modes** `FitError`: unknown BP-D-06 name; `thin < 1`; missing parquet;
 missing `ambo_posterior` schema metadata; missing scale factors; a posterior

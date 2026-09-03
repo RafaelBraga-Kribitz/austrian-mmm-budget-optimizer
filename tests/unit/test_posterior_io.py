@@ -178,7 +178,17 @@ def test_loco_variant_name_is_accepted(tmp_path: Path) -> None:
     load_posterior("R__loco-search_brand", directory=tmp_path)
 
 
-def test_thin_less_than_one_raises(tmp_path: Path) -> None:
+def test_path_separator_in_name_raises(tmp_path: Path) -> None:
+    with pytest.raises(FitError, match="basename"):
+        save_posterior(
+            _idata(n_chains=1, n_draws=8),
+            _scale_factors(),
+            "../P-SA",
+            data_hash=_DATA_HASH,
+            prior_sha256=_PRIOR_SHA,
+            thin=1,
+            directory=tmp_path,
+        )
     with pytest.raises(FitError, match="thin must be"):
         _save(tmp_path, _idata(n_chains=1, n_draws=8), thin=0)
 
