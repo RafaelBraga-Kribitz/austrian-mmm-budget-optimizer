@@ -53,3 +53,10 @@ class FitError(AmboError):
     be scaled, a requested channel missing from the input frame, invalid transform
     domain (L < 1, non-finite scale factors), and later sampler/posterior I/O
     failures. Inherits the redaction invariant on `AmboError` unchanged."""
+
+
+class ValidationError(AmboError):
+    """Raised by `src/ambo/validate/` (SPEC-05) for: an unknown layer name, a
+    missing truth file or posterior, a malformed recovery-gate YAML, or a
+    zero-spend channel that would make average ROAS 0/0. Inherits the redaction
+    invariant on `AmboError` unchanged."""

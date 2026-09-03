@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 5
 current_phase_name: Recovery Suite
 status: executing
-stopped_at: Executing 05-01-PLAN.md
-last_updated: "2026-09-03T11:05:00Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-09-03T11:20:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "Phase 5 planned (05-01…05-10); executing T-401"
+last_activity_desc: "05-01 complete; T-401 recovery metrics engine"
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 36
-  completed_plans: 36
+  total_plans: 46
+  completed_plans: 37
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 5 of 9 (Recovery Suite)
-Plan: 05-01 (T-401 recovery metrics)
+Plan: 05-02 (T-402 P-SB/P-SC fits) next
 Status: executing
-Last activity: 2026-09-03 — Phase 5 planned; executing 05-01
+Last activity: 2026-09-03 — 05-01 complete (T-401)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [··········] 0%.
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██████████] 100% (8/8). Phase 5 [█·········] 10% (1/10).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 36
+- Total plans completed: 37
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -50,6 +50,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
 | 04 | 8/8 | - | - |
+| 05 | 1/10 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -124,9 +125,13 @@ unratified and are candidates for ADR-001+ as they are exercised.
   `PRIOR_ELICITATION.md` or `priors_real.yaml`. Phase 4 closed. Live CI vs
   main still D-19 — do not invent `"Approved"`.
 
+- [2026-09-03, 05-01]: Recovery metrics engine (T-401). Gate table is YAML
+  mirroring SPEC-05 §3. validate may import `simulate.truth` (`response_curve_at`)
+  but not `simulate.dgp` (D-03). HDI via ArviZ. No Layer R.
+
 ### Pending Todos
 
-- Execute 05-01…05-10 (T-401…T-410). Drop-independent. Never invent Layer R.
+- Execute 05-02…05-10 (T-402…T-410). Drop-independent. Never invent Layer R.
 
 ### Blockers/Concerns
 
@@ -178,7 +183,7 @@ corrected. What remains:
 
 Last session: 2026-09-03T11:00:00Z
 Stopped at: Completed 04-08-PLAN.md
-Resume file: .planning/phases/05-recovery-suite/05-01-PLAN.md
+Resume file: .planning/phases/05-recovery-suite/05-02-PLAN.md
 
-Next: execute 05-01 Task 2 (recovery.py). Never invent Layer R (A-5). Do not copy
+Next: execute 05-02 (P-SB/P-SC fits). Never invent Layer R (A-5). Do not copy
 m0 `uv.lock`. Do not create priors_real.yaml or PRIOR_ELICITATION.md.

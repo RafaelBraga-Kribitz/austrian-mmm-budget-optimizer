@@ -348,7 +348,7 @@ makes that proof unfalsifiable for every result that follows.
 Plans:
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — T-401 `validate/recovery.py` VR-301…306 metrics engine (wave 1)
+- [x] 05-01-PLAN.md — T-401 `validate/recovery.py` VR-301…306 metrics engine (wave 1)
 
 **Wave 2** *(blocked on Wave 1)*
 

@@ -143,6 +143,9 @@ built-in exception type for expected failure conditions (09 §A-7).
 - `class FitError(AmboError)` — raised by `src/ambo/model/` (SPEC-04) for an all-zero
   channel that cannot be scaled, a missing spend column, invalid transform domain, and
   later sampler/posterior I/O failures.
+- `class ValidationError(AmboError)` — raised by `src/ambo/validate/` (SPEC-05) for an
+  unknown layer, a missing truth/posterior, a malformed recovery-gate YAML, or a
+  zero-spend channel that would make average ROAS 0/0.
 
 **Invariants** Exception messages never contain private-drop content or file-system paths
 under `AMBO_PRIVATE_DROP` (redaction is the logging filter's job for log records; exceptions
@@ -732,6 +735,38 @@ to 1e-10, Hill(K)=0.5, scaling round-trip to 1e-12, all-zero channel `FitError`.
 
 ---
 
+### src/ambo/validate/recovery.py
+
+**Purpose** Compute VR-301…306 recovery statistics against `truth.json` and evaluate
+them against the SPEC-05 §3 gate table. The credibility engine's metrics home.
+
+**Public API**
+- `LAYER_TO_SCENARIO: dict[str, str]` — `P-SA→s_a`, `P-SB→s_b`, `P-SC→s_c`.
+- `class ChannelRecovery` / `class RecoveryMetrics` / `class GateCheck` /
+  `class GateResults` — frozen pydantic; JSON side-file payloads.
+- `compute_recovery(layer, *, bundle=None, frame=None, truth=None, output_dir=None,
+  adstock_length=None) -> RecoveryMetrics` — ROAS = Σm_c/Σx_c via model transforms
+  and `revenue_mean` (MD-030 inverse). Optional injections for tests (D-25).
+- `evaluate_gates(metrics, *, output_dir=None, gates_path=None) -> GateResults` —
+  thresholds from `config/recovery_gates.yaml` only (D-04).
+- `load_gate_table(path=None) -> dict` — parse the YAML; `ValidationError` if empty.
+
+**Invariants** Does not import `ambo.simulate.dgp`. Does not call `pm.sample`.
+90% intervals are `arviz.hdi` (D-07). VR-303 uses the MD-082 21-point 0…1.5× grid
+with `response_curve_at` at those points (no interpolation). Zero-max true curves
+report `mae_pct=None` and are excluded from the median. Writes
+`reports/recovery/metrics_<layer>.json` and `gates_<layer>.json`.
+
+**Failure modes** `ValidationError`: unknown layer; missing truth file; missing
+posterior column; zero total spend or revenue; malformed gate YAML; median λ
+outside (0, 1).
+
+**Testing** `tests/unit/test_recovery.py` — constructed-posterior ROAS vs numpy to
+1e-8; HDI miss fails VR-301; YAML cells match SPEC-05 §3; zero-effect MAE is
+`None`; half-life ranking; JSON round-trip; no `simulate.dgp` import.
+
+---
+
 ### scripts/export_marts.py
 
 **Purpose** The registry-driven, byte-stable export writer (T-205, D-01..D-05).
@@ -803,7 +838,8 @@ opening the gitignored blueprint.
 simulate  →  (nothing in ambo except common)
 intake    →  common
 model     →  common
-validate  →  common, model (fit/posterior_io/transforms), truth.json files
+validate  →  common, model (posterior_io/transforms), simulate.truth
+            (`response_curve_at` / `TruthFile` only; never `simulate.dgp`)
 decide    →  common, model.posterior_io/transforms (read-only)
 report    →  common, exports/SSOT side-files, model.posterior_io (read-only)
 common    →  (nothing in ambo)

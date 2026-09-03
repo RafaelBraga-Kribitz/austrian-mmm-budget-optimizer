@@ -689,3 +689,16 @@ lives on `Settings.max_fit_minutes`). ROADMAP Phase 4 effort line set to 1 d.
 **Verification.** `uv run pytest tests/unit/test_elicit.py tests/unit/test_repo_layout.py
 -q` green. `make lint && make test` — **382 passed**, 1 deselected (smoke), 90%
 coverage.
+
+### 2026-09-03 — Phase 5 open + T-401 recovery metrics (05-01)
+
+Phase 5 planning corpus committed (D-01…D-26; 05-01…05-10). T-401 lands
+`ambo.validate.recovery`: VR-301…306 on constructed posteriors; gate table is
+`config/recovery_gates.yaml` mirroring SPEC-05 §3; ROAS via model transforms +
+`revenue_mean`; truth curves via `response_curve_at` on the MD-082 grid; HDI via
+`arviz.hdi`. `ValidationError` added. No P-SB/P-SC artifacts in this commit
+(05-02). No Layer R. `priors_real.yaml` and `PRIOR_ELICITATION.md` still absent.
+
+**Verification.** `uv run pytest tests/unit/test_recovery.py tests/unit/test_repo_layout.py
+tests/unit/test_import_independence.py -q` green. `make lint && make test` — **390 passed**,
+1 deselected (smoke), 91% coverage.

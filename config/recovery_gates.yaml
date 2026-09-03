@@ -1,0 +1,43 @@
+# SPEC-05 §3 recovery gates. Thresholds are DATA (D-04). Do not edit a cell to
+# chase a red gate without an ADR that names the structural cause (VR-310).
+# Keys are BP-D-06 layer names (D-05). "6 channels" means Layer-P channels present.
+
+P-SA:
+  n_channels: 6
+  vr_301_min_in_hdi: 5
+  vr_302_min_spearman: 0.83
+  vr_302_gated: true
+  vr_303_max_mae_pct_per_channel: 15.0
+  vr_303_max_mae_pct_median: 10.0
+  vr_303_gated: true
+  vr_304_gated: false
+  vr_305_required: true
+  vr_306_max_share_delta: 0.10
+
+P-SB:
+  n_channels: 6
+  vr_301_min_in_hdi: 4
+  vr_302_min_spearman: 0.7
+  vr_302_gated: true
+  vr_303_max_mae_pct_per_channel: 25.0
+  vr_303_max_mae_pct_median: 15.0
+  vr_303_gated: true
+  vr_304_gated: false
+  vr_305_required: true
+  vr_306_max_share_delta: 0.10
+
+P-SC:
+  n_channels: 6
+  vr_301_min_in_hdi: 4
+  vr_302_min_spearman: 0.7
+  vr_302_gated: false
+  vr_303_max_mae_pct_per_channel: 25.0
+  vr_303_max_mae_pct_median: 15.0
+  vr_303_gated: false
+  vr_304_gated: true
+  vr_304_channel: display_video
+  vr_304_roas_threshold: 0.2
+  vr_304_min_prob: 0.7
+  vr_304_max_median_share: 0.03
+  vr_305_required: true
+  vr_306_max_share_delta: 0.10
