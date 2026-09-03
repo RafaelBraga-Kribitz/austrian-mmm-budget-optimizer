@@ -560,3 +560,13 @@ truncated Gamma(3,2) on [0.3, 3.0], β HalfNormal(0.15). Globals match SPEC-04
 **Verification.** `uv run pytest tests/unit/test_priors.py tests/unit/test_config.py
 tests/unit/test_repo_layout.py -q` green. Full `make lint && make test` recorded
 after this plan's remaining checks.
+
+### 2026-09-03 — T-302 MD-070 shared-shape sanity (04-03)
+
+On P-SA spend, model `adstock_convolve` (L=8 normalized) vs simulator
+`adstock_recursive` at each channel's truth λ correlate above 0.95 for all six
+present channels. Equality is not asserted (MD-020 deliberate mismatch). The
+test file imports both packages; `test_import_independence` stays green.
+
+04-02 full suite after PriorConfig: `make lint && make test` — **341 passed**,
+93% coverage.

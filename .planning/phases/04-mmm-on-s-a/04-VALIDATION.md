@@ -39,7 +39,7 @@ created: 2026-09-03
 | T-301 | 04-01 | 1 | REQ-dl8-quality | Pitfall 1 | `import pymc` succeeds after numpy constraint | smoke-import | `uv run python -c "import pymc, arviz"` | ✅ | ✅ |
 | T-303 | 04-02 | 2 | REQ-q1-truth-recovery | MD-040 | synthetic priors channel-agnostic; extra=forbid | unit | `uv run pytest tests/unit/test_priors.py -q` | ✅ | ✅ |
 | T-303 | 04-02 | 2 | ADR-006 deferral | W6 | `max_fit_minutes==35` on Settings | unit | `uv run pytest tests/unit/test_config.py -q` | ✅ | ✅ |
-| T-302 | 04-03 | 3 | REQ-q1-truth-recovery | T-2/T-3 | r>0.95 per S-A channel; test imports both packages | unit | `uv run pytest tests/unit/test_transform_sanity.py -q` | ⬜ | ⬜ |
+| T-302 | 04-03 | 3 | REQ-q1-truth-recovery | T-2/T-3 | r>0.95 per S-A channel; test imports both packages | unit | `uv run pytest tests/unit/test_transform_sanity.py -q` | ✅ | ✅ |
 | T-304 | 04-04 | 4 | REQ-q2-real-incremental-roas | MD-002 | free-RV name set; no S-A/layer literals in mmm.py | unit | `uv run pytest tests/unit/test_mmm.py -q` | ⬜ | ⬜ |
 | T-304 | 04-04 | 4 | REQ-dl8-quality | EB-060 | smoke fit completes; R-hat finite | smoke | `make test SMOKE=1` | ⬜ | ⬜ |
 | T-305 | 04-05 | 5 | REQ-dl1-reproducible-pipeline | T-1 | save/load round-trip; refuse missing scale factors; atomic | unit | `uv run pytest tests/unit/test_posterior_io.py -q` | ⬜ | ⬜ |
@@ -55,7 +55,7 @@ created: 2026-09-03
 - [x] `FitError` — 04-01
 - [x] numpy lock constraint — 04-01
 - [x] `priors.py` + `priors_synthetic.yaml` — 04-02
-- [ ] `test_transform_sanity.py` — 04-03
+- [x] `test_transform_sanity.py` — 04-03
 - [ ] `mmm.py` + `fit.sample_model` + smoke — 04-04
 - [ ] `posterior_io.py` — 04-05
 - [ ] `diagnostics.py` — 04-06

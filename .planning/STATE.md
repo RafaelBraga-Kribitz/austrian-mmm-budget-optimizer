@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-09-03T10:00:00Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-09-03T10:30:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-02 complete (PriorConfig + max_fit_minutes)"
+last_activity_desc: "04-03 complete (MD-070 shared-shape sanity)"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 36
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: 04-03 next (T-302 MD-070)
+Plan: 04-04 next (T-304)
 Status: executing
-Last activity: 2026-09-03 — 04-02 complete (PriorConfig, synthetic priors, max_fit_minutes)
+Last activity: 2026-09-03 — 04-03 complete (MD-070 r>0.95 on S-A)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [██········] 25% (2/8).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [███·······] 38% (3/8).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 30
+- Total plans completed: 31
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,7 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
-| 04 | 2/8 | - | - |
+| 04 | 3/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -105,10 +105,11 @@ unratified and are candidates for ADR-001+ as they are exercised.
 - [2026-09-03, 04-02]: D-01 `max_fit_minutes: 35` on Settings (not SamplerConfig).
   MD-040 synthetic priors are an explicit seven-channel YAML with identical
   values. `priors_real.yaml` was not created.
+- [2026-09-03, 04-03]: MD-070 green on P-SA spend vs recursive DGP at truth λ;
+  equality is not asserted.
 
 ### Pending Todos
 
-- T-302 MD-070 (04-03)
 - T-304 build_model + smoke (04-04)
 - T-305 posterior_io (04-05)
 - T-306 diagnostics (04-06)
@@ -163,9 +164,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T10:00:00Z
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-mmm-on-s-a/04-03-PLAN.md
+Last session: 2026-09-03T10:30:00Z
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-mmm-on-s-a/04-04-PLAN.md
 
-Next: stacked 04-03…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
+Next: stacked 04-04…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
 Do not create priors_real.yaml.
