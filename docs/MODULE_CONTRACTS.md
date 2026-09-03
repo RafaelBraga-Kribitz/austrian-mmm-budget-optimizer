@@ -558,6 +558,31 @@ validation (unknown key, missing channel, non-positive hyperparameters).
 **Testing** `tests/unit/test_priors.py` — load synthetic YAML; seven channels
 value-equal; globals match SPEC-04 §4; extra keys fail; `priors_real.yaml` absent.
 
+### src/ambo/model/elicit.py
+
+**Purpose** MD-060 converters from elicited ranges to `PriorConfig` hyperparameters.
+Pure and deterministic. Built ahead of M4; does not parse or invent
+`docs/PRIOR_ELICITATION.md`.
+
+**Public API**
+- `lambda_from_halflife(weeks) -> float` / `halflife_from_lambda(lam) -> float` —
+  `λ = 2 ** (-1 / weeks)`. Longer half-life ⇒ larger λ.
+- `beta_params_from_halflife_range(lo_wk, hi_wk) -> BetaParams` — mode at
+  λ(mid); ~90% mass in `[λ(lo), λ(hi)]` via brentq on concentration.
+- `gamma_params_from_k_range(lo, hi) -> GammaParams` — scaled K; mode at mid;
+  ~90% mass in `[lo, hi]`.
+- `sigma_beta_from_max_effect_share(share) -> float` — HalfNormal σ whose 95th
+  percentile equals `share` of mean scaled revenue (mean y = 1).
+
+**Invariants** Does not import `ambo.simulate` or PyMC. Does not write YAML.
+Does not create `priors_real.yaml` or `PRIOR_ELICITATION.md`.
+
+**Failure modes** `FitError`: non-positive or unordered ranges; share ≤ 0;
+90% mass unachievable in the search bracket.
+
+**Testing** `tests/unit/test_elicit.py` — mass ±1%; monotonicity; doctests;
+`PRIOR_ELICITATION.md` still absent.
+
 ### src/ambo/model/mmm.py
 
 **Purpose** The single raw-PyMC model definition (SPEC-04 §2, MD-002). Additive in

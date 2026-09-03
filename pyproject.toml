@@ -76,6 +76,12 @@ ignore_missing_imports = true
 module = ["yaml.*"]
 ignore_missing_imports = true
 
+# `scipy` is a pinned SPEC-08 §3 runtime dependency. Official `scipy-stubs` would
+# be a new third-party package (EB-030 / ADR). Same one-line override as PyYAML.
+[[tool.mypy.overrides]]
+module = ["scipy", "scipy.*"]
+ignore_missing_imports = true
+
 # `pandas` ships an incomplete py.typed marker for mypy's strict-mode purposes; it
 # is a pinned SPEC-08 §3 runtime dependency (not a new one), so this follows the
 # same precedent as the `yaml` override immediately above rather than adding the
