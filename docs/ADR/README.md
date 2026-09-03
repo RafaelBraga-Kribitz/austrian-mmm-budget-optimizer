@@ -28,6 +28,7 @@ marked **Superseded** by a new ADR that references it, never edited or deleted i
 | [ADR-008](ADR-008_pyarrow-parquet-engine.md) | Adding `pyarrow` so MD-051 thinned posteriors can be parquet | **Ratified** | `pyarrow>=14,<23` (locked 22.0.0) so pandas 2.3 can write MD-051 parquet. SPEC-08 §3 extended by ADR, not edited in place. |
 | [ADR-005](ADR-005_md073-rung2-noncentered-fourier.md) | MD-073 rung 2: non-centered Fourier block | **Ratified** | P-SA still had 17 divergences after rung 1 (`target_accept` 0.95). Fourier `gamma_sin`/`gamma_cos` are Deterministic reconstructions of unit-normal offsets. D-06 reported names unchanged. |
 | [ADR-009](ADR-009_md073-rung3-tighten-s.md) | MD-073 rung 3: tighten Hill slope prior at fit time | **Ratified** | After rungs 1–2, P-SA still had 3 divergences. `s` becomes Gamma(4, 3) trunc [0.5, 2.5] via `PriorConfig.model_copy`. YAML / MD-040 unchanged. |
+| [ADR-010](ADR-010_md073-rung4-fix-s.md) | MD-073 rung 4: fix Hill slope `s_c = 1` | **Ratified** | After rungs 1–3, P-SA still had 2 divergences in a search-brand K/s funnel. `s` is Deterministic ones (logistic saturation). YAML `s` prior unused at sampling. |
 
 ## Reserved slots (GB-202)
 

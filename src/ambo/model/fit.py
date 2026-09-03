@@ -45,9 +45,9 @@ _RUNG1_NOTE = (
     "MD-073 rung 1 applied: target_accept raised to 0.95 "
     "(Settings.sampler unchanged; not an MD-050 edit)."
 )
-_RUNG3_NOTE = (
-    "MD-073 rung 3 applied: s_c prior tightened to Gamma(4, 3) trunc [0.5, 2.5] "
-    "via PriorConfig.model_copy (config/priors_synthetic.yaml unchanged; ADR-009)."
+_MODEL_NOTES = (
+    "MD-073 rung 2 (ADR-005): non-centered Fourier; reported names gamma_sin/gamma_cos.",
+    "MD-073 rung 4 (ADR-010): s_c fixed at 1 (logistic saturation). YAML s prior is not sampled.",
 )
 
 
@@ -158,27 +158,27 @@ def _run_md073_ladder(
     frame: pd.DataFrame,
     priors_path: Path,
 ) -> Path:
-    """MD-050 sample, then MD-073 rungs 1 and 3 if only divergences fail.
+    """MD-050 sample, then MD-073 rung 1 if only divergences fail.
 
     Rebuild the PyMC model each attempt: a second `pm.sample` on the same
-    instance fails (`logp` is None). Rung 2 is already the `build_model`
-    parameterization (ADR-005).
+    instance fails (`logp` is None). Rungs 2 and 4 are already the
+    `build_model` parameterization (ADR-005, ADR-010). Rung 3's s-prior copy
+    is not applied because s is not sampled.
     """
     attempts: tuple[tuple[PriorConfig, float, tuple[str, ...], str | None, str], ...] = (
-        (priors, sampler.target_accept, (), None, "fit %s all-green; posterior %s"),
+        (
+            priors,
+            sampler.target_accept,
+            _MODEL_NOTES,
+            None,
+            "fit %s all-green; posterior %s",
+        ),
         (
             priors,
             MD073_RUNG1_TARGET_ACCEPT,
-            (_RUNG1_NOTE,),
+            (*_MODEL_NOTES, _RUNG1_NOTE),
             "MD-071 red on divergences only; MD-073 rung 1 retry (raised target_accept)",
             "fit %s all-green after MD-073 rung 1; posterior %s",
-        ),
-        (
-            tighten_s_c_prior(priors),
-            MD073_RUNG1_TARGET_ACCEPT,
-            (_RUNG1_NOTE, _RUNG3_NOTE),
-            "MD-071 red on divergences only; MD-073 rung 3 retry (tightened s_c)",
-            "fit %s all-green after MD-073 rung 3; posterior %s",
         ),
     )
     report = Path()

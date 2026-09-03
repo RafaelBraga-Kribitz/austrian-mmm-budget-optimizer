@@ -1,6 +1,6 @@
 """Raw PyMC MMM builder (SPEC-04 §2).
 
-Implements: MD-001, MD-002, MD-073, ADR-005
+Implements: MD-001, MD-002, MD-073, ADR-005, ADR-010
 
 One definition serves every dataset: the channel list and the prior YAML are the
 only knobs. Additive in revenue *level*, not log (T-9). Fourier period 52.18 and
@@ -62,10 +62,6 @@ def _stack_channel_params(channels: list[str], priors: PriorConfig) -> dict[str,
         "lam_b": np.array([row.lam.b for row in rows], dtype=np.float64),
         "k_shape": np.array([row.K.shape for row in rows], dtype=np.float64),
         "k_rate": np.array([row.K.rate for row in rows], dtype=np.float64),
-        "s_shape": np.array([row.s.shape for row in rows], dtype=np.float64),
-        "s_rate": np.array([row.s.rate for row in rows], dtype=np.float64),
-        "s_lower": np.array([row.s.lower for row in rows], dtype=np.float64),
-        "s_upper": np.array([row.s.upper for row in rows], dtype=np.float64),
         "beta_sigma": np.array([row.beta.sigma for row in rows], dtype=np.float64),
     }
 
@@ -167,7 +163,6 @@ def _register_nodes(
     spend_data = pm.Data("spend", spend, dims=("week", "channel"))
     k_mean = hyper["k_shape"] / hyper["k_rate"]
     lam_mean = hyper["lam_a"] / (hyper["lam_a"] + hyper["lam_b"])
-    s_mean = np.clip(hyper["s_shape"] / hyper["s_rate"], hyper["s_lower"], hyper["s_upper"])
     alpha = pm.Normal(
         "alpha", mu=globals_.alpha.mu, sigma=globals_.alpha.sigma, initval=globals_.alpha.mu
     )
@@ -219,14 +214,8 @@ def _register_nodes(
         "lam", alpha=hyper["lam_a"], beta=hyper["lam_b"], dims="channel", initval=lam_mean
     )
     k = pm.Gamma("k", alpha=hyper["k_shape"], beta=hyper["k_rate"], dims="channel", initval=k_mean)
-    s = pm.Truncated(
-        "s",
-        pm.Gamma.dist(alpha=hyper["s_shape"], beta=hyper["s_rate"]),
-        lower=hyper["s_lower"],
-        upper=hyper["s_upper"],
-        dims="channel",
-        initval=s_mean,
-    )
+    # MD-073 rung 4 / ADR-010: s_c = 1 (logistic saturation). Reported name stays `s`.
+    s = pm.Deterministic("s", pt.ones((n_channels,)), dims="channel")
     beta = pm.HalfNormal(
         "beta",
         sigma=hyper["beta_sigma"],

@@ -569,8 +569,9 @@ revenue level. Channel list + `PriorConfig` drive media terms; no scenario branc
 - `build_model(df, channels, priors) -> pm.Model` — `df` is already scaled.
   Coords: `channel`, `week`, `fourier`. Free RVs: `alpha`, `tau`,
   `gamma_sin_offset`, `gamma_cos_offset`, `delta_promo`, `delta_advent`,
-  `delta_jan`, `lam`, `k`, `s`, `beta`, `sigma`. Deterministic (D-06 names):
-  `gamma_sin`, `gamma_cos` = μ + σ · offset (MD-073 rung 2 / ADR-005).
+  `delta_jan`, `lam`, `k`, `beta`, `sigma`. Deterministic (D-06 names):
+  `gamma_sin`, `gamma_cos` = μ + σ · offset (MD-073 rung 2 / ADR-005);
+  `s` = 1 per channel (MD-073 rung 4 / ADR-010, logistic saturation).
   Observed: `y`.
 
 **Invariants** Does not import `ambo.simulate` or `ambo.common.db`. Does not contain
@@ -601,8 +602,9 @@ literals.
 - `run_fit(layer, *, variant=None) -> Path` — mart → scale → build → sample →
   save_posterior → write_diag_report. Logs `max_fit_minutes` first (EB-050).
   If MD-071 fails on divergences only, retries MD-073 rung 1 (`target_accept`
-  0.95) then rung 3 (tightened `s`). Variants `flat|nopromo|holdout|loco-<ch>`
-  are parsed and then refused as unwired (T-402 / Phase 6).
+  0.95). Rungs 2 and 4 live in `build_model` (ADR-005, ADR-010). Variants
+  `flat|nopromo|holdout|loco-<ch>` are parsed and then refused as unwired
+  (T-402 / Phase 6).
 - `main(argv=None) -> int` — `python -m ambo.model.fit --layer P-SA`
 
 **Invariants** AST-confined: no other `src/ambo/` module calls `pm.sample` /
