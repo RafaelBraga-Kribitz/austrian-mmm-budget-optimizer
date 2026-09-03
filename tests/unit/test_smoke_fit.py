@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import arviz as az
 import numpy as np
-import pytensor
 import pytest
+import xarray as xr
 
 from ambo.common.config import load_settings, repo_root
 from ambo.common.db import read_dim_layer, read_mmm_input
@@ -18,8 +18,6 @@ from ambo.model.fit import sample_model
 from ambo.model.mmm import build_model
 from ambo.model.priors import SYNTHETIC_PRIORS_RELATIVE, load_priors
 from ambo.model.transforms import compute_scale_factors, to_model_scale
-
-pytensor.config.cxx = ""
 
 _SMOKE_WEEKS = 60
 _SMOKE_DRAWS = 200
@@ -53,14 +51,30 @@ def test_smoke_fit_p_sa_completes_with_finite_rhat() -> None:
         progressbar=False,
         compute_convergence_checks=False,
     )
-    rhat = az.rhat(idata)
-    values = np.asarray(rhat.to_array())
-    finite = values[np.isfinite(values)]
-    # One-chain rank-normalized R-hat can be NaN; split-R-hat on the same
-    # idata must still produce at least one finite number so the smoke gate
-    # is not a silent pass on an empty diagnostic.
-    if finite.size == 0:
-        split = np.asarray(az.rhat(idata, method="split").to_array())
-        finite = split[np.isfinite(split)]
-    assert finite.size > 0, "R-hat produced no finite values"
-    assert np.isfinite(finite).all()
+    rhat_values = _finite_rhat_values(idata)
+    assert rhat_values.size > 0, "R-hat produced no finite values"
+    assert np.isfinite(rhat_values).all()
+
+
+def _finite_rhat_values(idata: az.InferenceData) -> np.ndarray:
+    """R-hat that is defined for the 1-chain smoke profile.
+
+    ArviZ 0.23 requires ``(chains=2, draws=4)`` before it will compute rank
+    R-hat, so a spec-faithful 1×200 smoke run yields an all-NaN Dataset. Split
+    the draws into two contiguous halves (the usual split-R-hat construction)
+    and evaluate R-hat on that 2-chain view. Sampling-without-error is already
+    proven by ``sample_model`` returning.
+    """
+    posterior = idata.posterior
+    n_draw = int(posterior.sizes["draw"])
+    half = n_draw // 2
+    first = posterior.isel(chain=0, draw=slice(0, half))
+    second = posterior.isel(chain=0, draw=slice(half, 2 * half)).assign_coords(
+        draw=first.coords["draw"]
+    )
+    split = xr.concat(
+        [first.expand_dims(chain=[0]), second.expand_dims(chain=[1])],
+        dim="chain",
+    )
+    values = np.asarray(az.rhat(split).to_array())
+    return values[np.isfinite(values)]

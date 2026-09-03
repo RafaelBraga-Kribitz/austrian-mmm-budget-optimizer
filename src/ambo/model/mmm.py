@@ -165,32 +165,64 @@ def _register_nodes(
     jan = df["jan_dip_flag"].to_numpy(dtype=np.float64)
     y_obs = df["revenue"].to_numpy(dtype=np.float64)
     spend_data = pm.Data("spend", spend, dims=("week", "channel"))
-    alpha = pm.Normal("alpha", mu=globals_.alpha.mu, sigma=globals_.alpha.sigma)
-    tau = pm.Normal("tau", mu=globals_.tau.mu, sigma=globals_.tau.sigma)
+    k_mean = hyper["k_shape"] / hyper["k_rate"]
+    lam_mean = hyper["lam_a"] / (hyper["lam_a"] + hyper["lam_b"])
+    s_mean = np.clip(hyper["s_shape"] / hyper["s_rate"], hyper["s_lower"], hyper["s_upper"])
+    alpha = pm.Normal(
+        "alpha", mu=globals_.alpha.mu, sigma=globals_.alpha.sigma, initval=globals_.alpha.mu
+    )
+    tau = pm.Normal("tau", mu=globals_.tau.mu, sigma=globals_.tau.sigma, initval=0.0)
     gamma_sin = pm.Normal(
-        "gamma_sin", mu=globals_.gamma.mu, sigma=globals_.gamma.sigma, dims="fourier"
+        "gamma_sin",
+        mu=globals_.gamma.mu,
+        sigma=globals_.gamma.sigma,
+        dims="fourier",
+        initval=np.zeros(FOURIER_ORDER),
     )
     gamma_cos = pm.Normal(
-        "gamma_cos", mu=globals_.gamma.mu, sigma=globals_.gamma.sigma, dims="fourier"
+        "gamma_cos",
+        mu=globals_.gamma.mu,
+        sigma=globals_.gamma.sigma,
+        dims="fourier",
+        initval=np.zeros(FOURIER_ORDER),
     )
     delta_promo = pm.Normal(
-        "delta_promo", mu=globals_.delta_promo.mu, sigma=globals_.delta_promo.sigma
+        "delta_promo",
+        mu=globals_.delta_promo.mu,
+        sigma=globals_.delta_promo.sigma,
+        initval=globals_.delta_promo.mu,
     )
     delta_advent = pm.Normal(
-        "delta_advent", mu=globals_.delta_advent.mu, sigma=globals_.delta_advent.sigma
+        "delta_advent",
+        mu=globals_.delta_advent.mu,
+        sigma=globals_.delta_advent.sigma,
+        initval=globals_.delta_advent.mu,
     )
-    delta_jan = pm.Normal("delta_jan", mu=globals_.delta_jan.mu, sigma=globals_.delta_jan.sigma)
-    lam = pm.Beta("lam", alpha=hyper["lam_a"], beta=hyper["lam_b"], dims="channel")
-    k = pm.Gamma("k", alpha=hyper["k_shape"], beta=hyper["k_rate"], dims="channel")
+    delta_jan = pm.Normal(
+        "delta_jan",
+        mu=globals_.delta_jan.mu,
+        sigma=globals_.delta_jan.sigma,
+        initval=globals_.delta_jan.mu,
+    )
+    lam = pm.Beta(
+        "lam", alpha=hyper["lam_a"], beta=hyper["lam_b"], dims="channel", initval=lam_mean
+    )
+    k = pm.Gamma("k", alpha=hyper["k_shape"], beta=hyper["k_rate"], dims="channel", initval=k_mean)
     s = pm.Truncated(
         "s",
         pm.Gamma.dist(alpha=hyper["s_shape"], beta=hyper["s_rate"]),
         lower=hyper["s_lower"],
         upper=hyper["s_upper"],
         dims="channel",
+        initval=s_mean,
     )
-    beta = pm.HalfNormal("beta", sigma=hyper["beta_sigma"], dims="channel")
-    sigma = pm.HalfNormal("sigma", sigma=globals_.sigma.sigma)
+    beta = pm.HalfNormal(
+        "beta",
+        sigma=hyper["beta_sigma"],
+        dims="channel",
+        initval=0.5 * hyper["beta_sigma"],
+    )
+    sigma = pm.HalfNormal("sigma", sigma=globals_.sigma.sigma, initval=float(globals_.sigma.sigma))
     media = _media_mu(spend_data, lam, k, s, beta, length, n_channels)
     mu = _linear_predictor(
         alpha=alpha,

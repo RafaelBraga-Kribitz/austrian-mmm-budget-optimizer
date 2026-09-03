@@ -52,8 +52,10 @@ def numpy_adstock_convolve(x: np.ndarray, lam: float, length: int) -> np.ndarray
 
 
 def numpy_hill(a: np.ndarray, k: float, s: float) -> np.ndarray:
-    a_pow = a**s
-    return a_pow / (a_pow + k**s)
+    floor = 1e-8
+    a_safe = np.maximum(a, floor)
+    k_safe = max(k, floor)
+    return 1.0 / (1.0 + np.exp(-s * (np.log(a_safe) - np.log(k_safe))))
 
 
 def _eval_adstock(x: np.ndarray, lam: float, length: int) -> np.ndarray:
@@ -128,7 +130,7 @@ def test_hill_at_k_is_exactly_half() -> None:
 
 def test_hill_at_zero_is_zero() -> None:
     got = _eval_hill(np.array([0.0]), 100.0, 1.1)
-    assert got[0] == pytest.approx(0.0, abs=_PT_ATOL)
+    assert got[0] == pytest.approx(0.0, abs=1e-8)
 
 
 def test_hill_pytensor_matches_numpy_reference() -> None:

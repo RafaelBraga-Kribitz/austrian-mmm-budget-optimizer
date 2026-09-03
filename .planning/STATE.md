@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-09-03T10:30:00Z"
+stopped_at: Completed 04-04-PLAN.md
+last_updated: "2026-09-03T12:00:00Z"
 last_activity: 2026-09-03
-last_activity_desc: "04-03 complete (MD-070 shared-shape sanity)"
+last_activity_desc: "04-04 complete (build_model + CI smoke)"
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 36
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -28,17 +28,17 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: 04-04 next (T-304)
+Plan: 04-05 next (T-305)
 Status: executing
-Last activity: 2026-09-03 — 04-03 complete (MD-070 r>0.95 on S-A)
+Last activity: 2026-09-03 — 04-04 complete (build_model, sample_model, smoke)
 
-Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [███·······] 38% (3/8).
+Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9). Phase 4 [████······] 50% (4/8).
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: —
 - Total execution time: 0.0 hours
 
@@ -49,7 +49,7 @@ Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██�
 | 01 | 9/9 | - | - |
 | 02 | 10/10 | - | - |
 | 03 | 9/9 | - | - |
-| 04 | 3/8 | - | - |
+| 04 | 4/8 | - | - |
 
 **Recent Trend:** No data yet.
 
@@ -107,10 +107,12 @@ unratified and are candidates for ADR-001+ as they are exercised.
   values. `priors_real.yaml` was not created.
 - [2026-09-03, 04-03]: MD-070 green on P-SA spend vs recursive DGP at truth λ;
   equality is not asserted.
+- [2026-09-03, 04-04]: `build_model` + `sample_model` (only `pm.sample` site).
+  Hill is log-space with floor 1e-8 (Pitfall 8). Smoke 1×200/200 green locally;
+  1-chain R-hat uses a split-chain construction.
 
 ### Pending Todos
 
-- T-304 build_model + smoke (04-04)
 - T-305 posterior_io (04-05)
 - T-306 diagnostics (04-06)
 - T-307 full S-A fit (04-07)
@@ -164,9 +166,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-03T10:30:00Z
-Stopped at: Completed 04-03-PLAN.md
-Resume file: .planning/phases/04-mmm-on-s-a/04-04-PLAN.md
+Last session: 2026-09-03T12:00:00Z
+Stopped at: Completed 04-04-PLAN.md
+Resume file: .planning/phases/04-mmm-on-s-a/04-05-PLAN.md
 
-Next: stacked 04-04…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
+Next: stacked 04-05…04-08. Never invent Layer R (A-5). Do not copy m0 `uv.lock`.
 Do not create priors_real.yaml.

@@ -61,13 +61,21 @@ def adstock_convolve(x: Any, lam: Any, length: int) -> Any:
     return total
 
 
+_HILL_FLOOR = 1e-8
+
+
 def hill_saturation(a: Any, K: Any, s: Any) -> Any:
     """Hill saturation `a^s / (a^s + K^s)` (SPEC-01 §2.2 math, independent copy).
 
     Implements: MD-021
+
+    Evaluated as `sigmoid(s * (log(a) - log(K)))` with a positive floor so
+    gradients stay finite when adstocked spend is zero and `s < 1` (Pitfall 8).
+    The floor is a numerical domain assertion, not a change to the formula.
     """
-    a_pow = a**s
-    return a_pow / (a_pow + K**s)
+    a_safe = pt.maximum(a, _HILL_FLOOR)
+    k_safe = pt.maximum(K, _HILL_FLOOR)
+    return pt.sigmoid(s * (pt.log(a_safe) - pt.log(k_safe)))
 
 
 @dataclass(frozen=True)

@@ -570,3 +570,19 @@ test file imports both packages; `test_import_independence` stays green.
 
 04-02 full suite after PriorConfig: `make lint && make test` — **341 passed**,
 93% coverage.
+
+### 2026-09-03 — T-304 build_model + CI smoke (04-04)
+
+`build_model(df, channels, priors)` implements SPEC-04 §2 on already-scaled
+data. Free RV names match D-06. `sample_model` is the only `pm.sample` site.
+The sampler-key guard now forbids restated MD-050 literals (D-05), not
+identifier names.
+
+**Pitfall 8.** Naive `a^s/(a^s+K^s)` has infinite gradient at a=0 when s<1
+(flighted channels). Hill is now `sigmoid(s*(log(a)-log(K)))` with floor
+1e-8. RV `initval`s are the prior means. Smoke (P-SA 60 weeks, 1×200/200)
+completes in ~23 s here with 0 divergences; ArviZ R-hat is evaluated on a
+split of the single chain because rank-R-hat requires two chains.
+
+`make lint && make test` — **347 passed**, 1 deselected (smoke), 92%
+coverage. `make test SMOKE=1` green locally. Live CI vs main still D-19.
