@@ -14,8 +14,9 @@ dependency-directions table, since they are the same kind of fact:
 - the PyMC sampling entry point (`pm.sample()` / `pymc.sample()`) called nowhere
   outside `ambo/model/fit.py`
 
-Both are vacuously true today (`crosscheck.py` and `fit.py` do not exist yet) and
-become load-bearing in Phase 4.
+Both become load-bearing in Phase 4: `transforms.py` is present from 04-01,
+and `fit.py` / `crosscheck.py` land in later Phase 4 / Phase 5 plans. Until
+those files exist the sample/marketing guards still scan the whole tree.
 """
 
 from __future__ import annotations
@@ -81,8 +82,7 @@ def test_simulate_and_model_do_not_import_each_other(repo_root: Path) -> None:
     )
     print(
         f"import-independence guard: scanned {len(simulate_files)} simulate/ file(s) "
-        f"and {len(model_files)} model/ file(s); 0 cross-imports (vacuously intact "
-        "today -- both packages are otherwise empty, not skipped)."
+        f"and {len(model_files)} model/ file(s); 0 cross-imports."
     )
 
 
@@ -107,8 +107,8 @@ def test_pymc_marketing_imported_only_in_validate_crosscheck(repo_root: Path) ->
         "pymc_marketing imported outside validate/crosscheck.py (MD-003): " + ", ".join(offenders)
     )
     print(
-        f"pymc_marketing-confinement guard: scanned {len(py_files)} file(s) "
-        "(vacuously true today -- validate/crosscheck.py does not exist yet)."
+        f"pymc_marketing-confinement guard: scanned {len(py_files)} file(s); "
+        "0 offenders outside validate/crosscheck.py."
     )
 
 
@@ -137,6 +137,6 @@ def test_pymc_sample_called_only_in_model_fit(repo_root: Path) -> None:
         offenders
     )
     print(
-        f"pymc-sample-confinement guard: scanned {len(py_files)} file(s) "
-        "(vacuously true today -- model/fit.py does not exist yet)."
+        f"pymc-sample-confinement guard: scanned {len(py_files)} file(s); "
+        "0 pm.sample() calls outside model/fit.py."
     )

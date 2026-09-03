@@ -138,6 +138,9 @@ built-in exception type for expected failure conditions (09 §A-7).
 - `class DataContractError(AmboError)` — raised by `ambo.common.db` (the only data doorway for
   model/decide/report code, AD-030) for a missing warehouse file, an unknown layer argument, a
   mart-schema mismatch, or a violated frame postcondition.
+- `class FitError(AmboError)` — raised by `src/ambo/model/` (SPEC-04) for an all-zero
+  channel that cannot be scaled, a missing spend column, invalid transform domain, and
+  later sampler/posterior I/O failures.
 
 **Invariants** Exception messages never contain private-drop content or file-system paths
 under `AMBO_PRIVATE_DROP` (redaction is the logging filter's job for log records; exceptions
@@ -521,6 +524,36 @@ rendering, no-CR-bytes, the ISO-date/gapless-spine check, media row ordering
 (taxonomy, not alphabetical), single-scenario/unknown-target CLI behavior, and
 `validate_sim`'s pass/fail on a fresh generation, a corrupted `truth.json`, and a
 missing artifact.
+
+---
+
+### src/ambo/model/transforms.py
+
+**Purpose** Model-side geometric adstock (normalized finite convolution), Hill
+saturation, and the MD-030 scaling pair. Independent of `ambo.simulate` (MD-020's
+deliberate parameterization mismatch). The only back-transformation site (T-1).
+
+**Public API**
+- `geometric_adstock_weights(lam, L: int)` — normalized weights `w_i = λ^i / Σ λ^j`.
+- `adstock_convolve(x, lam, L: int)` — causal length-L convolution; pytensor graph;
+  unrolled over `L` (no `numpy.convolve` in this module).
+- `hill_saturation(a, K, s)` — `a^s / (a^s + K^s)`, independent of `dgp.hill`.
+- `class ScaleFactors` — frozen: `revenue_mean: float`, `spend_means: Mapping[str, float]`;
+  all values finite and > 0.
+- `compute_scale_factors(df, channels: list[str]) -> ScaleFactors`
+- `to_model_scale(df, sf) -> pd.DataFrame` / `from_model_scale(df, sf) -> pd.DataFrame` —
+  exact inverse pair on revenue and listed spend columns.
+
+**Invariants** This module does not import `ambo.simulate` or `load_settings`; `L` is an
+argument. `from_model_scale(to_model_scale(df, sf), sf)` matches the original revenue and
+scaled spend columns to 1e-12. Weights sum to 1. `output[t]` depends only on `x[<=t]`.
+
+**Failure modes** `FitError`: `L < 1`; empty channel list or frame; missing `revenue` /
+`spend_<channel>` column; a channel with no strictly positive spend weeks; non-positive
+scale factors.
+
+**Testing** `tests/unit/test_transforms.py` — impulse-first causality, pytensor-vs-numpy
+to 1e-10, Hill(K)=0.5, scaling round-trip to 1e-12, all-zero channel `FitError`.
 
 ---
 

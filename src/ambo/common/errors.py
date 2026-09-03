@@ -46,3 +46,10 @@ class DataContractError(AmboError):
     Phase 6's real anonymized data mean a `DataContractError` message must never
     carry private-drop content or path, exactly like every other `AmboError`
     subclass."""
+
+
+class FitError(AmboError):
+    """Raised by `src/ambo/model/` (SPEC-04) for: an all-zero channel that cannot
+    be scaled, a requested channel missing from the input frame, invalid transform
+    domain (L < 1, non-finite scale factors), and later sampler/posterior I/O
+    failures. Inherits the redaction invariant on `AmboError` unchanged."""
