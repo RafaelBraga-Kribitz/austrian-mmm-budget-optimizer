@@ -598,6 +598,33 @@ literals.
 **Testing** `tests/unit/test_smoke_fit.py` (`@pytest.mark.smoke`) plus the
 `pm.sample` confinement AST guard.
 
+### src/ambo/model/diagnostics.py
+
+**Purpose** MD-071/072/074 gate evaluation and the `reports/model/diag_<layer>.md`
+writer. Profiles are explicit constructors; never inferred from `n_obs` or layer
+name.
+
+**Public API**
+- `class DiagGates` — `rhat_max`, `ess_min`, `divergences_max`, `bfmi_min`,
+  `ppc_coverage_min`. `standard()` = MD-071 (R-hat < 1.01, ESS > 400,
+  divergences = 0, BFMI > 0.3) plus PPC ≥ 85%. `layer_r()` = MD-074 (ESS > 300,
+  divergences ≤ 5) with the other thresholds unchanged.
+- `run_diagnostics(idata, gates: DiagGates) -> DiagResult` — pure.
+- `write_diag_report(res, layer, *, idata, directory: Path | None = None) -> Path`
+  — markdown + `ppc_<layer>.png`; `energy_<layer>.png` when divergences > 0.
+- `class GateCheck` / `class DiagResult` — frozen; `all_green: bool`.
+
+**Invariants** `run_diagnostics` does not construct `DiagGates.standard` /
+`layer_r` itself. A missing posterior predictive fails PPC (MD-072 evaluated,
+not dropped). Does not import `ambo.simulate` or call `pm.sample`.
+
+**Failure modes** `FitError`: missing `sample_stats.diverging` or `energy`;
+`layer` is not a basename.
+
+**Testing** `tests/unit/test_diagnostics.py` — healthy idata passes `standard()`;
+3 injected divergences fail `standard()` and pass `layer_r()`; short `n_weeks`
+does not auto-select; missing PPC fails; report writer emits table + plots.
+
 ### src/ambo/model/posterior_io.py
 
 **Purpose** The only posterior doorway (MD-051). Thins stacked `(chain, draw)`
