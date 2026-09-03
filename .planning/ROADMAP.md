@@ -283,17 +283,49 @@ recovery failure can be attributed to the science rather than to the machinery.
   4. `data/posteriors/P-SA.parquet` (thinned, carrying scale factors and provenance metadata) and `reports/model/diag_P-SA.md` are committed, and the CI smoke-fit is green inside its 15-minute budget.
   5. MD-040's test proves the Layer P priors are channel-agnostic — identical Beta on every λ, identical HalfNormal on every β — so recovery cannot come from priors that encode the truth table.
 
-**Plans**: TBD
+**Plans**: 8 plans across 8 waves (not on `m0-bootstrap`; planned 2026-09-03 from SPEC-04)
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — T-301 transforms (adstock, Hill, scaling), FitError, `numpy<2.5` lock constraint (D-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 04-02-PLAN.md — T-303 PriorConfig + priors_synthetic.yaml + D-01 `max_fit_minutes` (wave 2)
+
+**Wave 3** *(blocked on Wave 1)*
+
+- [ ] 04-03-PLAN.md — T-302 MD-070 shared-shape transform sanity (wave 3)
+
+**Wave 4** *(blocked on Waves 1–2)*
+
+- [ ] 04-04-PLAN.md — T-304 `build_model` + `sample_model` + CI smoke fit (wave 4)
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 04-05-PLAN.md — T-305 posterior_io (wave 5)
+
+**Wave 6** *(blocked on Wave 5)*
+
+- [ ] 04-06-PLAN.md — T-306 diagnostics (wave 6)
+
+**Wave 7** *(blocked on Waves 3–6)*
+
+- [ ] 04-07-PLAN.md — T-307 `make fit-synthetic` (P-SA) + committed posterior + MD-071/072 (wave 7)
+
+**Wave 8** *(blocked on Wave 7)*
+
+- [ ] 04-08-PLAN.md — T-308 elicit.py converters + Phase 4 / M2 model close (wave 8)
+
 **WBS tasks**: T-301…T-308
 **Quality gates**: G-SCI-2 (sampler health), G-ENG
 **Rollback**: An MD-071 failure triggers the MD-073 reparameterization ladder **in order**, one rung per attempt; leaving rung 1 requires ADR-005. Rung 4 (fixing s = 1) is a model-class change and forces all of Phase 5 to be re-run. Two failed root-cause attempts ⇒ stop and ask the human.
 
-**Open item — INGEST-CONFLICTS WARNING 6 (runtime ceiling):** three SPEC-tier documents give
-three different full-fit ceilings — ~35 min (07_QUALITY_STANDARDS Part A), ~30 min (03_MODULES
-§4), and 15–35 min (04_DEPENDENCIES §7). A 32-minute fit is simultaneously compliant and
-non-compliant depending on which page a reviewer opens, and the value feeds the Charter §5
-effort tripwire through the compute ledger. Pick one number, put it in the single home that
-09 A-2 (magic numbers) demands, and have the other documents cite it rather than restate it.
+**W6 runtime ceiling:** closed at ingest (single home: 07_QUALITY_STANDARDS Part A, ≤ 35 min/fit).
+ADR-006 deferred the *published* home to Phase 4; CONTEXT D-01 / plan 04-02 write
+`max_fit_minutes: 35` into `config/settings.yaml`. The paragraph that treated W6 as an
+open Phase-4 research item is stale and is removed at 04-08 close.
 
 ---
 
@@ -482,8 +514,8 @@ dashboard page's content list (RB-401…406) plus the German subtitle and a€ f
 |-------|-----------|----------------|--------|-----------|
 | 1. Repository Foundation | M0 | 9/9 | Complete | 2026-09-02 |
 | 2. Ground-Truth Simulator | M1 | 10/10 | Complete | 2026-09-02 |
-| 3. Warehouse | M1→M2 | 0/TBD | Not started | - |
-| 4. MMM on S-A | M2 | 0/TBD | Not started | - |
+| 3. Warehouse | M1→M2 | 9/9 | Complete (CI vs main deferred D-19) | 2026-09-02 |
+| 4. MMM on S-A | M2 | 0/8 | Planned; executing 04-01 | - |
 | 5. Recovery Suite | M3 | 0/TBD | Not started | - |
 | 6. Agency Intake | M4 | 0/TBD | Not started | - |
 | 7. Layer R Fit & Sensitivity | M5 | 0/TBD | Not started | - |

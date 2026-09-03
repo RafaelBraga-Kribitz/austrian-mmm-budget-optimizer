@@ -6,9 +6,9 @@ current_phase: 4
 current_phase_name: MMM on S-A
 status: executing
 stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-09-02T16:20:00Z"
-last_activity: 2026-09-02
-last_activity_desc: "Phase 3 warehouse closed; Task 3 CI deferred (D-19)"
+last_updated: "2026-09-03T08:00:00Z"
+last_activity: 2026-09-03
+last_activity_desc: "Phase 4 planned (04-01…04-08); executing T-301 transforms"
 progress:
   total_phases: 9
   completed_phases: 3
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 4 of 9 (MMM on S-A)
-Plan: Phase 3 complete; Phase 4 not yet planned on this lineage
+Plan: 04-01 in progress (T-301)
 Status: executing
-Last activity: 2026-09-02 — warehouse closed (9/9); Task 3 CI deferred D-19
+Last activity: 2026-09-03 — Phase 4 planned from SPEC-04 (not on m0-bootstrap)
 
 Progress: Phase 1 [██████████] 100% (9/9). Phase 2 [██████████] 100% (10/10). Phase 3 [██████████] 100% (9/9).
 
@@ -101,7 +101,14 @@ unratified and are candidates for ADR-001+ as they are exercised.
 
 ### Pending Todos
 
-None yet.
+- T-301 transforms + D-02 numpy pin (04-01)
+- T-303 PriorConfig + D-01 max_fit_minutes (04-02)
+- T-302 MD-070 (04-03)
+- T-304 build_model + smoke (04-04)
+- T-305 posterior_io (04-05)
+- T-306 diagnostics (04-06)
+- T-307 full S-A fit (04-07)
+- T-308 elicit.py + Phase 4 close (04-08)
 
 ### Blockers/Concerns
 
@@ -151,10 +158,9 @@ corrected. What remains:
 
 ## Session Continuity
 
-Last session: 2026-09-02T16:20:00Z
-Stopped at: Completed 03-09-PLAN.md (Phase 3 warehouse closed; Task 3 CI D-19)
-Resume file: none on m0-bootstrap — Phase 4 plans do not exist there
+Last session: 2026-09-03T08:00:00Z
+Stopped at: Phase 4 planning complete; 04-01 execution in progress
+Resume file: .planning/phases/04-mmm-on-s-a/04-01-PLAN.md
 
-Next: plan **Phase 4 (MMM on S-A)** from Charter/SPEC-04, or fill the drop wait
-with intake T-501…T-506 / decide T-701…T-704 / report T-801/T-802. Never invent
-Layer R (A-5). Do not copy m0 `uv.lock`.
+Next: finish 04-01 (numpy pin, FitError, transforms), then stacked 04-02…04-08.
+Never invent Layer R (A-5). Do not copy m0 `uv.lock`. Do not create priors_real.yaml.
