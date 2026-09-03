@@ -198,6 +198,13 @@ def mapping_table() -> tuple[MappingRow, ...]:
             note="Controls are unscaled in MMM; flags are already 0/1.",
         ),
         MappingRow(
+            element="NUTS init",
+            ambo="jitter+adapt_diag (MD-050)",
+            marketing="adapt_diag",
+            status="unmatched",
+            note="jitter+adapt_diag trips GeometricAdstock CheckParameterValue 0<alpha<=1.",
+        ),
+        MappingRow(
             element="MMM class",
             ambo="raw PyMC in ambo.model.mmm",
             marketing="pymc_marketing.mmm.MMM (legacy in 0.19.4)",
@@ -459,7 +466,8 @@ def _fit_marketing(frame: pd.DataFrame, channels: list[str]) -> tuple[Any, float
         chains=sampler.chains,
         target_accept=sampler.target_accept,
         random_seed=sampler.random_seed,
-        init=sampler.init,
+        # MD-050 is jitter+adapt_diag; that init violates their alpha check.
+        init="adapt_diag",
     )
     wall = time.perf_counter() - started
     n_div = _count_divergences(idata)

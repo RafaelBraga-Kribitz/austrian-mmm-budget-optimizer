@@ -48,6 +48,7 @@ def test_mapping_table_covers_required_rows() -> None:
     unmatched = {item.element for item in mapping_table() if item.status == "unmatched"}
     assert "s / slope prior" in unmatched
     assert "yearly Fourier" in unmatched
+    assert "NUTS init" in unmatched
     assert all(item.status in {"matched", "unmatched"} for item in mapping_table())
 
 
@@ -165,6 +166,12 @@ def test_build_mmm_is_geometric_hill() -> None:
     assert mmm.adstock.normalize is True
     assert mmm.adstock_first is True
     assert mmm.yearly_seasonality is None
+
+
+def test_fit_kwargs_use_adapt_diag() -> None:
+    source = (repo_root() / "src/ambo/validate/crosscheck.py").read_text(encoding="utf-8")
+    assert 'init="adapt_diag"' in source
+    assert "init=sampler.init" not in source
 
 
 def test_crosscheck_source_does_not_call_pm_sample() -> None:
