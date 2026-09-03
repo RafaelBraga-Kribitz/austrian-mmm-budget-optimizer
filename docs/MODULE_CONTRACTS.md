@@ -598,6 +598,38 @@ literals.
 **Testing** `tests/unit/test_smoke_fit.py` (`@pytest.mark.smoke`) plus the
 `pm.sample` confinement AST guard.
 
+### src/ambo/model/posterior_io.py
+
+**Purpose** The only posterior doorway (MD-051). Thins stacked `(chain, draw)`
+samples, writes a sidecar-free parquet with `ScaleFactors` and provenance in
+schema metadata, and writes a gitignored NetCDF companion for local debug.
+
+**Public API**
+- `save_posterior(idata, sf: ScaleFactors, name: str, *, data_hash: str,
+  prior_sha256: str, thin: int = 4, directory: Path | None = None) -> Path` —
+  atomic parquet under `directory` or `Settings.paths.posteriors`; NetCDF beside
+  it. Columns `<var>` or `<var>__<coord>`. `name` is a BP-D-06 basename
+  (`P-SA`, `P-SB`, `P-SC`, `R`, `R__flat`, `R__nopromo`, `P-SB__flat`,
+  `R__loco-<channel>`).
+- `load_posterior(name: str, *, directory: Path | None = None) -> PosteriorBundle`
+- `class PosteriorBundle` — frozen: `draws: pd.DataFrame`, `metadata: dict`,
+  `scale_factors: ScaleFactors`, `path: Path`.
+
+**Invariants** Loader refuses files without scale-factor metadata (T-1). Sampler
+settings in metadata are read from `Settings.sampler`, never restated MD-050
+literals. Atomic write is temp-sibling + `os.replace`; a crash before replace
+leaves no file at the final path. Does not import `ambo.simulate`. Does not call
+`pandas.read_parquet` / `pq.read_table` (AD-030 AST guard). NetCDF uses the
+scipy engine (already a SPEC-08 dependency).
+
+**Failure modes** `FitError`: unknown BP-D-06 name; `thin < 1`; missing parquet;
+missing `ambo_posterior` schema metadata; missing scale factors; a posterior
+variable with more than one extra dimension.
+
+**Testing** `tests/unit/test_posterior_io.py` — round-trip draws + metadata;
+thinning 4000→1000; missing scale factors; atomicity (replace-fail and
+write-fail leave no final file); BP-D-06 naming.
+
 ### src/ambo/model/transforms.py
 
 **Purpose** Model-side geometric adstock (normalized finite convolution), Hill
