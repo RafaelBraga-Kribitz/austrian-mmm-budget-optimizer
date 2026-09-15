@@ -1,0 +1,20 @@
+{
+  "d_breakeven": "2,50",
+  "d_delta_Media channel 1": "+23",
+  "d_delta_Media channel 2": "-45",
+  "d_gain_median": "2,5",
+  "d_gain_p10": "-0,8",
+  "d_margin": "40",
+  "d_p25_gain": "23,3",
+  "d_p_neg": "14,6",
+  "date": "2026-09-15",
+  "p_covered": "26",
+  "p_search_gap": "24,8",
+  "p_total": "28",
+  "r_hi_Media channel 1": "28,1",
+  "r_hi_Media channel 2": "7,7",
+  "r_lo_Media channel 1": "18,1",
+  "r_lo_Media channel 2": "6,6",
+  "r_share_Media channel 1": "22,1",
+  "r_share_Media channel 2": "7,1"
+}
