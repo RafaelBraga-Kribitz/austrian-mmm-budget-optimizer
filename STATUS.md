@@ -10,9 +10,10 @@ Written 2026-09-15 at the end of the run. Six stages done; nothing is blocked.
 hygiene, package skeleton and CI) and commit 3768d7c (merge of 6218abd, Layer P with
 parameter recovery). build/ambo holds, on top of that, bbf6b2a (Stage 3, Layer R),
 7bbccf5 (Stage 4, Layer D), 90b0658 (Stage 5, rendered README and German summary),
-081b14b (Stage 6, executed notebook) and this STATUS commit. Draft pull request 46
-(build/ambo into main) is the review vehicle. Nine commits in total, one human
-identity, no history rewritten, no branch deleted.
+081b14b (Stage 6, executed notebook), 6ef121e (this brief) and one fix commit for
+the CI smoke profile. Draft pull request 46 (build/ambo into main) is the review
+vehicle. Ten commits in total, one human identity, no history rewritten, no branch
+deleted.
 
 **Three charts to open first.**
 
@@ -207,6 +208,13 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
   salvaged (diagnostics gates, holdout protocol).
 - D-21 Pull request 45, opened by a parallel tooling session during the run, was not
   triaged, commented on or closed; it is Rafael's call.
+- D-22 The first CI run of the Stage 2 commit on build/ambo failed on the smoke step's
+  180-second limit: the tiny profile kept the reporting thresholds, which a 100-draw run
+  cannot meet, so the ladder fitted each model three times. The tiny profile now
+  switches the ladder off (sampling.ladder: false) and carries thresholds suited to
+  its budget; its gates are still written to diagnostics.json and its numbers are
+  never reported. Every later run, including main, had passed, but close to the
+  limit.
 
 ## Next action
 
