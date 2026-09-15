@@ -308,7 +308,9 @@ def fit_with_ladder(md: ModelData, config: dict) -> tuple[object, dict, dict]:
     """
     base = dict(config["sampling"])
     use_ladder = bool(base.pop("ladder", True))
-    rungs = [float(base["target_accept"]), 0.95, 0.99] if use_ladder else [float(base["target_accept"])]
+    rungs = [float(base["target_accept"])]
+    if use_ladder:
+        rungs += [0.95, 0.99]
     rung = 0
     draws = int(base["draws"])
     attempts: list[dict] = []

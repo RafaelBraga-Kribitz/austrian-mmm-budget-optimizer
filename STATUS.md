@@ -10,10 +10,10 @@ Written 2026-09-15 at the end of the run. Six stages done; nothing is blocked.
 hygiene, package skeleton and CI) and commit 3768d7c (merge of 6218abd, Layer P with
 parameter recovery). build/ambo holds, on top of that, bbf6b2a (Stage 3, Layer R),
 7bbccf5 (Stage 4, Layer D), 90b0658 (Stage 5, rendered README and German summary),
-081b14b (Stage 6, executed notebook), 6ef121e (this brief) and one fix commit for
-the CI smoke profile. Draft pull request 46 (build/ambo into main) is the review
-vehicle. Ten commits in total, one human identity, no history rewritten, no branch
-deleted.
+081b14b (Stage 6, executed notebook), 6ef121e (this brief), 3328693 (smoke profile
+fix) and one lint fix on top of it. Draft pull request 46 (build/ambo into main) is
+the review vehicle. Eleven commits in total, one over the cap of ten (see D-23), one
+human identity, no history rewritten, no branch deleted.
 
 **Three charts to open first.**
 
@@ -215,6 +215,11 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
   its budget; its gates are still written to diagnostics.json and its numbers are
   never reported. Every later run, including main, had passed, but close to the
   limit.
+- D-23 Commit 3328693 went out with one line over the ruff length limit because the
+  shell command that ran the gates did not stop on the lint failure before committing.
+  The eleventh commit fixes the line. Amending and force-pushing would have kept the
+  count at ten but breaks the no-rewrite rule, which weighs more; the cap of ten
+  commits is therefore exceeded by one, and the cause is recorded here.
 
 ## Next action
 
