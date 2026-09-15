@@ -25,9 +25,9 @@ Channel names (STATUS D-05): TV, Radio, Print, Paid Search, Paid Social.
 
 ```bash
 uv sync --python 3.11
-uv run pytest -m "not slow"
-uv run python -m ambo.run simulate   # data/synthetic/
-uv run python -m ambo.run layer_p    # fit + reports (slow; NUTS)
+make lint && make test
+make simulate
+make layer_p    # fit + reports (slow; NUTS)
 ```
 
 Numbers in `reports/NUMERIC_SSOT.md` are generated, not typed. If a chart shows

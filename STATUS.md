@@ -73,10 +73,16 @@ Expected reallocation gain 4.06% of mean weekly revenue, 90% HDI [-1.83, 9.76]
 
 ## Next action
 
-Human review of PR #45. Do not merge as “M3 green”: recovery is RED and MD-071
-fails by one divergence. Layer R stays unavailable until a real drop exists.
-Further identification or sampler knobs need a human decision (widen a gate via
-ADR, or accept the honest RED).
+Human review. **Do not merge this branch onto current `main` without a
+rebase decision:** `origin/main` already contains Stage 2 from `build/ambo`
+(`3768d7c`), a parallel Layer P package. PR #46 continues that path through
+Layers R/D (pymc-marketing example as a disclosed public demo). This branch
+is the spec-governance alternative: MD-020, SPEC-04 calendar, Charter §7
+refusal of a stand-in Layer R, recovery gated on ROAS not parameter points,
+honest RED.
+
+Further identification or sampler knobs on *this* graph need a human
+decision (widen a gate via ADR, or accept the RED).
 
 ## Inventory
 

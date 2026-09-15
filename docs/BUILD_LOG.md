@@ -126,3 +126,14 @@ recovery are all-green.
 
 Measured: MD-071 1 divergence; recovery VR-301/306 PASS, VR-302/303/305
 FAIL; holdout MAPE 0.0418 vs naive 0.0784; gain HDI crosses zero.
+
+---
+
+## 2026-09-15 — Parallel Stage 2 on origin/main
+
+While this branch was fitting, `build/ambo` Stage 2 merged to `main`
+(`3768d7c`): a different Layer P package (parameter-recovery headline,
+`target_accept` 0.99, 2 chains). PR #46 continues that path with a
+pymc-marketing example labeled as Layer R (disclosed public demo, not the
+agency drop). This branch is not rebased onto that merge; doing so would
+collide two simulators. Makefile added for `lint` / `test` / `layer_p`.
