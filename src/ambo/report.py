@@ -179,13 +179,15 @@ def _render(
         "This recovery suite shows that the raw-PyMC MMM recovers disclosed simulator "
         "truth it was never shown. Recovery is gated on ROAS and response-curve shape at "
         "observed spend, not on point recovery of Hill K and s. The simulator uses raw "
-        "geometric recursion; the model uses a truncated convolution — agreement is "
-        "evidence rather than a circular identity. Layer R (real agency data) is not in "
-        "this repository; Charter §7 degradation applies (ADR-012). The optimiser result "
-        "is an in-sample counterfactual under the fitted model: response curves are "
-        "assumed to hold and competitors do not react. No channel is pushed beyond 1.3× "
-        "its historically observed weekly spend. Platform-reported conversions remain "
-        "the object of the attribution-gap comparison, never a calibration target."
+        "geometric recursion; the model uses a truncated convolution with MD-020 "
+        "normalised weights (steady-state adstock of a constant weekly allocation "
+        "equals the allocation itself; DC-201) — agreement is evidence rather than a "
+        "circular identity. Layer R (real agency data) is not in this repository; "
+        "Charter §7 degradation applies (ADR-012). The optimiser result is an in-sample "
+        "counterfactual under the fitted model: response curves are assumed to hold and "
+        "competitors do not react. No channel is pushed beyond 1.3× its historically "
+        "observed weekly spend. Platform-reported conversions remain the object of the "
+        "attribution-gap comparison, never a calibration target."
     )
     return "\n".join(
         [
@@ -227,7 +229,9 @@ def _render(
             "Expected weekly media-contribution gain vs historical mix: "
             f"{allocation.gain_vs_historical:.0f} € "
             f"(90% HDI [{allocation.gain_hdi[0]:.0f}, {allocation.gain_hdi[1]:.0f}]), "
-            f"{gain_pct:.2f}% of mean weekly revenue (90% HDI [{gain_lo:.2f}, {gain_hi:.2f}]).",
+            f"{gain_pct:.2f}% of mean weekly revenue (90% HDI [{gain_lo:.2f}, {gain_hi:.2f}]). "
+            "Steady-state adstock of a constant weekly allocation equals the allocation "
+            "itself (MD-020 normalised weights; DC-201).",
             "",
             *alloc_lines,
             "",

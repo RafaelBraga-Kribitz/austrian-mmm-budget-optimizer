@@ -36,6 +36,8 @@ def test_build_model_compiles():
     names = {rv.name for rv in model.unobserved_RVs}
     assert "lam" in names
     assert "delta_holiday" in names
+    assert "delta_advent" in names
+    assert "delta_promo" in names
     assert "gamma_sin_offset" in names
     assert any(rv.name == "y" for rv in model.observed_RVs)
 
@@ -46,7 +48,7 @@ def test_shared_shape_adstock_correlates():
     x = sim.spend["paid_search"].to_numpy(dtype=float)
     decay = 0.35
     rec = adstock_recursive(x, decay)
-    trunc = adstock(x, decay, 8)
+    trunc = adstock(x, decay, 8, normalize=True)
     rho = np.corrcoef(rec, trunc)[0, 1]
     assert rho > 0.95
 

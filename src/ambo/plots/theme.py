@@ -67,7 +67,7 @@ def apply_theme() -> None:
     """Apply the design-system rcParams. Safe to call more than once."""
     mpl.use("Agg", force=False)
     if _BK is not None:
-        _BK.apply(mode="light")
+        _BK.apply("light")
         return
     plt.rcParams.update(
         {

@@ -21,7 +21,7 @@ from ambo.config import (
     RESPONSE_GRID_POINTS,
 )
 from ambo.model import ScaleFactors, fourier_features
-from ambo.transforms import adstock, hill, hill_marginal
+from ambo.transforms import adstock, adstock_steady_state_gain, hill, hill_marginal
 
 
 @dataclass
@@ -209,8 +209,8 @@ def _steady_state_curve(
     revenue_mean: float,
     length: int,
 ) -> np.ndarray:
-    weight_sum = float(np.sum(lam ** np.arange(length)))
-    adstocked = (spend_eur / spend_mean) * weight_sum
+    gain = adstock_steady_state_gain(lam, length)
+    adstocked = (spend_eur / spend_mean) * gain
     return beta * hill(adstocked, k, slope) * revenue_mean
 
 
@@ -313,6 +313,13 @@ def _control_mean(
     mu = mu + draws["gamma_sin"] @ sin_feat.T
     mu = mu + draws["gamma_cos"] @ cos_feat.T
     mu = mu + np.outer(draws["delta_holiday"].ravel(), holiday)
+    for name, column in (
+        ("delta_promo", "promo_flag"),
+        ("delta_advent", "advent_flag"),
+        ("delta_jan", "jan_dip_flag"),
+    ):
+        if name in draws and column in frame.columns:
+            mu = mu + np.outer(draws[name].ravel(), frame[column].to_numpy(dtype=float))
     return mu * scales.revenue_mean
 
 
@@ -332,14 +339,14 @@ def marginal_roas_at_mean(
     spend_mean = scales.spend_means[channel]
     for draw in range(n_draws):
         lam = float(draws["lam"][draw, index])
-        weight_sum = float(np.sum(lam ** np.arange(length)))
-        a = (mean_spend / spend_mean) * weight_sum
+        gain = adstock_steady_state_gain(lam, length)
+        a = (mean_spend / spend_mean) * gain
         deriv_h = hill_marginal(
             np.array([a]), float(draws["k"][draw, index]), float(draws["s"][draw, index])
         )[0]
-        # d a / d x_eur = weight_sum / spend_mean; contribution = beta * h * revenue_mean
+        # d a / d x_eur = gain / spend_mean; contribution = beta * h * revenue_mean
         out[draw] = (
-            draws["beta"][draw, index] * deriv_h * (weight_sum / spend_mean) * scales.revenue_mean
+            draws["beta"][draw, index] * deriv_h * (gain / spend_mean) * scales.revenue_mean
         )
     return out
 

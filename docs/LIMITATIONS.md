@@ -5,9 +5,10 @@ recovery table.
 
 ## What the model is
 
-A weekly, additive-in-level Bayesian MMM: geometric adstock, Hill saturation,
-linear trend, yearly Fourier seasonality, and one Austrian public-holiday
-control. It is identified on a **disclosed** synthetic advertiser (Layer P). It
+A weekly, additive-in-level Bayesian MMM: geometric adstock with MD-020
+normalised weights, Hill saturation, linear trend, yearly Fourier seasonality,
+and Austrian calendar dummies (promo, Advent, January dip) plus a public-holiday
+indicator. It is identified on a **disclosed** synthetic advertiser (Layer P). It
 is not a causal experiment, not a lift test, and not a claim about a live
 client.
 
@@ -48,7 +49,9 @@ client.
   The clean Layer P series turns that confound *off* so identification is
   possible; reality will look more like S-B.
 - Simulator adstock is an infinite recursion; the model is a truncated
-  convolution of length 8. Agreement is evidence, not a tautology (MD-020, T-3).
+  convolution of length 8 with unit-sum weights. Agreement is evidence, not a
+  tautology (MD-020, T-3). At constant spend the model’s steady-state adstock
+  equals weekly spend (DC-201).
 - Inputs are scaled (T-1). Every reported euro is back-transformed through
   `ScaleFactors`. If a chart ever shows a number without its 90% HDI, the chart
   is wrong (A-7).

@@ -90,12 +90,15 @@ def _design_matrix(
         sin_feat,
         cos_feat,
         frame["holiday_flag"].to_numpy(dtype=float)[:, None],
+        frame["promo_flag"].to_numpy(dtype=float)[:, None],
+        frame["advent_flag"].to_numpy(dtype=float)[:, None],
+        frame["jan_dip_flag"].to_numpy(dtype=float)[:, None],
     ]
     names: list[str] = (
         ["intercept", "t_over_t"]
         + [f"sin_{k}" for k in range(1, FOURIER_ORDER + 1)]
         + [f"cos_{k}" for k in range(1, FOURIER_ORDER + 1)]
-        + ["holiday_flag"]
+        + ["holiday_flag", "promo_flag", "advent_flag", "jan_dip_flag"]
     )
     for channel in channels:
         spend = frame[f"spend_{channel}"].to_numpy(dtype=float)

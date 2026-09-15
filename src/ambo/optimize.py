@@ -22,7 +22,7 @@ from ambo.config import (
 )
 from ambo.evaluate import hdi_interval
 from ambo.model import ScaleFactors
-from ambo.transforms import hill
+from ambo.transforms import adstock_steady_state_gain, hill
 
 
 @dataclass(frozen=True)
@@ -35,10 +35,6 @@ class Allocation:
     gain_hdi: tuple[float, float]
     binding: dict[str, bool]
     restart_spread: float
-
-
-def _ss_factor(lam: float, length: int) -> float:
-    return float(np.sum(lam ** np.arange(length)))
 
 
 def contribution_ss(
@@ -55,7 +51,7 @@ def contribution_ss(
     """Media contribution (euros / week) at constant spend, one draw, all channels."""
     total = 0.0
     for i, x in enumerate(spend_eur):
-        adstocked = (x / spend_means[i]) * _ss_factor(float(lam[i]), length)
+        adstocked = (x / spend_means[i]) * adstock_steady_state_gain(float(lam[i]), length)
         total = total + float(beta[i]) * float(
             hill(np.array([adstocked]), float(k[i]), float(slope[i]))[0]
         )

@@ -5,7 +5,15 @@ import pytensor
 import pytensor.tensor as pt
 import pytest
 
-from ambo.transforms import adstock, adstock_pt, hill, hill_marginal, hill_pt
+from ambo.transforms import (
+    adstock,
+    adstock_pt,
+    adstock_steady_state_gain,
+    adstock_weights,
+    hill,
+    hill_marginal,
+    hill_pt,
+)
 
 X = np.array([10.0, 0.0, 5.0, 0.0, 0.0])
 
@@ -13,12 +21,14 @@ X = np.array([10.0, 0.0, 5.0, 0.0, 0.0])
 def test_adstock_matches_hand_computation():
     # decay 0.5, full length: a = [10, 5, 7.5, 3.75, 1.875]
     expected = np.array([10.0, 5.0, 7.5, 3.75, 1.875])
-    np.testing.assert_allclose(adstock(X, 0.5, 5), expected)
+    np.testing.assert_allclose(adstock(X, 0.5, 5, normalize=False), expected)
 
 
 def test_adstock_truncation_drops_old_lags():
     # length 2 keeps only lag 0 and lag 1: [10, 5, 5, 2.5, 0]
-    np.testing.assert_allclose(adstock(X, 0.5, 2), np.array([10.0, 5.0, 5.0, 2.5, 0.0]))
+    np.testing.assert_allclose(
+        adstock(X, 0.5, 2, normalize=False), np.array([10.0, 5.0, 5.0, 2.5, 0.0])
+    )
 
 
 def test_adstock_equals_recursion_when_length_covers_series():
@@ -30,7 +40,24 @@ def test_adstock_equals_recursion_when_length_covers_series():
     for t, value in enumerate(x):
         carry = value + decay * carry
         rec[t] = carry
-    np.testing.assert_allclose(adstock(x, decay, 40), rec, rtol=1e-12)
+    np.testing.assert_allclose(adstock(x, decay, 40, normalize=False), rec, rtol=1e-12)
+
+
+def test_md020_normalized_weights_sum_to_one():
+    weights = adstock_weights(0.55, 8, normalize=True)
+    np.testing.assert_allclose(weights.sum(), 1.0)
+    np.testing.assert_allclose(
+        weights, (0.55 ** np.arange(8)) / np.sum(0.55 ** np.arange(8))
+    )
+
+
+def test_md020_steady_state_equals_constant_spend():
+    x = np.full(24, 10.0)
+    out = adstock(x, 0.6, 8, normalize=True)
+    np.testing.assert_allclose(out[8:], 10.0, rtol=1e-12)
+    assert adstock_steady_state_gain(0.6, 8, normalize=True) == 1.0
+    unnorm = float(np.sum(0.6 ** np.arange(8)))
+    assert adstock_steady_state_gain(0.6, 8, normalize=False) == pytest.approx(unnorm)
 
 
 def test_hill_hand_values():
@@ -52,9 +79,19 @@ def test_pytensor_graphs_match_numpy_reference():
     decay = pt.dscalar("decay")
     k = pt.dscalar("k")
     s = pt.dscalar("s")
-    f_adstock = pytensor.function([x, decay], adstock_pt(x, decay, 5))
+    f_adstock = pytensor.function(
+        [x, decay], adstock_pt(x, decay, 5, normalize=False)
+    )
+    f_norm = pytensor.function(
+        [x, decay], adstock_pt(x, decay, 5, normalize=True)
+    )
     f_hill = pytensor.function([x, k, s], hill_pt(x, k, s))
-    np.testing.assert_allclose(f_adstock(X, 0.5), adstock(X, 0.5, 5), rtol=1e-12)
+    np.testing.assert_allclose(
+        f_adstock(X, 0.5), adstock(X, 0.5, 5, normalize=False), rtol=1e-12
+    )
+    np.testing.assert_allclose(
+        f_norm(X, 0.5), adstock(X, 0.5, 5, normalize=True), rtol=1e-12
+    )
     a = np.array([0.0, 1.0, 2.0, 4.0, 8.0])
     np.testing.assert_allclose(f_hill(a, 2.0, 2.0), hill(a, 2.0, 2.0), atol=1e-7)
 
@@ -65,3 +102,12 @@ def test_hill_marginal_matches_finite_difference():
     eps = 1e-6
     fd = (hill(a + eps, k, s) - hill(a - eps, k, s)) / (2 * eps)
     np.testing.assert_allclose(hill_marginal(a, k, s), fd, rtol=1e-5)
+
+
+def test_adstock_default_follows_md020_config():
+    from ambo.config import ADSTOCK_NORMALIZE
+
+    assert ADSTOCK_NORMALIZE is True
+    np.testing.assert_allclose(
+        adstock(X, 0.5, 5), adstock(X, 0.5, 5, normalize=True), rtol=1e-12
+    )

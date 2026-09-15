@@ -72,3 +72,23 @@ After Stage 1 landed on `main`, the stacked GSD PRs were closed as superseded
 - `ambo.evaluate` / `baselines` / `optimize` / `report` — recovery observables,
   OLS+HC1, SLSQP with 1.3× cap, HDI-bearing artifacts.
 - `ambo.data.load_layer_r` raises (A-5, Charter §7). Deviation ADR: `docs/adr/ADR-012_five-channel-layer-p-and-charter-7.md`.
+
+---
+
+## 2026-09-15 — VR-310 calendar + MD-020 normalised adstock
+
+Layer P identification, two focused attempts, gates not widened:
+
+1. **Calendar (VR-310 #1 / SPEC-04 §2).** Promo, Advent, and January-dip
+   dummies added to the linear predictor (plus D-07 holiday). MD-073 rung 1:
+   `target_accept=0.95` after 53 divergences at 0.9. Local 4×1000 nutpie fit
+   went MD-071 all-green (0 divergences). Recovery stayed RED on VR-302/303/305
+   (search half-life outranked TV; print curve MAE 50%).
+2. **MD-020 (VR-310 #2).** Model / evaluate / OLS / optimiser now share
+   unit-sum truncated weights (`ADSTOCK_NORMALIZE=True`). Simulator recursion
+   is unchanged (SIM-003). `bk_theme.apply("light")` positional call (D-07).
+   ADR-012 amendment records the closed calendar deviation.
+
+Full `python -m ambo.run layer_p` after this entry regenerates reports from a
+posterior that matches the normalised graph. Recovery all-green is not claimed
+until that report says so.

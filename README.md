@@ -10,8 +10,9 @@ refused rather than invented.
 
 ## What you get
 
-- A five-channel weekly MMM in raw PyMC (geometric adstock, Hill saturation,
-  trend, yearly Fourier, Austrian holiday control).
+- A five-channel weekly MMM in raw PyMC (geometric adstock with MD-020
+  normalised weights, Hill saturation, trend, yearly Fourier, promo / Advent /
+  January dummies plus an Austrian holiday indicator).
 - A simulator that does **not** share transform code with the model, so recovery
   is evidence.
 - Recovery, holdout vs a seasonal-naive baseline, OLS+HC1, a budget optimiser

@@ -72,3 +72,24 @@ platform numbers are never a calibration target (T-8).
 | SPEC-05 §3 | six-channel cell counts | five-channel analogue in evaluate.py | Observables (ROAS, shape, share), not K/s point recovery |
 | SPEC-08 Python | 3.12 | 3.11 (D-06) | None in the maths |
 | Charter §7 | optional degradation ADR at M4 | taken now; no Layer R | README alternate framing |
+
+## Amendment 2026-09-15 — calendar, MD-073 rung 1, MD-020
+
+The original spec-deviations table recorded a holiday-only control. That was the
+Stage 1 skeleton, not the intended end state.
+
+1. **SPEC-04 §2 calendar.** Promo, Advent, and January-dip dummies now sit on top
+   of the Fourier block, plus the D-07 holiday indicator. Leaving Advent out of
+   the linear predictor dumped the DGP's +55% Advent baseline onto flighted
+   print/radio (VR-310 attempt 1). The "one holiday flag" row above is
+   superseded. Output contract unchanged: additive-in-level, scaled inputs.
+2. **MD-073 rung 1.** `target_accept=0.95` after 53 divergences at 0.9. MD-071
+   went green on the calendar-controlled Layer P fit (0 divergences, R-hat <
+   1.01, ESS > 400). No further ladder rungs in this amendment.
+3. **MD-020 normalised adstock.** Stage 1 shipped unnormalised truncated weights.
+   The model, evaluate, OLS, and optimiser now use
+   `w_i = λ^i / Σ_{i=0..L−1} λ^i` together. At constant weekly spend the
+   steady-state adstock equals the spend itself (DC-201). Recovery gates are
+   **not** widened.
+
+Implements: MD-020, MD-022, MD-073.

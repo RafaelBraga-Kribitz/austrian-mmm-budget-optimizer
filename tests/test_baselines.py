@@ -28,4 +28,5 @@ def test_ols_runs_on_layer_p():
     result = fit_ols_baseline(frame, bayesian_roas=roas)
     assert result.n_obs == 80
     assert "adstock_tv" in result.coef
+    assert "advent_flag" in result.coef
     assert result.se_hc1["intercept"] >= 0

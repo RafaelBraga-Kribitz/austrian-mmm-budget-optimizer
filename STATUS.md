@@ -10,7 +10,8 @@ recovery, optimiser, reports — five channels, no Layer R (ADR-012).
 
 ## Current stage
 
-Stage 2, Layer P pipeline.
+Stage 2+, Layer P pipeline: calendar controls, MD-020 normalised adstock,
+awaiting a matching 4×1000 posterior and recovery report.
 
 ## Done
 
@@ -66,8 +67,9 @@ and `truth.json`. Full regeneration is `python -m ambo.run layer_p`.
 
 ## Next action
 
-Land the Layer P pipeline on `main`, run `python -m ambo.run layer_p` for the
-reported posterior, and keep Layer R unavailable until a real drop exists.
+Regenerate `python -m ambo.run layer_p` on this branch (normalised adstock +
+calendar). Do not merge until the recovery report is honest about remaining
+RED gates. Layer R stays unavailable until a real drop exists.
 
 ## Inventory
 
@@ -99,16 +101,15 @@ of remote branches (44 pull request heads plus main), and there are no issues at
    Orders are descriptive only. Weekly grain, ISO weeks, Europe/Vienna.
 5. Media response: geometric adstock (decay per channel) then Hill saturation
    (half-saturation K and slope s per channel), contribution beta times Hill.
-6. Baseline: intercept, linear trend, yearly Fourier seasonality, calendar controls
-   (promo, Advent, January dip in the spec; one control in tonight's build).
+6. Baseline: intercept, linear trend, yearly Fourier seasonality, calendar
+   controls (promo, Advent, January dip) plus the D-07 holiday indicator.
 7. Inputs are scaled (spend by its channel mean, revenue by its mean) before sampling;
    every reported quantity is back-transformed.
 8. Layer P priors are weakly informative and channel-agnostic so that recovery comes
    from the data, not from priors that encode the truth table.
-9. Sampler: NUTS, target_accept 0.9, fixed seed. Diagnostics gates: R-hat below 1.01,
-   ESS above 400, zero divergences. The reparameterisation ladder already exercised on
-   the stack: non-centered Fourier block (ADR-005), tighter slope prior, higher
-   target_accept. Fixing the slope at 1 was tried and rolled back (ADR-010, ADR-011).
+9. Sampler: NUTS via nutpie, `target_accept=0.95` (MD-073 rung 1; 0.9 left 53
+   divergences), fixed seed. Diagnostics gates: R-hat below 1.01, ESS above 400,
+   zero divergences. Non-centered Fourier (ADR-005). MD-020 unit-sum adstock.
 10. Recovery is judged on observable quantities (ROAS, contribution shares, response
     curve shape), not on point recovery of K and s, which trade off against beta.
 11. Platform-reported numbers are the object of study, never a calibration target.

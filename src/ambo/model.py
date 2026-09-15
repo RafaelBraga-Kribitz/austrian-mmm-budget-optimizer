@@ -1,9 +1,8 @@
-"""Raw PyMC MMM: geometric adstock, Hill saturation, trend, Fourier, one control.
+"""Raw PyMC MMM: geometric adstock, Hill saturation, trend, Fourier, calendar.
 
 Implements: MD-001, MD-002, MD-020, MD-021, MD-030, MD-040, MD-050, ADR-005
 (non-centred Fourier). Sampler: nutpie with PyMC NUTS fallback (STATUS D-08).
-
-The builder has no scenario branches. Channel list + scaled data are the knobs.
+Calendar dummies: promo, advent, January dip (SPEC-04 §2) plus holiday (D-07).
 """
 
 from __future__ import annotations
@@ -17,12 +16,19 @@ import pymc as pm
 
 from ambo.config import (
     ADSTOCK_LENGTH,
+    ADSTOCK_NORMALIZE,
     ALPHA_MU,
     ALPHA_SIGMA,
     BETA_SIGMA,
     CHANNEL_IDS,
+    DELTA_ADVENT_MU,
+    DELTA_ADVENT_SIGMA,
     DELTA_HOLIDAY_MU,
     DELTA_HOLIDAY_SIGMA,
+    DELTA_JAN_MU,
+    DELTA_JAN_SIGMA,
+    DELTA_PROMO_MU,
+    DELTA_PROMO_SIGMA,
     FOURIER_ORDER,
     FOURIER_PERIOD_WEEKS,
     GAMMA_SIGMA,
@@ -102,7 +108,12 @@ def build_model(
     *,
     adstock_length: int = ADSTOCK_LENGTH,
 ) -> pm.Model:
-    """SPEC-04 §2 on already-scaled data (MD-002). One holiday control (STATUS §6)."""
+    """SPEC-04 §2 on already-scaled data (MD-002).
+
+    Calendar dummies match the DGP flags (advent, promo, January dip) plus the
+    Austrian holiday indicator. Leaving Advent out of the linear predictor dumps
+    the 55% baseline bump onto flighted print/radio (VR-310).
+    """
     _require(df, channels)
     n_weeks = int(len(df))
     n_channels = len(channels)
@@ -110,6 +121,9 @@ def build_model(
     t_over_t = np.arange(1, n_weeks + 1, dtype=float) / n_weeks
     spend = np.column_stack([df[f"spend_{c}"].to_numpy(dtype=float) for c in channels])
     holiday = df["holiday_flag"].to_numpy(dtype=float)
+    promo = df["promo_flag"].to_numpy(dtype=float)
+    advent = df["advent_flag"].to_numpy(dtype=float)
+    jan = df["jan_dip_flag"].to_numpy(dtype=float)
     y_obs = df["revenue"].to_numpy(dtype=float)
     coords = {
         "channel": list(channels),
@@ -129,6 +143,24 @@ def build_model(
             mu=DELTA_HOLIDAY_MU,
             sigma=DELTA_HOLIDAY_SIGMA,
             initval=DELTA_HOLIDAY_MU,
+        )
+        delta_promo = pm.Normal(
+            "delta_promo",
+            mu=DELTA_PROMO_MU,
+            sigma=DELTA_PROMO_SIGMA,
+            initval=DELTA_PROMO_MU,
+        )
+        delta_advent = pm.Normal(
+            "delta_advent",
+            mu=DELTA_ADVENT_MU,
+            sigma=DELTA_ADVENT_SIGMA,
+            initval=DELTA_ADVENT_MU,
+        )
+        delta_jan = pm.Normal(
+            "delta_jan",
+            mu=DELTA_JAN_MU,
+            sigma=DELTA_JAN_SIGMA,
+            initval=DELTA_JAN_MU,
         )
         lam = pm.Beta(
             "lam",
@@ -167,6 +199,9 @@ def build_model(
             + pm.math.dot(sin_feat, gamma_sin)
             + pm.math.dot(cos_feat, gamma_cos)
             + delta_holiday * holiday
+            + delta_promo * promo
+            + delta_advent * advent
+            + delta_jan * jan
             + media
         )
         pm.Deterministic("mu", mu, dims="week")
@@ -179,7 +214,7 @@ def _require(df: pd.DataFrame, channels: tuple[str, ...]) -> None:
         raise ValueError("build_model: channels must be non-empty")
     if df.empty:
         raise ValueError("build_model: empty frame")
-    for column in ("revenue", "holiday_flag"):
+    for column in ("revenue", "holiday_flag", "promo_flag", "advent_flag", "jan_dip_flag"):
         if column not in df.columns:
             raise ValueError(f"build_model: missing column {column}")
     for channel in channels:
@@ -190,7 +225,9 @@ def _require(df: pd.DataFrame, channels: tuple[str, ...]) -> None:
 def _media_mu(spend: Any, lam: Any, k: Any, s: Any, beta: Any, length: int, n_channels: int) -> Any:
     terms = []
     for index in range(n_channels):
-        adstocked = adstock_pt(spend[:, index], lam[index], length)
+        adstocked = adstock_pt(
+            spend[:, index], lam[index], length, normalize=ADSTOCK_NORMALIZE
+        )
         saturated = hill_pt(adstocked, k[index], s[index])
         terms.append(beta[index] * saturated)
     return pm.math.sum(pm.math.stack(terms), axis=0)
@@ -207,23 +244,27 @@ def sample_model(
     progressbar: bool = False,
 ) -> Any:
     """NUTS via nutpie; fall back to PyMC if nutpie cannot compile the model (D-08)."""
-    kwargs: dict[str, Any] = {
+    common: dict[str, Any] = {
         "draws": draws,
         "tune": tune,
         "chains": chains,
         "random_seed": seed,
         "progressbar": progressbar,
-        "idata_kwargs": {"log_likelihood": False},
     }
     with model:
         try:
-            idata = pm.sample(nuts_sampler="nutpie", **kwargs)
+            idata = pm.sample(
+                nuts_sampler="nutpie",
+                target_accept=target_accept,
+                **common,
+            )
         except Exception:
             idata = pm.sample(
                 nuts_sampler="pymc",
                 target_accept=target_accept,
                 init="adapt_diag",
-                **kwargs,
+                idata_kwargs={"log_likelihood": False},
+                **common,
             )
         pm.sample_posterior_predictive(
             idata, extend_inferencedata=True, random_seed=seed, progressbar=progressbar
