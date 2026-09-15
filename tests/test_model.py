@@ -40,6 +40,7 @@ def test_build_model_compiles():
     assert "delta_promo" in names
     assert "gamma_sin_offset" in names
     assert any(rv.name == "y" for rv in model.observed_RVs)
+    assert "s" in {var.name for var in model.deterministics}
 
 
 def test_shared_shape_adstock_correlates():

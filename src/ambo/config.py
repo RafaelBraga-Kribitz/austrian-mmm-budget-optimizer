@@ -48,8 +48,9 @@ NOISE_SHARE = 0.04  # σ = this × mean(base)
 # Weakly informative, channel-agnostic Layer P priors (MD-040).
 LAM_A, LAM_B = 2.0, 4.0
 K_SHAPE, K_RATE = 2.0, 1.3
-S_SHAPE, S_RATE = 4.0, 3.0
+S_SHAPE, S_RATE = 4.0, 3.0  # MD-073 rung 3 (unused once rung 4 fixes s=1)
 S_LOWER, S_UPPER = 0.5, 2.5
+S_FIXED = 1.0  # MD-073 rung 4: logistic saturation; changes the model class
 BETA_SIGMA = 0.15
 ALPHA_MU, ALPHA_SIGMA = 1.0, 0.3
 TAU_SIGMA = 0.1

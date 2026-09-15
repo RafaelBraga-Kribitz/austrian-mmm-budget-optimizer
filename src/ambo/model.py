@@ -3,6 +3,7 @@
 Implements: MD-001, MD-002, MD-020, MD-021, MD-030, MD-040, MD-050, ADR-005
 (non-centred Fourier). Sampler: nutpie with PyMC NUTS fallback (STATUS D-08).
 Calendar dummies: promo, advent, January dip (SPEC-04 §2) plus holiday (D-07).
+Hill slope is fixed at 1 (MD-073 rung 4; ADR-013).
 """
 
 from __future__ import annotations
@@ -36,10 +37,7 @@ from ambo.config import (
     K_SHAPE,
     LAM_A,
     LAM_B,
-    S_LOWER,
-    S_RATE,
-    S_SHAPE,
-    S_UPPER,
+    S_FIXED,
     SAMPLER_CHAINS,
     SAMPLER_DRAWS,
     SAMPLER_SEED,
@@ -176,15 +174,8 @@ def build_model(
             dims="channel",
             initval=np.full(n_channels, K_SHAPE / K_RATE),
         )
-        s_mean = float(np.clip(S_SHAPE / S_RATE, S_LOWER, S_UPPER))
-        s = pm.Truncated(
-            "s",
-            pm.Gamma.dist(alpha=S_SHAPE, beta=S_RATE),
-            lower=S_LOWER,
-            upper=S_UPPER,
-            dims="channel",
-            initval=np.full(n_channels, s_mean),
-        )
+        # MD-073 rung 4 / ADR-013: s_c = 1. Broadcast off lam so dims match.
+        s = pm.Deterministic("s", S_FIXED + 0.0 * lam, dims="channel")
         beta = pm.HalfNormal(
             "beta",
             sigma=np.full(n_channels, BETA_SIGMA),

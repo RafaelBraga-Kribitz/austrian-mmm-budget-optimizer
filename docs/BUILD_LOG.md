@@ -92,3 +92,13 @@ Layer P identification, two focused attempts, gates not widened:
 Full `python -m ambo.run layer_p` after this entry regenerates reports from a
 posterior that matches the normalised graph. Recovery all-green is not claimed
 until that report says so.
+
+---
+
+## 2026-09-15 — MD-073 rung 4 (ADR-013)
+
+The MD-020 4×1000 nutpie fit was RED on MD-071: **1 divergence** (chain 3,
+draw 423) at low search `K` with `s ≈ 1.53`. Rungs 1–3 of the ladder were
+already applied (target_accept 0.95, non-centred Fourier, tight s prior).
+Rung 4 fixes `s_c = 1` (logistic saturation). Recovery gates are not widened.
+See `docs/adr/ADR-013_hill-slope-fixed.md`.

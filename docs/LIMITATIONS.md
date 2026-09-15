@@ -25,9 +25,10 @@ client.
 - **Not S-B / S-C recovery.** Collinear spend and a zero-effect channel are
   implemented and unit-tested in the simulator. The reported fit is the 156-week
   clean series.
-- **Not a guarantee that K and s are recovered as points.** Hill slope, half-sat
-  and β trade off. Gates are on ROAS, curve *shape* at observed spend, half-life
-  *direction*, and media share (T-5).
+- **Not a guarantee that K and s are recovered as points.** Hill slope is
+  fixed at 1 (MD-073 rung 4 / ADR-013). Half-sat K and β still trade off.
+  Gates are on ROAS, curve *shape* at observed spend, half-life *direction*,
+  and media share (T-5).
 - **Not platform-calibrated.** Simulated dashboards over-credit by construction
   (φ, θ in `truth.json`). The attribution-gap chart treats those numbers as the
   object of study (T-8).
