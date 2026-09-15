@@ -1,0 +1,49 @@
+{
+  "channels_share_covered": 4,
+  "coverage_share": 0.9285714285714286,
+  "diagnostics_pass": true,
+  "elapsed_seconds": 891.5,
+  "holdout": [
+    {
+      "coverage_90": 0.9230769230769231,
+      "interval_width_mean": 64320.620054064355,
+      "mape": 0.09581736100917627,
+      "model": "Seasonal naive",
+      "n_test": 26,
+      "train_weeks": 130
+    },
+    {
+      "coverage_90": 0.9230769230769231,
+      "interval_width_mean": 30404.88756598297,
+      "mape": 0.04713598933478147,
+      "model": "Ridge regression (alpha 100)",
+      "n_test": 26,
+      "train_weeks": 130
+    },
+    {
+      "coverage_90": 0.8461538461538461,
+      "interval_width_mean": 12145.819713691728,
+      "mape": 0.02987393093669278,
+      "model": "Bayesian MMM",
+      "n_test": 26,
+      "train_weeks": 130
+    }
+  ],
+  "holdout_diagnostics_pass": true,
+  "largest_gap_channel": "TV",
+  "largest_gap_pp": 28.32010110421156,
+  "layer": "layer_p",
+  "parameters_covered": 26,
+  "parameters_total": 28,
+  "sampler": "nutpie",
+  "versions": {
+    "ambo": "0.1.0",
+    "arviz": "0.23.4",
+    "numpy": "2.4.6",
+    "nutpie": "0.16.8",
+    "pandas": "3.0.5",
+    "pymc": "5.28.5",
+    "python": "3.11.15"
+  },
+  "weeks": 156
+}

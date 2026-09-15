@@ -53,11 +53,16 @@ def adstock(x: np.ndarray, decay: float, length: int) -> np.ndarray:
     return out
 
 
-def hill(a: np.ndarray, k: float, slope: float) -> np.ndarray:
-    """Hill saturation (numpy reference): ``a^s / (a^s + k^s)``."""
+def hill(a: np.ndarray, k, slope) -> np.ndarray:
+    """Hill saturation (numpy reference): ``a^s / (a^s + k^s)``.
+
+    ``k`` and ``slope`` may be scalars or arrays that broadcast against ``a``.
+    """
     a = np.maximum(np.asarray(a, dtype=float), 0.0)
+    k = np.asarray(k, dtype=float)
+    slope = np.asarray(slope, dtype=float)
     num = a**slope
-    return num / (num + float(k) ** slope)
+    return num / (num + k**slope)
 
 
 def adstock_pt(x, decay, length: int):
@@ -82,10 +87,12 @@ def hill_pt(a, k, slope):
     return pt.sigmoid(slope * (pt.log(a_safe) - pt.log(k_safe)))
 
 
-def hill_marginal(a: np.ndarray, k: float, slope: float) -> np.ndarray:
+def hill_marginal(a: np.ndarray, k, slope) -> np.ndarray:
     """Derivative of the Hill curve with respect to its input, numpy reference."""
     a = np.maximum(np.asarray(a, dtype=float), HILL_FLOOR)
-    ks = float(k) ** slope
+    k = np.asarray(k, dtype=float)
+    slope = np.asarray(slope, dtype=float)
+    ks = k**slope
     num = slope * ks * a ** (slope - 1.0)
     den = (a**slope + ks) ** 2
     return num / den

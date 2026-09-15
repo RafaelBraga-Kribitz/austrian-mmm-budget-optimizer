@@ -25,3 +25,6 @@ jobs:
 
       - name: Tests (fast)
         run: uv run pytest -m "not slow"
+
+      - name: Smoke run of the Layer P pipeline on the tiny config
+        run: timeout 180 uv run python -m ambo.run layer_p --config src/ambo/configs/tiny.yaml --out /tmp/smoke/reports --data /tmp/smoke/data

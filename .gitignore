@@ -16,3 +16,7 @@ build/
 data/cache/
 reports/**/trace/
 reports/**/*.parquet
+
+# Smoke-profile outputs of the tiny config (CI and the notebook); never reported
+reports/layer_p_tiny/
+data/synthetic_tiny/
