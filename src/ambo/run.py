@@ -71,6 +71,10 @@ def run_layer_p(config_path=None, out_dir=None, data_dir=None) -> dict:
     gap = evaluate.attribution_gap(data, contribs, md, truth)
     gap.to_csv(out / "attribution_gap.csv", index=False, lineterminator="\n")
     charts.attribution_gap(gap, out / "attribution_gap.png", source)
+    curves, curve_metrics = evaluate.response_curve_recovery(post, md, truth, config)
+    curves.to_csv(out / "response_curves.csv", index=False, lineterminator="\n")
+    curve_metrics.to_csv(out / "response_curve_metrics.csv", index=False, lineterminator="\n")
+    charts.response_curve_recovery(curves, out / "response_curve_recovery.png", source)
 
     # 4. holdout against the two baselines
     metrics, preds, hold_info, hold_idata = evaluate.holdout(data, config)
@@ -89,6 +93,9 @@ def run_layer_p(config_path=None, out_dir=None, data_dir=None) -> dict:
         "parameters_covered": int(recovery["covered"].sum()),
         "coverage_share": float(recovery["covered"].mean()),
         "channels_share_covered": int(contribution["covered"].sum()),
+        "curve_coverage_min": float(curve_metrics["curve_coverage_observed_range"].min()),
+        "curve_coverage_mean": float(curve_metrics["curve_coverage_observed_range"].mean()),
+        "curve_mae_pct_max": float(curve_metrics["curve_mae_pct_of_true_max"].max()),
         "largest_gap_channel": str(gap.loc[gap["abs_gap_pp"].idxmax(), "channel"]),
         "largest_gap_pp": float(gap["abs_gap_pp"].max()),
         "holdout": metrics.to_dict(orient="records"),

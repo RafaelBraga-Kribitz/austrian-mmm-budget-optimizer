@@ -2,9 +2,63 @@
 
 Run date: 2026-09-15. Working branch: build/ambo. MERGE_TO_MAIN: true.
 
+## Audit fixes, second session (2026-09-15 evening)
+
+Ranked audit items (ADR-007) and what was done:
+
+1. Pull request 46 merged to main (merge commit 0be8cbc). Pull requests 45, 18 and 34
+   closed with a comment; 36 and 41 had been closed earlier. Open pull requests: none
+   besides the follow-up draft for this session.
+2. Layer R swapped to Robyn's simulated weekly dataset (five named channels, money
+   units, competitor sales as the control). Source, licence and checksum in
+   data/README.md. The breakeven gate now binds: on the same budget it holds Print and
+   Search (marginal ROAS lower bounds below 2.5) and Out-of-home loses budget because
+   its ROAS sits below breakeven.
+3. Layer P gained a response-curve overlay (reports/layer_p/response_curve_recovery.png,
+   response_curves.csv, response_curve_metrics.csv) and the README states the
+   effect-times-saturation trade-off and the TV share miss in plain words.
+4. README wording: interval coverage against nominal is stated per layer (85 versus 90
+   on Layer P: slightly overconfident; 100 on Layer R: wider than needed); the
+   attribution gap now leads with online over-credit in absolute terms (Paid Search
+   platform-reported revenue 45 percent above its true incremental revenue).
+5. A sentence under the title says what "Austrian" means here.
+6. duckdb removed from the dependencies and the lockfile. Branch deletion is blocked in
+   this environment (see Blockers); the command for Rafael is there.
+
+Numbers produced in this session (each from the named artifact):
+
+| Metric | Value | Artifact |
+|--------|-------|----------|
+| Layer P response-curve coverage, mean over channels / worst (TV) | 91 / 56 percent of grid points in the observed spend range | reports/layer_p/response_curve_metrics.csv |
+| Layer P response-curve error, worst channel | 13.6 percent of the true curve height | same |
+| Layer P effect and half-saturation medians above truth | 5 of 5 and 5 of 5 | reports/layer_p/parameter_recovery.csv |
+| Paid Search platform-reported over true incremental revenue | +45.1 percent (3489025 vs 2404051); Paid Social +54.9 percent | reports/layer_p/attribution_gap.csv |
+| Layer R (Robyn) revenue share, median (90 percent interval) | TV 6.0 (3.5 to 10.0); Out-of-home 2.7 (0.3 to 7.9); Print 1.8 (0.4 to 5.5); Facebook 2.5 (0.6 to 5.5); Search 3.2 (0.3 to 10.5) | reports/layer_r/channel_contributions.csv |
+| Layer R ROAS, median | TV 7.3; Out-of-home 1.1; Print 8.7; Facebook 21.4; Search 9.8 | same |
+| Layer R diagnostics | full fit passed at 0.95 with 2000 draws after ESS shortfalls (290, 301); holdout passed at 0.99 with 2000 draws | reports/layer_r/diagnostics.json, holdout_diagnostics.json |
+| Layer R holdout, 26 weeks | MMM MAPE 7.9 percent, ridge 5.1, seasonal naive 22.3; coverage 100, 100, 96 percent. The MMM loses on point error; the README says so | reports/layer_r/holdout_metrics.csv |
+| Layer D same budget | median gain +15.1 percent of media contribution, 10th percentile +8.8, no losing draw; TV +50 percent, Facebook +50 percent, Out-of-home -20 percent, Print and Search held by the rule; verdict recommend | reports/layer_d/decision.json, reallocation_table.csv |
+| Layer D plus 25 percent | median gain +24.0 percent, 10th percentile +15.2; Out-of-home, Print and Search held | same |
+| Layer D plus 200000 per year | median gain +17.4 percent, 10th percentile +10.6; verdict recommend | reports/layer_d/next_200k.md |
+
+Decisions taken in this session:
+
+- D-24 Layer R uses competitor sales (divided by its mean) as the one control; the two
+  one-off events and the newsletter column are not used. Reversible in
+  src/ambo/configs/layer_r.yaml.
+- D-25 The 200000-per-year question is answered as a third optimiser scenario, the
+  yearly amount spread over 52 weeks on top of the current weekly total, in the
+  dataset's money units.
+- D-26 The smoke profile of Layer P is unchanged; the overlay chart is produced there
+  too and shown in the notebook.
+- D-27 Pull request 45 was closed on Rafael's decision (ADR-007) with a comment; its
+  branch is untouched and retrievable from the pull request.
+
 ## Morning brief
 
-Written 2026-09-15 at the end of the run. Six stages done; nothing is blocked.
+Written 2026-09-15 at the end of the overnight run, kept as the record of that run.
+Its Layer R and Layer D numbers come from the pymc-marketing example data and are
+superseded by the audit-fixes section above. Six stages done; nothing is blocked.
 
 **Where the code is.** main holds Stages 1 and 2: commit 3285620 (merge of cd235f2,
 hygiene, package skeleton and CI) and commit 3768d7c (merge of 6218abd, Layer P with
@@ -103,7 +157,9 @@ All six stages done. Awaiting Rafael's review of pull request 46.
 
 ## Numbers
 
-Every number below is read from the named artifact; none is typed from memory.
+Every number below is read from the named artifact; none is typed from memory. The
+Layer R and Layer D tables are from the overnight run on the pymc-marketing example data;
+the current Robyn-data numbers are in the audit-fixes section at the top.
 
 Layer P, synthetic advertiser with known truth (156 weeks, 5 channels):
 
@@ -138,8 +194,15 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
 
 ## Blockers
 
-- None that stop a stage. The gh CLI is absent (Stage 0); the GitHub API was used
-  instead with the same outcome.
+- Branch deletion is refused in this environment: every git push --delete, in batches
+  or one branch at a time, ends with the remote hanging up (HTTP 403 from the outbound
+  proxy), and the GitHub API tools available here have no delete-branch call. The 44
+  closed-PR branches (43 with the 9588 suffix plus m0-bootstrap) and the closed pull
+  request 45 branch are still on the remote. Rafael can delete them locally with:
+  git fetch --prune && git push origin --delete $(git branch -r | sed 's#origin/##' |
+  grep -E -- '-9588$|^m0-bootstrap$' | tr '\n' ' '). Every one of them belongs to a
+  closed pull request, from which GitHub can restore it.
+- The gh CLI is absent (Stage 0); the GitHub API was used instead with the same outcome.
 
 ## Decisions taken
 
@@ -223,7 +286,9 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
 
 ## Next action
 
-Rafael reviews pull request 46 and decides on the five items in the morning brief.
+Rafael confirms the 40 percent contribution margin, deletes the closed-PR branches
+with the command under Blockers, and merges the follow-up pull request if it is not
+already merged.
 
 ## Inventory
 
@@ -336,7 +401,7 @@ merged wholesale.
 | 43 | p5-crosscheck-9588 | pymc-marketing cross-check | c | none (out of tonight's scope) |
 | 44 | p5-recovery-report-9588 | RECOVERY_REPORT generator | c | none |
 
-Kept open for Rafael's decision: 18 and 34. All others are closed with the comment
-"Superseded by the build on main; see STATUS.md for the salvage record." (36 and 41 at
-the end of the run, see D-20). Open at the end of the run: 18, 34, 45 (parallel build,
-not part of this inventory) and 46 (build/ambo). No branch was deleted.
+All 44 stack pull requests are closed with the comment "Superseded by the build on
+main; see STATUS.md for the salvage record." (18, 34, 36 and 41 last, per the audit).
+Pull request 45 (parallel build) was closed per ADR-007; pull request 46 (build/ambo)
+was merged to main. Branch deletion is pending on Rafael's side (see Blockers).

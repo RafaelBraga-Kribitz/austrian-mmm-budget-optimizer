@@ -1,27 +1,45 @@
 {
   "attempts": [
     {
-      "divergences": 0,
+      "divergences": 3,
       "draws": 1000,
-      "elapsed_seconds": 16.4,
-      "max_rhat": 1.0054256695090118,
-      "min_ess": 338.78937856595564,
+      "elapsed_seconds": 73.7,
+      "max_rhat": 1.0049682637689767,
+      "min_ess": 336.4999406879797,
       "pass_all": false,
       "target_accept": 0.9
     },
     {
       "divergences": 0,
+      "draws": 1000,
+      "elapsed_seconds": 42.5,
+      "max_rhat": 1.005896689447236,
+      "min_ess": 319.0266027031548,
+      "pass_all": false,
+      "target_accept": 0.95
+    },
+    {
+      "divergences": 2,
       "draws": 2000,
-      "elapsed_seconds": 19.5,
-      "max_rhat": 1.0026343713450059,
-      "min_ess": 719.1582117840624,
+      "elapsed_seconds": 58.5,
+      "max_rhat": 1.0047518414359682,
+      "min_ess": 672.5632663247341,
+      "pass_all": false,
+      "target_accept": 0.95
+    },
+    {
+      "divergences": 0,
+      "draws": 2000,
+      "elapsed_seconds": 85.3,
+      "max_rhat": 1.0024682146791617,
+      "min_ess": 662.7387007548194,
       "pass_all": true,
-      "target_accept": 0.9
+      "target_accept": 0.99
     }
   ],
   "chains": 2,
   "deviations": [
-    "sampler settings changed after a failed gate: target_accept 0.9, draws 1000 gave 0 divergences and min ESS 339; target_accept 0.9, draws 2000 gave 0 divergences and min ESS 719"
+    "sampler settings changed after a failed gate: target_accept 0.9, draws 1000 gave 3 divergences and min ESS 336; target_accept 0.95, draws 1000 gave 0 divergences and min ESS 319; target_accept 0.95, draws 2000 gave 2 divergences and min ESS 673; target_accept 0.99, draws 2000 gave 0 divergences and min ESS 663"
   ],
   "divergences": 0,
   "draws_per_chain": 2000,
@@ -29,17 +47,17 @@
     "chains": 2,
     "deviations": [],
     "draws": 2000,
-    "elapsed_seconds": 19.5,
+    "elapsed_seconds": 85.3,
     "sampler": "nutpie",
     "seed": 42,
-    "target_accept": 0.9,
+    "target_accept": 0.99,
     "tune": 1000
   },
   "layer": "layer_r",
-  "max_rhat": 1.0026343713450059,
-  "min_bfmi": 0.9399106135343758,
-  "min_ess_bulk": 719.1582117840624,
-  "min_ess_tail": 791.4618299285219,
+  "max_rhat": 1.0024682146791617,
+  "min_bfmi": 0.8756977414316743,
+  "min_ess_bulk": 706.3459517885052,
+  "min_ess_tail": 662.7387007548194,
   "pass_all": true,
   "pass_divergences": true,
   "pass_ess": true,
@@ -49,7 +67,7 @@
     "ess_min": 400.0,
     "rhat_max": 1.01
   },
-  "weeks": 153,
-  "worst_ess_parameter": "effect_log__",
-  "worst_rhat_parameter": "slope_log__"
+  "weeks": 182,
+  "worst_ess_parameter": "intercept",
+  "worst_rhat_parameter": "effect_log__"
 }

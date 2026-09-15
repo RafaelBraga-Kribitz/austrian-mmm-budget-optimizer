@@ -67,13 +67,23 @@ def main() -> int:
     moves = []
     for _, r in table[table["scenario"] == "same_total"].iterrows():
         delta = v("d_delta_" + r["channel"], f"{r['delta_pct']:+.0f}")
-        moves.append(f"{r['channel']} {delta} Prozent")
+        held = " (von der Regel gehalten)" if bool(r["held_by_rule"]) else ""
+        moves.append(f"{r['channel']} {delta} Prozent{held}")
     gain_med = v("d_gain_median", num(same["gain_pct_of_current_contribution_median"], 1))
     gain_p10 = v("d_gain_p10", num(same["gain_pct_of_current_contribution_p10"], 1))
     p_neg = v("d_p_neg", pct(same["probability_gain_negative"]))
     breakeven = v("d_breakeven", num(dec["breakeven_roas"]))
     margin = v("d_margin", pct(dec["contribution_margin"], 0))
     p25 = v("d_p25_gain", num(plus["gain_pct_of_current_contribution_median"], 1))
+    extra = dec.get("plus_extra_budget")
+    extra_sentence = ""
+    if extra:
+        extra_year = v("d_extra_year", f"{dec['extra_budget_per_year']:.0f}")
+        extra_gain = v("d_extra_gain", num(extra["gain_pct_of_current_contribution_median"], 1))
+        extra_sentence = (
+            f" Mit {extra_year} Geldeinheiten mehr pro Jahr steigt der Medienbeitrag im Median um "
+            f"{extra_gain} Prozent."
+        )
     verdict = (
         "wird empfohlen" if same["recommend"]
         else "wird nach der Entscheidungsregel nicht empfohlen"
@@ -100,14 +110,14 @@ von Paid Search liegt {search_gap} Prozentpunkte über dem tatsächlichen inkrem
 Anteil; Offline-Medien bekommen von der Plattform gar nichts zugeschrieben.
 
 **Beiträge (Layer R, öffentliche Demodaten).** Inkrementeller Umsatzanteil:
-{"; ".join(shares)}. Es handelt sich um öffentliche Demodaten mit indexierten
-Ausgaben; ein Wechsel auf echte Kundendaten ist vorgesehen. Es wurden keine
-österreichischen Kundendaten verwendet.
+{"; ".join(shares)}. Es handelt sich um öffentliche Demodaten (Robyn, fünf benannte
+Kanäle, Geldeinheiten ohne Währungsangabe); ein Wechsel auf echte Kundendaten ist
+vorgesehen. Es wurden keine österreichischen Kundendaten verwendet.
 
 **Entscheidung (Layer D).** Bei gleichem Gesamtbudget: {"; ".join(moves)}. Erwarteter
 Gewinn im Median {gain_med} Prozent des heutigen Medienbeitrags, 10. Perzentil
 {gain_p10} Prozent, Wahrscheinlichkeit eines Verlusts {p_neg} Prozent. Die Umschichtung
-{verdict}. Mit 25 Prozent mehr Budget liegt der Median-Gewinn bei {p25} Prozent.
+{verdict}. Mit 25 Prozent mehr Budget liegt der Median-Gewinn bei {p25} Prozent.{extra_sentence}
 
 **Regel.** Budget wird nur in einen Kanal verschoben, solange die untere Grenze des
 90-Prozent-Intervalls seines Grenz-ROAS über dem Breakeven-ROAS von {breakeven} liegt

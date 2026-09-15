@@ -13,7 +13,6 @@ dependencies = [
     "pymc>=5.20,<6",
     "arviz>=0.20",
     "matplotlib>=3.8",
-    "duckdb>=1.0",
     "pyyaml>=6",
     "nutpie>=0.13",
     "bk-viz",

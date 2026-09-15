@@ -3,6 +3,12 @@
 For one advertiser, which channels contributed incrementally, how far off were
 platform-reported numbers, and what does a reallocation gain?
 
+"Austrian" names the setting the model is built for, not the data behind it: the
+Austrian public-holiday calendar as a control, weekly grain, euro and
+contribution-margin logic for an Austrian advertiser. It is validated on synthetic
+data with known truth and demonstrated on public data, pending a client swap-in. No
+Austrian client data was used.
+
 ![{{headline_alt}}]({{headline_chart}})
 
 {{headline_lines}}
@@ -18,6 +24,10 @@ have arrived anyway. The model below is built to test those claims.
 ## Method
 
 {{method_bullets}}
+
+## Proof on known truth
+
+{{proof_section}}
 
 ## Results: holdout forecast against two baselines
 

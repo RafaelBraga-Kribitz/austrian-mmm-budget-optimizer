@@ -73,6 +73,14 @@ CELLS = [
         "rec[['family', 'parameter', 'true', 'median', 'lo', 'hi', 'covered']]"
     ),
     new_markdown_cell(
+        "## 4b. Response curves against the truth\n\nThe orange line is the true response "
+        "curve of the generator, the black line the posterior median and the band its 90 "
+        "percent interval. This is the test a budget decision depends on: the curve at "
+        "observed spend, not the individual parameters behind it."
+    ),
+    new_code_cell("display(Image(filename=str(OUT / 'response_curve_recovery.png'), width=1000))"),
+    new_code_cell("pd.read_csv(OUT / 'response_curve_metrics.csv')"),
+    new_markdown_cell(
         "## 5. Contribution recovery\n\nThe share of revenue each channel drives is what a "
         "marketer acts on. It is recovered more tightly than the individual curve parameters, "
         "because half-saturation, slope and effect size trade off against each other while "

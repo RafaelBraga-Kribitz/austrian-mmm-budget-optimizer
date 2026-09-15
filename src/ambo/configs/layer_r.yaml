@@ -1,24 +1,24 @@
 # Layer R: public demo data through the same model as Layer P.
-# Source: the example MMM dataset bundled with pymc-marketing (see data/README.md).
-# Two media channels and two one-off events; the events are merged into one
-# control indicator because the model carries one control.
+# Source: Robyn's simulated weekly dataset (see data/README.md): five named media
+# channels with spend in money units, revenue, and competitor sales as the control.
 
 layer: layer_r
-title: "Layer R, public demo data (pymc-marketing example dataset)"
+title: "Layer R, public demo data (Robyn simulated weekly dataset)"
 output_dir: reports/layer_r
 data_dir: data/layer_r
 
 source:
-  file: mmm_example.csv
-  date_column: date_week
-  revenue_column: y
-  spend_columns: {x1: "Media channel 1", x2: "Media channel 2"}
-  event_columns: [event_1, event_2]
+  file: dt_simulated_weekly.csv
+  date_column: DATE
+  revenue_column: revenue
+  spend_columns: {tv_S: "TV", ooh_S: "Out-of-home", print_S: "Print", facebook_S: "Facebook", search_S: "Search"}
+  control_column: competitor_sales_B
+  control_scale: mean       # divided by its mean, so the coefficient reads per average level
 
-channels: ["Media channel 1", "Media channel 2"]
+channels: ["TV", "Out-of-home", "Print", "Facebook", "Search"]
 control:
-  name: "Event week"
-  column: event
+  name: "Competitor sales (index)"
+  column: competitor_sales
 
 model:
   adstock_length: 13
@@ -51,7 +51,7 @@ diagnostics:
   divergences_max: 0
 
 holdout:
-  train_weeks: 153        # 179 weeks in the file; the last 26 are held out
+  train_weeks: 182        # 208 weeks in the file; the last 26 are held out
   ridge_alphas: [0.1, 1.0, 10.0, 100.0]
 
 response_curves:
@@ -61,10 +61,11 @@ response_curves:
 # Layer D reads these. The contribution margin turns revenue into gross profit;
 # breakeven ROAS is 1 / margin: a channel only pays back if one unit of spend
 # returns more than that in revenue. The margin is an assumption, stated here so
-# it can be changed in one place.
+# it can be changed in one place. Money units are the dataset's.
 decision:
   contribution_margin: 0.40
-  bound_share: 0.50           # each channel may move at most 50 percent of its current spend
+  bound_share: 0.50             # each channel may move at most 50 percent of its current spend
   scenarios: {same_total: 1.0, plus_25_percent: 1.25}
+  extra_budget_per_year: 200000 # the "next 200k" question, spread over 52 weeks
   posterior_draws: 500
-  extra_budget: 200000        # the "next 200k" question, in the data's money units
+  per_draw_optimisations: 200

@@ -1,8 +1,11 @@
 {
   "channels_share_covered": 4,
   "coverage_share": 0.9285714285714286,
+  "curve_coverage_mean": 0.9111111111111111,
+  "curve_coverage_min": 0.5555555555555556,
+  "curve_mae_pct_max": 13.564643329097223,
   "diagnostics_pass": true,
-  "elapsed_seconds": 891.5,
+  "elapsed_seconds": 907.3,
   "holdout": [
     {
       "coverage_90": 0.9230769230769231,

@@ -1,21 +1,33 @@
 {
   "adstock_length": 13,
   "channels": [
-    "Media channel 1",
-    "Media channel 2"
+    "TV",
+    "Out-of-home",
+    "Print",
+    "Facebook",
+    "Search"
   ],
-  "revenue_mean": 5284.947575897942,
+  "revenue_mean": 1822142.7724358975,
   "spend_max_week": {
-    "Media channel 1": 0.9966581290617555,
-    "Media channel 2": 0.994374311652612
+    "Facebook": 15400.3914080076,
+    "Out-of-home": 500361.6,
+    "Print": 31922.3111111111,
+    "Search": 17880.0,
+    "TV": 158046.573333333
   },
   "spend_mean_week": {
-    "Media channel 1": 0.3090815783028675,
-    "Media channel 2": 0.16184999078719198
+    "Facebook": 2145.657826295471,
+    "Out-of-home": 43217.94102564102,
+    "Print": 3728.632264957266,
+    "Search": 5915.512820512821,
+    "TV": 14843.691217948714
   },
   "spend_means": {
-    "Media channel 1": 0.3090815783028675,
-    "Media channel 2": 0.9053483859658551
+    "Facebook": 4418.780473955028,
+    "Out-of-home": 105756.84392156864,
+    "Print": 8914.43116219668,
+    "Search": 6991.060606060607,
+    "TV": 33559.64971014492
   },
-  "weeks": 179
+  "weeks": 208
 }

@@ -3,31 +3,52 @@
     {
       "divergences": 0,
       "draws": 1000,
-      "elapsed_seconds": 21.1,
-      "max_rhat": 1.005756008452057,
-      "min_ess": 441.14358225128444,
-      "pass_all": true,
+      "elapsed_seconds": 82.7,
+      "max_rhat": 1.0116779750755267,
+      "min_ess": 290.3218244139838,
+      "pass_all": false,
       "target_accept": 0.9
+    },
+    {
+      "divergences": 0,
+      "draws": 1000,
+      "elapsed_seconds": 46.6,
+      "max_rhat": 1.0061155543549962,
+      "min_ess": 300.8997121277101,
+      "pass_all": false,
+      "target_accept": 0.95
+    },
+    {
+      "divergences": 0,
+      "draws": 2000,
+      "elapsed_seconds": 61.8,
+      "max_rhat": 1.0032771198517183,
+      "min_ess": 577.2310137903446,
+      "pass_all": true,
+      "target_accept": 0.95
     }
   ],
   "chains": 2,
+  "deviations": [
+    "sampler settings changed after a failed gate: target_accept 0.9, draws 1000 gave 0 divergences and min ESS 290; target_accept 0.95, draws 1000 gave 0 divergences and min ESS 301; target_accept 0.95, draws 2000 gave 0 divergences and min ESS 577"
+  ],
   "divergences": 0,
-  "draws_per_chain": 1000,
+  "draws_per_chain": 2000,
   "fit": {
     "chains": 2,
     "deviations": [],
-    "draws": 1000,
-    "elapsed_seconds": 21.1,
+    "draws": 2000,
+    "elapsed_seconds": 61.8,
     "sampler": "nutpie",
     "seed": 42,
-    "target_accept": 0.9,
+    "target_accept": 0.95,
     "tune": 1000
   },
   "layer": "layer_r",
-  "max_rhat": 1.005756008452057,
-  "min_bfmi": 0.9516996476278832,
-  "min_ess_bulk": 441.14358225128444,
-  "min_ess_tail": 561.8912482974015,
+  "max_rhat": 1.0032771198517183,
+  "min_bfmi": 0.8329807744172122,
+  "min_ess_bulk": 764.0843618590698,
+  "min_ess_tail": 577.2310137903446,
   "pass_all": true,
   "pass_divergences": true,
   "pass_ess": true,
@@ -37,7 +58,7 @@
     "ess_min": 400.0,
     "rhat_max": 1.01
   },
-  "weeks": 179,
-  "worst_ess_parameter": "effect_log__",
-  "worst_rhat_parameter": "seasonality_sin"
+  "weeks": 208,
+  "worst_ess_parameter": "control",
+  "worst_rhat_parameter": "effect_log__"
 }
