@@ -4,26 +4,32 @@ Run date: 2026-09-15. Working branch: build/ambo. MERGE_TO_MAIN: true.
 
 ## Morning brief
 
-(written last; empty until then)
+Stage 1 is on `main`. The stacked GSD pull requests were closed as superseded
+(salvage record below). The next work is the flat package: simulator, model,
+recovery, optimiser, reports — five channels, no Layer R (ADR-012).
 
 ## Current stage
 
-Stage 1, Hygiene.
+Stage 2, Layer P pipeline.
 
 ## Done
 
 | Stage | Commit | Produced |
 |-------|--------|----------|
 | 0 Inventory | (committed together with Stage 1) | Counts, constraints and triage table below. |
+| 1 Hygiene | `cd235f2` / merge `3285620` | Package skeleton, CI, transforms, calendar |
+| 2+ Pipeline | this branch | `ambo.synth`, `model`, `evaluate`, `baselines`, `optimize`, `report`, `run` |
 
 ## Numbers
 
-None produced yet.
+None from a full NUTS run yet. `python -m ambo.run simulate` writes Layer P CSVs
+and `truth.json`. Full regeneration is `python -m ambo.run layer_p`.
 
 ## Blockers
 
 - Stage 0: the gh CLI is not installed in this environment. The GitHub API was used
   instead for listing and closing pull requests, with the same outcome.
+- Full NUTS is too slow for the default CI job; CI stays `pytest -m "not slow"`.
 
 ## Decisions taken
 
@@ -54,10 +60,14 @@ None produced yet.
   the literal form --exclude-dir=docs/agents excludes nothing and reports the twelve
   moved planning files under docs/agents/planning, which are allowed to contain those
   words. Tracked files outside docs/agents are clean.
+- D-10 Five-channel Layer P and Charter §7 degradation are ratified in ADR-012.
+  Layer R is not fabricated. Recovery gates are the SPEC-05 observables on five
+  channels. Python 3.11 and nutpie stand (D-06, D-08).
 
 ## Next action
 
-Build the package skeleton, CI file and tests for Stage 1, then merge to main.
+Land the Layer P pipeline on `main`, run `python -m ambo.run layer_p` for the
+reported posterior, and keep Layer R unavailable until a real drop exists.
 
 ## Inventory
 

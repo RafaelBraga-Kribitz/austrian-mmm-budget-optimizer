@@ -56,3 +56,19 @@ Observed column, not by copying the D-29 known-state table in
   `{"squash": false, "rebase": false, "merge": true}`. Squash and rebase merge are
   disabled at the repository level, so the merge button cannot destroy the task-level
   commit trail EB-082 and the layer-order argument depend on.
+
+---
+
+## 2026-09-15 — Stage 2+ pipeline on the rebuilt package (ADR-012)
+
+After Stage 1 landed on `main`, the stacked GSD PRs were closed as superseded
+(STATUS.md salvage record). This entry records the flat-package continuation:
+
+- `ambo.synth` — independent geometric recursion + Hill; five-channel Layer P
+  (D-05); platform over-credit (SIM-060); committed `data/synthetic/` via
+  `python -m ambo.run simulate`.
+- `ambo.model` — scaled additive-in-level MMM, non-centred Fourier, one holiday
+  control, nutpie primary (D-08).
+- `ambo.evaluate` / `baselines` / `optimize` / `report` — recovery observables,
+  OLS+HC1, SLSQP with 1.3× cap, HDI-bearing artifacts.
+- `ambo.data.load_layer_r` raises (A-5, Charter §7). Deviation ADR: `docs/adr/ADR-012_five-channel-layer-p-and-charter-7.md`.
