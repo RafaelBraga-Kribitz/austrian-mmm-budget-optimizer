@@ -8,22 +8,57 @@ Run date: 2026-09-15. Working branch: build/ambo. MERGE_TO_MAIN: true.
 
 ## Current stage
 
-Stage 1, Hygiene.
+Stage 5, README.
 
 ## Done
 
 | Stage | Commit | Produced |
 |-------|--------|----------|
-| 0 Inventory | (committed together with Stage 1) | Counts, constraints and triage table below. |
+| 0 Inventory | cd235f2 (with Stage 1) | Counts, constraints and triage table below. |
+| 1 Hygiene | cd235f2, merged to main in 3285620 | Root cleaned, docs moved, LICENSE, package skeleton with transforms and calendar, CI, uv lock; 40 pull requests closed, 4 kept open. |
+| 2 Layer P | (this commit) | Synthetic advertiser with disclosed truth, PyMC model, parameter and contribution recovery, attribution gap, holdout against two baselines, all under reports/layer_p. |
+| 3 Layer R | (build/ambo) | Same model on the pymc-marketing example dataset: channel contributions, response curves, holdout, diagnostics, posterior draws under reports/layer_r. |
+| 4 Layer D | (build/ambo) | Budget optimiser on the Layer R posterior: reallocation table, gain distribution, decision rule, next-budget note under reports/layer_d. |
 
 ## Numbers
 
-None produced yet.
+Every number below is read from the named artifact; none is typed from memory.
+
+Layer P, synthetic advertiser with known truth (156 weeks, 5 channels):
+
+| Metric | Value | Artifact |
+|--------|-------|----------|
+| True parameters inside their 90 percent interval | 26 of 28 | reports/layer_p/parameter_recovery.csv |
+| Misses | Paid Search decay (true 0.15, interval 0.17 to 0.52); TV slope (true 1.40, interval 0.69 to 1.29) | same |
+| Channels whose true revenue share is inside the interval | 4 of 5 (TV: true 9.5 percent, interval 9.7 to 11.4) | reports/layer_p/contribution_recovery.csv |
+| Platform-reported share minus true incremental share | Paid Search +24.8 pp (60.8 vs 36.0); Paid Social +17.5 pp; TV -28.3 pp; Print -7.1 pp; Radio -6.8 pp | reports/layer_p/attribution_gap.csv |
+| Full-fit diagnostics | max R-hat 1.009, min ESS 436, 0 divergences, BFMI 0.89; reached at target_accept 0.99 after 14 divergences at 0.9 and 1 at 0.95 | reports/layer_p/diagnostics.json |
+| Holdout, weeks 131 to 156 | MMM MAPE 3.0 percent, coverage 85 percent; ridge 4.7 percent, 92 percent; seasonal naive 9.6 percent, 92 percent. Holdout fit gates passed at target_accept 0.99 with 2000 draws after 13 divergences at 0.9, an ESS shortfall at 0.95 and 13 divergences again at 0.95 with 2000 draws | reports/layer_p/holdout_metrics.csv |
+| Wall time of the full run | 891.5 seconds (14.9 minutes) for both fits and all ladder attempts, nutpie, 2 chains | reports/layer_p/run_info.json |
+
+Layer R, public demo data (pymc-marketing example, 179 weeks, 2 channels):
+
+| Metric | Value | Artifact |
+|--------|-------|----------|
+| Share of revenue, Media channel 1 | 22.1 percent (18.1 to 28.1) | reports/layer_r/channel_contributions.csv |
+| Share of revenue, Media channel 2 | 7.1 percent (6.6 to 7.7) | same |
+| ROAS in the file's index units (revenue per unit of spend) | channel 1: 3783 (3089 to 4798); channel 2: 2322 (2160 to 2505) | same |
+| Full-fit diagnostics | max R-hat 1.006, min ESS 441, 0 divergences, first attempt | reports/layer_r/diagnostics.json |
+| Holdout, last 26 weeks | MMM MAPE 4.4 percent, coverage 85 percent; ridge 7.5 percent, 92 percent; seasonal naive 19.3 percent, 96 percent | reports/layer_r/holdout_metrics.csv |
+
+Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisations):
+
+| Metric | Value | Artifact |
+|--------|-------|----------|
+| Same total budget: gain from reallocation | median +2.5 percent of current media contribution, 10th percentile -0.8 percent, probability of a loss 14.6 percent; verdict: hold (10th percentile negative) | reports/layer_d/decision.json |
+| Same total budget: moves | Media channel 1 +23 percent, Media channel 2 -45 percent of current weekly spend | reports/layer_d/reallocation_table.csv |
+| Budget plus 25 percent | median gain +23.3 percent, 10th percentile +18.9 percent, no draw loses; 92 percent of the extra goes to channel 1; probability channel 1 is not the best marginal channel 43.6 percent; verdict: recommend | reports/layer_d/next_200k.md |
+| Breakeven ROAS | 2.50 at a contribution margin of 40 percent (assumption in src/ambo/configs/layer_r.yaml) | reports/layer_d/decision.json |
 
 ## Blockers
 
-- Stage 0: the gh CLI is not installed in this environment. The GitHub API was used
-  instead for listing and closing pull requests, with the same outcome.
+- None that stop a stage. The gh CLI is absent (Stage 0); the GitHub API was used
+  instead with the same outcome.
 
 ## Decisions taken
 
@@ -54,10 +89,43 @@ None produced yet.
   the literal form --exclude-dir=docs/agents excludes nothing and reports the twelve
   moved planning files under docs/agents/planning, which are allowed to contain those
   words. Tracked files outside docs/agents are clean.
+- D-10 The first Layer P probe gave the always-on channels nearly flat spend, which left
+  their curves unidentified (45 divergences, ESS 150). The generator now gives Paid
+  Search and Paid Social seasonal swings and campaign pulses, as real accounts have.
+- D-11 The model's adstock is the truncated recursion (13 lags, unnormalised weights),
+  the same definition the generator uses, so half-saturation and effect size are
+  comparable one to one in the recovery chart. SPEC-04's normalised-weight mismatch
+  was dropped for that reason.
+- D-12 The Hill slope prior is LogNormal(0, 0.5) instead of SPEC-04's truncated Gamma:
+  smoother geometry for the sampler, no hard boundary, same weakly informative range.
+- D-13 Sampler ladder, recorded in every diagnostics.json: divergences or a high R-hat
+  raise target_accept to 0.95 and then 0.99; too few effective draws double the draws
+  at the same rung; the best attempt is kept if none passes. The Layer P full fit
+  needed the 0.99 rung (14 divergences at 0.9, 1 at 0.95, 0 at 0.99). MD-050's
+  target_accept of 0.9 therefore does not hold on this data.
+- D-14 Holdout is weeks 131 to 156 (26 weeks) as the build brief asks, not the 13-week
+  protocol of SPEC-05.
+- D-15 Layer R uses the pymc-marketing example file because it was reachable; Robyn's
+  dt_simulated_weekly (five named channels, money units) is the alternative and was
+  also reachable at
+  github.com/facebookexperimental/Robyn/main/python/src/robyn/tutorials/resources/.
+  The file's two event dummies are merged into one control; its channels have no
+  names, so they are labelled Media channel 1 and 2; its spend is index scaled, so
+  Layer D reports shares and ratios and the marginal ROAS numbers are in index units.
+- D-16 Breakeven ROAS is 1 divided by a contribution margin of 40 percent, stated in
+  src/ambo/configs/layer_r.yaml. This is an assumption for Rafael to confirm.
+- D-17 The "next EUR 200k" question is answered through the plus-25-percent scenario,
+  with the unit caveat written into reports/layer_d/next_200k.md. The extra budget
+  bound lets each channel grow by the bound share plus the budget increase.
+- D-18 Posterior draws (a few hundred kilobytes per layer) are committed under reports/
+  so Layer D and the charts regenerate without sampling.
+- D-19 CI runs ruff, the fast tests, the tiny-config pipeline and the executed
+  notebook; the tiny outputs (reports/layer_p_tiny, data/synthetic_tiny) are ignored.
 
 ## Next action
 
-Build the package skeleton, CI file and tests for Stage 1, then merge to main.
+Render README.md from reports/ with scripts/render_readme.py, run the numbers test,
+write docs/summary_de.md, then execute the notebook for Stage 6.
 
 ## Inventory
 

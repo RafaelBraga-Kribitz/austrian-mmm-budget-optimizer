@@ -1,0 +1,33 @@
+{
+  "adstock_length": 13,
+  "channels": [
+    "TV",
+    "Radio",
+    "Print",
+    "Paid Search",
+    "Paid Social"
+  ],
+  "revenue_mean": 127911.1035897436,
+  "spend_max_week": {
+    "Paid Search": 17848.0,
+    "Paid Social": 13087.0,
+    "Print": 10066.0,
+    "Radio": 12938.0,
+    "TV": 42127.0
+  },
+  "spend_mean_week": {
+    "Paid Search": 7584.525641025641,
+    "Paid Social": 6049.429487179487,
+    "Print": 2454.519230769231,
+    "Radio": 3003.9679487179487,
+    "TV": 11479.301282051281
+  },
+  "spend_means": {
+    "Paid Search": 7584.525641025641,
+    "Paid Social": 6049.429487179487,
+    "Print": 7977.1875,
+    "Radio": 9762.895833333334,
+    "TV": 33162.42592592593
+  },
+  "weeks": 156
+}

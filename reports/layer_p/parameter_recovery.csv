@@ -1,0 +1,29 @@
+family,parameter,channel,unit,true,median,lo,hi,covered
+Adstock decay,TV,TV,share carried to next week,0.6,0.5732051106062459,0.5127822168270765,0.6197712467432448,True
+Adstock decay,Radio,Radio,share carried to next week,0.4,0.30692641946117377,0.1335275518039507,0.47750294820471,True
+Adstock decay,Print,Print,share carried to next week,0.5,0.5420554771098746,0.3876588007298089,0.643488804870836,True
+Adstock decay,Paid Search,Paid Search,share carried to next week,0.15,0.35542846094195174,0.16914616560806942,0.519940518312207,False
+Adstock decay,Paid Social,Paid Social,share carried to next week,0.3,0.38014113859527293,0.14505589712747663,0.593330769678145,True
+Saturation,TV half-saturation,TV,multiple of average weekly spend,1.2061843753333061,1.613223483334715,0.9441258073859518,3.3770822088053962,True
+Saturation,Radio half-saturation,Radio,multiple of average weekly spend,1.02428625386508,2.2557374451725165,0.7989841511573087,5.416288193181151,True
+Saturation,Print half-saturation,Print,multiple of average weekly spend,1.128217181807498,1.9811849200885403,0.7558064223813895,4.991490604912464,True
+Saturation,Paid Search half-saturation,Paid Search,multiple of average weekly spend,0.6592370092276278,2.0670719048566752,0.622121985079124,5.160553389587299,True
+Saturation,Paid Social half-saturation,Paid Social,multiple of average weekly spend,0.8265242219281115,1.4630714109767466,0.33698846230176,4.60487138665349,True
+Saturation,TV slope,TV,Hill slope,1.4,0.9384903525364577,0.6946315698022448,1.2917724228595193,False
+Saturation,Radio slope,Radio,Hill slope,1.1,0.9745217080228883,0.5868807208043225,1.5649981331115805,True
+Saturation,Print slope,Print,Hill slope,1.2,1.0795227287323976,0.6792315471730351,1.7624419837631622,True
+Saturation,Paid Search slope,Paid Search,Hill slope,0.9,1.0079975965363452,0.5142695758767412,2.0626228211084996,True
+Saturation,Paid Social slope,Paid Social,Hill slope,1.0,0.9476783627931543,0.4460792431837112,2.1032720157515556,True
+Coefficients,TV effect,TV,money per week,40000.0,52499.24241968643,39623.93242002023,74696.98523322173,True
+Coefficients,Radio effect,Radio,money per week,12000.0,18939.96128895626,10693.952707645356,34315.57234979831,True
+Coefficients,Print effect,Print,money per week,12000.0,18828.585094475235,10653.487751958466,33042.751372852304,True
+Coefficients,Paid Search effect,Paid Search,money per week,25000.0,30686.196442730045,14130.87521099621,58181.40558080119,True
+Coefficients,Paid Social effect,Paid Social,money per week,15000.0,21695.50138684072,7608.45544775505,47197.17439737037,True
+Coefficients,Baseline level,,money per week,80000.0,76625.28829702782,50546.78664390131,90560.75610838826,True
+Coefficients,Trend over the window,,money per week,12000.0,13938.482737683691,11534.433577980206,16260.99390959106,True
+Coefficients,Season sine 1,,money per week,-3700.0,-4321.000168616054,-5101.211239307589,-3571.281162792921,True
+Coefficients,Season cosine 1,,money per week,9300.0,9311.726844416955,8115.20612739834,10435.521192028356,True
+Coefficients,Season sine 2,,money per week,-2800.0,-2433.138318267167,-3195.97044665581,-1634.0197021259194,True
+Coefficients,Season cosine 2,,money per week,-1100.0,-1440.3838458646308,-2199.3867108676263,-690.3175772687681,True
+Coefficients,Public holiday week,,money per week,-4000.0,-3523.962037458493,-4792.125724227294,-2289.99711003183,True
+Coefficients,Noise (standard deviation),,money per week,3500.0,3529.48041418545,3206.1295310767246,3908.066947778242,True
