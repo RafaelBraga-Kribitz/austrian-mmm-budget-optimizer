@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "divergences": 0,
+      "draws": 1000,
+      "elapsed_seconds": 21.1,
+      "max_rhat": 1.005756008452057,
+      "min_ess": 441.14358225128444,
+      "pass_all": true,
+      "target_accept": 0.9
+    }
+  ],
+  "chains": 2,
+  "divergences": 0,
+  "draws_per_chain": 1000,
+  "fit": {
+    "chains": 2,
+    "deviations": [],
+    "draws": 1000,
+    "elapsed_seconds": 21.1,
+    "sampler": "nutpie",
+    "seed": 42,
+    "target_accept": 0.9,
+    "tune": 1000
+  },
+  "layer": "layer_r",
+  "max_rhat": 1.005756008452057,
+  "min_bfmi": 0.9516996476278832,
+  "min_ess_bulk": 441.14358225128444,
+  "min_ess_tail": 561.8912482974015,
+  "pass_all": true,
+  "pass_divergences": true,
+  "pass_ess": true,
+  "pass_rhat": true,
+  "thresholds": {
+    "divergences_max": 0,
+    "ess_min": 400.0,
+    "rhat_max": 1.01
+  },
+  "weeks": 179,
+  "worst_ess_parameter": "effect_log__",
+  "worst_rhat_parameter": "seasonality_sin"
+}

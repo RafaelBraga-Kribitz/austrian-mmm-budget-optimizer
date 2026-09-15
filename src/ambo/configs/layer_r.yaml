@@ -1,0 +1,70 @@
+# Layer R: public demo data through the same model as Layer P.
+# Source: the example MMM dataset bundled with pymc-marketing (see data/README.md).
+# Two media channels and two one-off events; the events are merged into one
+# control indicator because the model carries one control.
+
+layer: layer_r
+title: "Layer R, public demo data (pymc-marketing example dataset)"
+output_dir: reports/layer_r
+data_dir: data/layer_r
+
+source:
+  file: mmm_example.csv
+  date_column: date_week
+  revenue_column: y
+  spend_columns: {x1: "Media channel 1", x2: "Media channel 2"}
+  event_columns: [event_1, event_2]
+
+channels: ["Media channel 1", "Media channel 2"]
+control:
+  name: "Event week"
+  column: event
+
+model:
+  adstock_length: 13
+  fourier_order: 2
+  fourier_period: 52.18
+
+priors:
+  decay: {dist: beta, a: 2.0, b: 3.0}
+  half_saturation: {dist: gamma, shape: 2.0, rate: 1.0}
+  slope: {dist: lognormal, mu: 0.0, sigma: 0.5}
+  effect: {dist: halfnormal, sigma: 0.3}
+  intercept: {dist: normal, mu: 1.0, sigma: 0.5}
+  trend: {dist: normal, mu: 0.0, sigma: 0.3}
+  seasonality: {dist: normal, mu: 0.0, sigma: 0.2}
+  control: {dist: normal, mu: 0.0, sigma: 0.2}
+  noise: {dist: halfnormal, sigma: 0.1}
+
+sampling:
+  sampler: nutpie
+  chains: 2
+  tune: 1000
+  draws: 1000
+  target_accept: 0.9
+  seed: 42
+  max_minutes: 20
+
+diagnostics:
+  rhat_max: 1.01
+  ess_min: 400
+  divergences_max: 0
+
+holdout:
+  train_weeks: 153        # 179 weeks in the file; the last 26 are held out
+  ridge_alphas: [0.1, 1.0, 10.0, 100.0]
+
+response_curves:
+  grid_points: 41
+  max_multiple_of_observed: 1.5   # curves stop at 1.5x the largest observed weekly spend
+
+# Layer D reads these. The contribution margin turns revenue into gross profit;
+# breakeven ROAS is 1 / margin: a channel only pays back if one unit of spend
+# returns more than that in revenue. The margin is an assumption, stated here so
+# it can be changed in one place.
+decision:
+  contribution_margin: 0.40
+  bound_share: 0.50           # each channel may move at most 50 percent of its current spend
+  scenarios: {same_total: 1.0, plus_25_percent: 1.25}
+  posterior_draws: 500
+  extra_budget: 200000        # the "next 200k" question, in the data's money units

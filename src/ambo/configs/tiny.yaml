@@ -35,11 +35,15 @@ sampling:
   target_accept: 0.9
   seed: 42
   max_minutes: 5
+  ladder: false           # one fit per model; see the diagnostics comment below
 
+# The smoke profile fits each model exactly once (ladder: false above) so the
+# pipeline stays under the CI time limit; the gates are still evaluated and
+# written to diagnostics.json. Reported fits use the layer_p.yaml thresholds.
 diagnostics:
-  rhat_max: 1.01
-  ess_min: 400
-  divergences_max: 0
+  rhat_max: 1.10
+  ess_min: 40
+  divergences_max: 10
 
 holdout:
   train_weeks: 78

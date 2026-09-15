@@ -299,6 +299,7 @@ def fit_with_ladder(md: ModelData, config: dict) -> tuple[object, dict, dict]:
     """Fit, and when a diagnostic gate fails, adjust the sampler in a fixed, recorded order.
 
     Divergences (or a high R-hat) raise target_accept one rung (0.95, then 0.99).
+    ``sampling.ladder: false`` in the config (the smoke profile) disables the retries.
     Too few effective draws double the draw count at the same rung, at most twice.
     The sequence stops at the first fit that passes every gate; if none does, the
     attempt with the fewest divergences and then the highest effective sample size
@@ -306,7 +307,10 @@ def fit_with_ladder(md: ModelData, config: dict) -> tuple[object, dict, dict]:
     never silent.
     """
     base = dict(config["sampling"])
-    rungs = [float(base["target_accept"]), 0.95, 0.99]
+    use_ladder = bool(base.pop("ladder", True))
+    rungs = [float(base["target_accept"])]
+    if use_ladder:
+        rungs += [0.95, 0.99]
     rung = 0
     draws = int(base["draws"])
     attempts: list[dict] = []
@@ -334,6 +338,8 @@ def fit_with_ladder(md: ModelData, config: dict) -> tuple[object, dict, dict]:
         if best is None or key > best[0]:
             best = (key, idata, info, diag)
         if diag["pass_all"]:
+            break
+        if not use_ladder:
             break
         if not diag["pass_divergences"] or not diag["pass_rhat"]:
             if rung + 1 < len(rungs):

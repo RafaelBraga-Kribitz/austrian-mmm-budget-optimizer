@@ -1,0 +1,21 @@
+{
+  "adstock_length": 13,
+  "channels": [
+    "Media channel 1",
+    "Media channel 2"
+  ],
+  "revenue_mean": 5284.947575897942,
+  "spend_max_week": {
+    "Media channel 1": 0.9966581290617555,
+    "Media channel 2": 0.994374311652612
+  },
+  "spend_mean_week": {
+    "Media channel 1": 0.3090815783028675,
+    "Media channel 2": 0.16184999078719198
+  },
+  "spend_means": {
+    "Media channel 1": 0.3090815783028675,
+    "Media channel 2": 0.9053483859658551
+  },
+  "weeks": 179
+}

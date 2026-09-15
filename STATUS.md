@@ -4,11 +4,90 @@ Run date: 2026-09-15. Working branch: build/ambo. MERGE_TO_MAIN: true.
 
 ## Morning brief
 
-(written last; empty until then)
+Written 2026-09-15 at the end of the run. Six stages done; nothing is blocked.
+
+**Where the code is.** main holds Stages 1 and 2: commit 3285620 (merge of cd235f2,
+hygiene, package skeleton and CI) and commit 3768d7c (merge of 6218abd, Layer P with
+parameter recovery). build/ambo holds, on top of that, bbf6b2a (Stage 3, Layer R),
+7bbccf5 (Stage 4, Layer D), 90b0658 (Stage 5, rendered README and German summary),
+081b14b (Stage 6, executed notebook), 6ef121e (this brief), 3328693 (smoke profile
+fix) and one lint fix on top of it. Draft pull request 46 (build/ambo into main) is
+the review vehicle. Eleven commits in total, one over the cap of ten (see D-23), one
+human identity, no history rewritten, no branch deleted.
+
+**Three charts to open first.**
+
+1. reports/layer_p/parameter_recovery.png: true parameter values (orange crosses)
+   against the model's 90 percent intervals, 26 of 28 inside.
+2. reports/layer_p/attribution_gap.png: platform-reported share against true
+   incremental share; Paid Search overstated by 24.8 points, TV understated by 28.3.
+3. reports/layer_r/channel_contributions.png: the README headline chart, share of
+   revenue per channel on the public demo data with intervals.
+
+Then reports/layer_d/reallocation_gain.png, the gain distribution with its 10th
+percentile marked.
+
+**Headline numbers** (full table under Numbers, each with its artifact path):
+
+- Layer P recovery: 26 of 28 true parameters inside their 90 percent interval;
+  4 of 5 channel revenue shares covered (reports/layer_p/parameter_recovery.csv,
+  contribution_recovery.csv).
+- Layer P attribution gap: Paid Search +24.8 pp, Paid Social +17.5 pp, TV -28.3 pp
+  (reports/layer_p/attribution_gap.csv).
+- Layer P holdout, 26 weeks: MMM MAPE 3.0 percent, ridge 4.7, seasonal naive 9.6;
+  coverage 85, 92, 92 percent (reports/layer_p/holdout_metrics.csv).
+- Layer R: Media channel 1 drives 22.1 percent of revenue (18.1 to 28.1), channel 2
+  7.1 percent (6.6 to 7.7); holdout MAPE 4.4 percent against 7.5 (ridge) and 19.3
+  (naive) (reports/layer_r/channel_contributions.csv, holdout_metrics.csv).
+- Layer D: same budget reallocated gains a median 2.5 percent of media contribution,
+  10th percentile -0.8 percent, so the rule says hold; 25 percent more budget gains a
+  median 23.3 percent, 92 percent of it to channel 1, and the rule says recommend
+  (reports/layer_d/decision.json, next_200k.md).
+- Sampler gates: every reported fit passes R-hat below 1.01, ESS above 400, zero
+  divergences, after the recorded ladder (reports/layer_p/diagnostics.json,
+  holdout_diagnostics.json, reports/layer_r/*.json).
+
+**Blockers.** None that stopped a stage. Two things to know: the gh CLI was absent and
+the GitHub API was used instead; and a parallel build appeared during the night (pull
+request 45, branch layer-p-pipeline-9588, opened 17:59 by a second tooling session on
+top of the Stage 1 skeleton). It is a competing Layer P implementation, reports its own
+recovery gates as red, and now conflicts with main. It was left untouched.
+
+**Decisions for Rafael today, ranked by impact.**
+
+1. Merge build/ambo into main (pull request 46), or ask for changes first. Everything
+   in it regenerates from three commands; the README numbers test guards the text.
+2. Pull request 45, the parallel build: close it, or cherry-pick anything you prefer
+   from it (its calendar dummies and normalised adstock are the main differences), and
+   stop that session if it is still running. Two Layer P implementations on one repo
+   will confuse a reader.
+3. Layer R data source: the pymc-marketing example file has two unnamed, index-scaled
+   channels, which keeps Layer D in shares and ratios. Robyn's dt_simulated_weekly
+   (five named channels, money units) was reachable at
+   github.com/facebookexperimental/Robyn/main/python/src/robyn/tutorials/resources/
+   and would make the decision layer read in money; swapping it in is a config plus
+   loader change. Your anonymised agency data would be the real answer.
+4. Breakeven ROAS: the 40 percent contribution margin in src/ambo/configs/layer_r.yaml
+   is a placeholder assumption. Set the real margin; the rule and the README rerender.
+5. Kept pull requests 18 (platform over-credit) and 34 (model builder): their functions
+   are salvaged into the package, so they can be closed; 36 and 41 were closed at the
+   end of the run to keep four open once 45 and 46 existed.
+
+**One paragraph to read aloud.** This project builds a marketing mix model that
+estimates what each advertising channel really adds to revenue, then turns that into a
+budget recommendation with honest uncertainty. Before trusting it on any advertiser's
+data, I made it pass a test where the answer is known: on a synthetic advertiser with
+five channels, it recovered 26 of 28 true parameters inside its stated intervals and
+showed how a platform dashboard overstates paid search by about 25 points while giving
+TV no credit at all. Run on public demo data, it beats a seasonal forecast and a ridge
+regression on out-of-sample error, and its optimiser says the current budget split is
+close to optimal, with a 15 percent chance a reallocation would lose money, so the
+recommendation is to hold at the same budget and to put most of any extra budget into
+the stronger channel. The next step is to run the same pipeline on real client data.
 
 ## Current stage
 
-Stage 5, README.
+All six stages done. Awaiting Rafael's review of pull request 46.
 
 ## Done
 
@@ -16,9 +95,11 @@ Stage 5, README.
 |-------|--------|----------|
 | 0 Inventory | cd235f2 (with Stage 1) | Counts, constraints and triage table below. |
 | 1 Hygiene | cd235f2, merged to main in 3285620 | Root cleaned, docs moved, LICENSE, package skeleton with transforms and calendar, CI, uv lock; 40 pull requests closed, 4 kept open. |
-| 2 Layer P | (this commit) | Synthetic advertiser with disclosed truth, PyMC model, parameter and contribution recovery, attribution gap, holdout against two baselines, all under reports/layer_p. |
-| 3 Layer R | (build/ambo) | Same model on the pymc-marketing example dataset: channel contributions, response curves, holdout, diagnostics, posterior draws under reports/layer_r. |
-| 4 Layer D | (build/ambo) | Budget optimiser on the Layer R posterior: reallocation table, gain distribution, decision rule, next-budget note under reports/layer_d. |
+| 2 Layer P | 6218abd, merged to main in 3768d7c | Synthetic advertiser with disclosed truth, PyMC model, parameter and contribution recovery, attribution gap, holdout against two baselines, all under reports/layer_p. |
+| 3 Layer R | bbf6b2a (build/ambo) | Same model on the pymc-marketing example dataset: channel contributions, response curves, holdout, diagnostics, posterior draws under reports/layer_r. |
+| 4 Layer D | 7bbccf5 (build/ambo) | Budget optimiser on the Layer R posterior: reallocation table, gain distribution, decision rule, next-budget note under reports/layer_d. |
+| 5 README | 90b0658 (build/ambo) | README.md and docs/summary_de.md rendered from reports/ by scripts; numbers test in tests/test_readme_numbers.py. |
+| 6 Notebook | 081b14b (build/ambo) | notebooks/01_walkthrough.ipynb executed on the tiny config with outputs saved; CI runs it. |
 
 ## Numbers
 
@@ -121,11 +202,28 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
   so Layer D and the charts regenerate without sampling.
 - D-19 CI runs ruff, the fast tests, the tiny-config pipeline and the executed
   notebook; the tiny outputs (reports/layer_p_tiny, data/synthetic_tiny) are ignored.
+- D-20 Draft pull request 46 (build/ambo into main) was opened as the review vehicle
+  for Stages 3 to 6. To stay at four open pull requests after pull request 45 appeared,
+  36 and 41 were closed with the same comment as the others; their content is fully
+  salvaged (diagnostics gates, holdout protocol).
+- D-21 Pull request 45, opened by a parallel tooling session during the run, was not
+  triaged, commented on or closed; it is Rafael's call.
+- D-22 The first CI run of the Stage 2 commit on build/ambo failed on the smoke step's
+  180-second limit: the tiny profile kept the reporting thresholds, which a 100-draw run
+  cannot meet, so the ladder fitted each model three times. The tiny profile now
+  switches the ladder off (sampling.ladder: false) and carries thresholds suited to
+  its budget; its gates are still written to diagnostics.json and its numbers are
+  never reported. Every later run, including main, had passed, but close to the
+  limit.
+- D-23 Commit 3328693 went out with one line over the ruff length limit because the
+  shell command that ran the gates did not stop on the lint failure before committing.
+  The eleventh commit fixes the line. Amending and force-pushing would have kept the
+  count at ten but breaks the no-rewrite rule, which weighs more; the cap of ten
+  commits is therefore exceeded by one, and the cause is recorded here.
 
 ## Next action
 
-Render README.md from reports/ with scripts/render_readme.py, run the numbers test,
-write docs/summary_de.md, then execute the notebook for Stage 6.
+Rafael reviews pull request 46 and decides on the five items in the morning brief.
 
 ## Inventory
 
@@ -238,6 +336,7 @@ merged wholesale.
 | 43 | p5-crosscheck-9588 | pymc-marketing cross-check | c | none (out of tonight's scope) |
 | 44 | p5-recovery-report-9588 | RECOVERY_REPORT generator | c | none |
 
-Kept open for Rafael's decision (at most four): 18, 34, 36, 41. All others are closed
-with the comment "Superseded by the build on main; see STATUS.md for the salvage
-record." No branch was deleted.
+Kept open for Rafael's decision: 18 and 34. All others are closed with the comment
+"Superseded by the build on main; see STATUS.md for the salvage record." (36 and 41 at
+the end of the run, see D-20). Open at the end of the run: 18, 34, 45 (parallel build,
+not part of this inventory) and 46 (build/ambo). No branch was deleted.
