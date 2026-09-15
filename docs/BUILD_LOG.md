@@ -102,3 +102,13 @@ draw 423) at low search `K` with `s ≈ 1.53`. Rungs 1–3 of the ladder were
 already applied (target_accept 0.95, non-centred Fourier, tight s prior).
 Rung 4 fixes `s_c = 1` (logistic saturation). Recovery gates are not widened.
 See `docs/adr/ADR-013_hill-slope-fixed.md`.
+
+---
+
+## 2026-09-15 — ADR-014: rung 4 rolled back
+
+The `s_c = 1` 4×1000 fit produced 3 divergences (worse than the 1-divergence
+MD-020 sampled-`s` graph) and the same RED recovery (Spearman 0.600).
+Rung 4 is reverted. Identification attempts stop here (AGENTS §2). The
+reported model is MD-020 + calendar + sampled s + target_accept 0.95.
+MD-071 and recovery gates are not widened.

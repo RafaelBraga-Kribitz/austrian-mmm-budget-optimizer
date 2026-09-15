@@ -25,10 +25,10 @@ client.
 - **Not S-B / S-C recovery.** Collinear spend and a zero-effect channel are
   implemented and unit-tested in the simulator. The reported fit is the 156-week
   clean series.
-- **Not a guarantee that K and s are recovered as points.** Hill slope is
-  fixed at 1 (MD-073 rung 4 / ADR-013). Half-sat K and β still trade off.
-  Gates are on ROAS, curve *shape* at observed spend, half-life *direction*,
-  and media share (T-5).
+- **Not a guarantee that K and s are recovered as points.** Hill slope, half-sat
+  and β trade off. MD-073 rung 4 (fix s=1) increased divergences and was rolled
+  back (ADR-014). Gates are on ROAS, curve *shape* at observed spend, half-life
+  *direction*, and media share (T-5).
 - **Not platform-calibrated.** Simulated dashboards over-credit by construction
   (φ, θ in `truth.json`). The attribution-gap chart treats those numbers as the
   object of study (T-8).
@@ -38,7 +38,9 @@ client.
   euros; real TV/print/radio buying is flighted.
 - **Not cross-platform MCMC identical.** Seeded PyMC/nutpie is deterministic on
   one machine and version, not across platforms (T-6). Reports regenerate from a
-  saved posterior; they are not checksummed draw-for-draw.
+  saved posterior; they are not checksummed draw-for-draw. The MD-020 graph left
+  one divergence in 4×1000 draws after the full MD-073 ladder; rung 4 made that
+  worse and was rolled back (ADR-014). MD-071 is reported as it measured.
 - **Not pymc-marketing, Robyn, or Meridian.** Charter O-3. A pymc-marketing
   cross-check was out of this build's scope (STATUS PR 43 triage).
 - **Not a hosted app or a Power BI file.** Dashboard screenshots remain a human

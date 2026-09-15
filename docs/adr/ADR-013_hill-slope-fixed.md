@@ -1,6 +1,6 @@
 # ADR-013 — MD-073 rung 4: Hill slope fixed at 1
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-014
 - **Date:** 2026-09-15
 - **Deciders:** recorded on the Layer P pipeline branch after MD-071 failed with
   one divergence on the MD-020 graph; the reparameterisation ladder (SPEC-04
