@@ -163,19 +163,20 @@ def channel_contributions(
     styles = [(ink, "-"), (mid, (0, (3, 3))), (ink, (0, (1, 2))), (mid, "-"), (ink, (0, (5, 2)))]
     for i, ch in enumerate(channels):
         col, ls = styles[i % len(styles)]
-        ax_right.fill_between(x, weekly[f"{ch} lo"], weekly[f"{ch} hi"],
+        ax_right.fill_between(x, weekly[f"{ch} lo"] / 1000.0, weekly[f"{ch} hi"] / 1000.0,
                               color=theme.color("surface-3"), lw=0, zorder=1)
-        ax_right.plot(x, weekly[f"{ch} median"], color=col, ls=ls, lw=1.6, zorder=3, label=ch)
+        ax_right.plot(x, weekly[f"{ch} median"] / 1000.0, color=col, ls=ls, lw=1.6, zorder=3,
+                      label=ch)
     ax_right.legend(loc="upper right", frameon=False, fontsize=9, labelcolor=ink)
     theme.hairlines(ax_right)
-    ax_right.set_title("Weekly incremental contribution per channel, median line and 90% band",
-                       loc="left", color=ink, fontsize=11, pad=10)
+    ax_right.set_title("Weekly incremental contribution per channel, thousand, "
+                       "median line and 90% band", loc="left", color=ink, fontsize=11, pad=10)
     ax_right.set_xlabel("Week", color=mid)
     ax_right.margins(x=0.03)
     theme.footer(
         fig, source,
         note="Left: line = 90% posterior interval, dot = median; orange marks the largest share. "
-             "Right: contribution in the data's revenue units.",
+             "Right: contribution in the data's money units, thousands.",
     )
     return theme.save(fig, path)
 
@@ -190,18 +191,20 @@ def response_curves(curves: pd.DataFrame, path: Path, source: str) -> Path:
     ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
     for ax, ch in zip(axes, channels, strict=True):
         sub = curves[curves["channel"] == ch]
-        ax.fill_between(sub["spend"], sub["lo"], sub["hi"], color=theme.color("surface-3"),
-                        lw=0, zorder=1)
-        ax.plot(sub["spend"], sub["median"], color=ink, lw=1.8, zorder=3)
-        current = float(sub["current_spend"].iloc[0])
+        x = sub["spend"] / 1000.0
+        ax.fill_between(x, sub["lo"] / 1000.0, sub["hi"] / 1000.0,
+                        color=theme.color("surface-3"), lw=0, zorder=1)
+        ax.plot(x, sub["median"] / 1000.0, color=ink, lw=1.8, zorder=3)
+        current = float(sub["current_spend"].iloc[0]) / 1000.0
         ax.axvline(current, color=accent, lw=1.5, zorder=2)
         ax.annotate("current average\nweekly spend", xy=(current, 1.0),
                     xycoords=("data", "axes fraction"), xytext=(5, -4),
                     textcoords="offset points", ha="left", va="top", color=accent, fontsize=8)
         theme.hairlines(ax)
         ax.set_title(ch, loc="left", color=ink, fontsize=11, pad=10)
-        ax.set_xlabel("Weekly spend held constant", color=mid)
-        ax.set_ylabel("Incremental revenue per week", color=mid)
+        ax.set_xlabel("Weekly spend, thousand", color=mid)
+        if ax is axes[0]:
+            ax.set_ylabel("Incremental revenue per week, thousand", color=mid)
         ax.margins(x=0.02)
     theme.footer(
         fig, source,
@@ -239,5 +242,36 @@ def reallocation_gain(gain: np.ndarray, contribution_current: np.ndarray, path: 
         fig, source,
         note=f"Probability the reallocation loses money: {100 * np.mean(gain < 0):.1f}%. "
              "Constant-spend steady state; channels bounded to plus or minus 50% of current spend.",
+    )
+    return theme.save(fig, path)
+
+
+def response_curve_recovery(curves: pd.DataFrame, path: Path, source: str) -> Path:
+    """Per channel: true response curve (orange) against the posterior median and 90% band."""
+    channels = list(dict.fromkeys(curves["channel"]))
+    fig, axes = theme.new_figure(height_px=640, ncols=len(channels))
+    if len(channels) == 1:
+        axes = [axes]
+    fig.subplots_adjust(left=0.06, right=0.99, top=0.84, bottom=0.24, wspace=0.35)
+    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    for ax, name in zip(axes, channels, strict=True):
+        sub = curves[curves["channel"] == name]
+        x = sub["spend"] / 1000.0
+        ax.fill_between(x, sub["lo"] / 1000.0, sub["hi"] / 1000.0,
+                        color=theme.color("surface-3"), lw=0, zorder=1)
+        ax.plot(x, sub["median"] / 1000.0, color=ink, lw=1.6, zorder=3)
+        ax.plot(x, sub["true"] / 1000.0, color=accent, lw=2.0, zorder=4)
+        observed = float(sub["observed_max_spend"].iloc[0]) / 1000.0
+        theme.guide(ax, observed, "v")
+        theme.hairlines(ax)
+        ax.set_title(name, loc="left", color=ink, fontsize=11, pad=8)
+        ax.set_xlabel("Weekly spend, EUR thousand", color=mid)
+        if ax is axes[0]:
+            ax.set_ylabel("Incremental revenue per week, EUR thousand", color=mid)
+        ax.margins(x=0.02)
+    theme.footer(
+        fig, source,
+        note="Orange: true response curve. Black: posterior median. Band: 90% interval. "
+             "Dashed line: largest observed weekly spend; beyond it the model extrapolates.",
     )
     return theme.save(fig, path)

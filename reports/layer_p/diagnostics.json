@@ -3,7 +3,7 @@
     {
       "divergences": 14,
       "draws": 1000,
-      "elapsed_seconds": 86.2,
+      "elapsed_seconds": 95.6,
       "max_rhat": 1.0071764075134753,
       "min_ess": 425.4861045302413,
       "pass_all": false,
@@ -12,7 +12,7 @@
     {
       "divergences": 1,
       "draws": 1000,
-      "elapsed_seconds": 103.5,
+      "elapsed_seconds": 104.9,
       "max_rhat": 1.0108719822293417,
       "min_ess": 421.6933145199537,
       "pass_all": false,
@@ -21,7 +21,7 @@
     {
       "divergences": 0,
       "draws": 1000,
-      "elapsed_seconds": 174.1,
+      "elapsed_seconds": 180.5,
       "max_rhat": 1.0087633136402838,
       "min_ess": 436.0700530378869,
       "pass_all": true,
@@ -38,7 +38,7 @@
     "chains": 2,
     "deviations": [],
     "draws": 1000,
-    "elapsed_seconds": 174.1,
+    "elapsed_seconds": 180.5,
     "sampler": "nutpie",
     "seed": 42,
     "target_accept": 0.99,

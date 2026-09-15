@@ -3,7 +3,7 @@
     {
       "divergences": 13,
       "draws": 1000,
-      "elapsed_seconds": 74.2,
+      "elapsed_seconds": 74.6,
       "max_rhat": 1.0072788039274854,
       "min_ess": 371.9480005953541,
       "pass_all": false,
@@ -12,7 +12,7 @@
     {
       "divergences": 0,
       "draws": 1000,
-      "elapsed_seconds": 94.3,
+      "elapsed_seconds": 93.1,
       "max_rhat": 1.0088340568767569,
       "min_ess": 364.41408766453475,
       "pass_all": false,
@@ -21,7 +21,7 @@
     {
       "divergences": 13,
       "draws": 2000,
-      "elapsed_seconds": 131.4,
+      "elapsed_seconds": 132.7,
       "max_rhat": 1.0071128432061047,
       "min_ess": 548.4051970997823,
       "pass_all": false,
@@ -30,7 +30,7 @@
     {
       "divergences": 0,
       "draws": 2000,
-      "elapsed_seconds": 222.7,
+      "elapsed_seconds": 221.4,
       "max_rhat": 1.0067273043499565,
       "min_ess": 603.1995634841277,
       "pass_all": true,
@@ -47,7 +47,7 @@
     "chains": 2,
     "deviations": [],
     "draws": 2000,
-    "elapsed_seconds": 222.7,
+    "elapsed_seconds": 221.4,
     "sampler": "nutpie",
     "seed": 42,
     "target_accept": 0.99,

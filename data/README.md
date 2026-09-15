@@ -15,12 +15,14 @@ Public demo data; a real-data swap-in is planned. No Austrian client data was us
 
 | Item | Value |
 |------|-------|
-| File | `mmm_example.csv` |
-| Source | The example MMM dataset bundled with pymc-marketing: https://github.com/pymc-labs/pymc-marketing/blob/main/data/mmm_example.csv |
-| Licence | Apache License 2.0 (pymc-marketing repository licence) |
+| File | `dt_simulated_weekly.csv` |
+| Source | Robyn's simulated weekly dataset, Meta Platforms: https://github.com/facebookexperimental/Robyn/blob/main/python/src/robyn/tutorials/resources/dt_simulated_weekly.csv |
+| Licence | MIT License, Copyright (c) Meta Platforms, Inc. and its affiliates (Robyn repository licence) |
 | Downloaded | 2026-09-15 |
-| SHA-256 | 320d299569b989c37facac5bda6a4ee2d661cb12e158ac5d80689c8cc3d37955 |
-| Columns used | `date_week` (week), `y` (revenue), `x1` and `x2` (media spend, index scaled), `event_1` and `event_2` (one-off events, merged into one control) |
+| SHA-256 | d541cfa92ca68fbda03ce6c987733e996b3abf44a95f2a32ce6836b9f8258cf1 |
+| Rows | 208 weeks, Mondays from 2015-11-23 to 2019-11-11 |
+| Columns used | `DATE` (week), `revenue`, the five spend columns `tv_S`, `ooh_S`, `print_S`, `facebook_S`, `search_S` (TV, Out-of-home, Print, Facebook, Search), and `competitor_sales_B` as the one control, scaled by its mean |
+| Columns not used | `facebook_I` (impressions), `search_clicks_P` (clicks), `events` (two one-off events), `newsletter` |
 
-The spend columns in this file are index scaled, not money, so Layer R and Layer D
-report ratios and shares rather than euro amounts.
+Spend and revenue are in the dataset's money units; the currency is not named by
+its authors, so amounts are reported as plain money units, never as euros.

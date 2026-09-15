@@ -288,27 +288,38 @@ RULE_SENTENCE = (
 )
 
 
-def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: float) -> str:
+def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: float,
+                     extra_year: float = 0.0) -> str:
     extra = plus.total - base.total
     delta = plus.recommended - rs.current
     inc = np.maximum(delta, 0)
     shares = inc / inc.sum() if inc.sum() > 0 else np.zeros_like(inc)
     m_plus = rs.marginal(plus.recommended)
     best = int(np.argmax(np.median(m_plus, axis=0)))
-    # probability that the top-ranked channel by marginal return is not the best in a draw
     ranks_best = np.argmax(m_plus, axis=1)
     p_wrong_channel = float(np.mean(ranks_best != best))
     gain_extra = plus.gain - base.gain
+    if extra_year > 0:
+        title = f"# If the advertiser gets {extra_year:,.0f} more per year, where does it go?"
+        framing = (
+            f"The extra budget is spread evenly over 52 weeks ({extra:,.0f} per week on top of "
+            f"the current {base.total:,.0f} per week, a {100 * (plus.total / base.total - 1):.1f} "
+            f"percent increase). Money is in the dataset's units; the same rule applies to euros "
+            f"once euro-denominated data is used."
+        )
+    else:
+        title = "# If the advertiser gets 25 percent more budget, where does it go?"
+        framing = (
+            f"Current weekly budget: {base.total:,.3f}. Scenario budget: {plus.total:,.3f} "
+            f"(extra {extra:,.3f})."
+        )
     lines = [
-        "# If the advertiser gets 25 percent more budget, where does it go?",
+        title,
         "",
         "Numbers come from the Layer R posterior (reports/layer_r/posterior_draws.csv) through "
-        "python -m ambo.run layer_d. The EUR 200k question maps onto the 25 percent scenario "
-        "once euro-denominated data replaces the public demo data; the demo data's spend is "
-        "index scaled, so this note gives shares and probabilities, not euro amounts.",
+        "python -m ambo.run layer_d.",
         "",
-        f"Current weekly budget: {base.total:,.3f} spend units. Scenario budget: "
-        f"{plus.total:,.3f} (extra {extra:,.3f}).",
+        framing,
         "",
         "## Where the extra budget goes",
         "",
@@ -316,7 +327,7 @@ def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: fl
     for i, ch in enumerate(rs.channels):
         lines.append(
             f"- {ch}: {100 * shares[i]:.0f} percent of the increase "
-            f"(from {rs.current[i]:.3f} to {plus.recommended[i]:.3f} per week); "
+            f"(from {rs.current[i]:,.0f} to {plus.recommended[i]:,.0f} per week); "
             f"marginal ROAS at the new spend {np.median(m_plus[:, i]):.2f} "
             f"(90 percent interval {np.percentile(m_plus[:, i], LO):.2f} to "
             f"{np.percentile(m_plus[:, i], HI):.2f})."
@@ -329,8 +340,8 @@ def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: fl
         f"{100 * np.mean(gain_extra < 0):.1f} percent.",
         f"- Probability that {rs.channels[best]} is not the channel with the highest marginal "
         f"return at the new allocation: {100 * p_wrong_channel:.1f} percent.",
-        f"- Breakeven ROAS at a contribution margin of {margin:.0%}: {1 / margin:.2f}. "
-        f"Channels held at current spend by the rule: "
+        f"- Breakeven ROAS at a contribution margin of {100 * margin:.0f} percent: "
+        f"{1 / margin:.2f}. Channels held at current spend by the rule: "
         f"{', '.join(plus.rule_holds['held_channels']) or 'none'}.",
         "- Verdict under the decision rule: "
         f"{'recommend' if plus.rule_holds['recommend'] else 'hold'}.",
@@ -358,21 +369,28 @@ def run_layer_d(config_path=None, out_dir=None) -> dict:
     margin = float(dec["contribution_margin"])
     breakeven = 1.0 / margin
     seed = int(config["sampling"]["seed"])
+    multipliers = {name: float(mult) for name, mult in dec["scenarios"].items()}
+    extra_year = float(dec.get("extra_budget_per_year", 0) or 0)
+    if extra_year > 0:
+        weekly_total = float(rs.current.sum())
+        multipliers["plus_extra_budget"] = 1.0 + (extra_year / 52.0) / weekly_total
     scenarios = {}
-    for name, mult in dec["scenarios"].items():
+    for name, mult in multipliers.items():
         scenarios[name] = run_scenario(
-            rs, float(mult), float(dec["bound_share"]), breakeven,
+            rs, mult, float(dec["bound_share"]), breakeven,
             n_per_draw=max(200, int(dec.get("per_draw_optimisations", 200))), seed=seed,
             name=name,
         )
     base = scenarios["same_total"]
-    plus = scenarios["plus_25_percent"]
+    plus = scenarios.get("plus_extra_budget", scenarios["plus_25_percent"])
     table = pd.concat([reallocation_table(rs, sc) for sc in scenarios.values()], ignore_index=True)
     table.to_csv(out / "reallocation_table.csv", index=False, lineterminator="\n")
     gains = pd.DataFrame({name: sc.gain for name, sc in scenarios.items()})
     gains.to_csv(out / "reallocation_gain_draws.csv", index=False, lineterminator="\n")
     summary = {name: gain_summary(sc) for name, sc in scenarios.items()}
     summary["decision_rule"] = RULE_SENTENCE
+    summary["extra_budget_per_year"] = extra_year
+    summary["extra_budget_scenario"] = plus.name
     summary["contribution_margin"] = margin
     summary["breakeven_roas"] = breakeven
     summary["posterior_draws_used"] = rs.n_draws
@@ -383,5 +401,7 @@ def run_layer_d(config_path=None, out_dir=None) -> dict:
     source = f"{config['title']}; python -m ambo.run layer_d"
     charts.reallocation_gain(base.gain, base.contribution_current, out / "reallocation_gain.png",
                              source)
-    (out / "next_200k.md").write_text(next_budget_note(rs, base, plus, margin), encoding="utf-8")
+    (out / "next_200k.md").write_text(
+        next_budget_note(rs, base, plus, margin, extra_year), encoding="utf-8"
+    )
     return summary

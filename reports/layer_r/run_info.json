@@ -1,64 +1,106 @@
 {
   "channels": [
     {
-      "channel": "Media channel 1",
-      "contribution_hi": 265467.9217180432,
-      "contribution_lo": 170908.92478440277,
-      "contribution_median": 209286.78781857068,
-      "roas_hi": 4798.2834283684,
-      "roas_lo": 3089.1471038985533,
-      "roas_median": 3782.819857356976,
-      "share_hi": 0.2806198157855177,
-      "share_lo": 0.1806637528131907,
-      "share_median": 0.22123207754783994,
-      "spend_mean_week": 0.3090815783028675,
-      "spend_total": 55.32560251621328
+      "channel": "TV",
+      "contribution_hi": 37808957.31741163,
+      "contribution_lo": 13325339.989781553,
+      "contribution_median": 22639670.211184688,
+      "roas_hi": 12.245864629479032,
+      "roas_lo": 4.315916683095126,
+      "roas_median": 7.332715746026197,
+      "share_hi": 0.09975828239506487,
+      "share_lo": 0.03515867995382959,
+      "share_median": 0.059734379747585026,
+      "spend_mean_week": 14843.691217948714,
+      "spend_total": 3087487.7733333325
     },
     {
-      "channel": "Media channel 2",
-      "contribution_hi": 72562.77457701949,
-      "contribution_lo": 62577.551688084925,
-      "contribution_median": 67260.85867189558,
-      "roas_hi": 2504.656484379462,
-      "roas_lo": 2159.9955559278005,
-      "roas_median": 2321.649727418865,
-      "share_hi": 0.07670438033683247,
-      "share_lo": 0.0661492390996692,
-      "share_median": 0.07109985134147456,
-      "spend_mean_week": 0.16184999078719198,
-      "spend_total": 28.971148350907363
+      "channel": "Out-of-home",
+      "contribution_hi": 29841853.65459046,
+      "contribution_lo": 1097408.54133818,
+      "contribution_median": 10086923.596665261,
+      "roas_hi": 3.3196965625302166,
+      "roas_lo": 0.1220789902845481,
+      "roas_median": 1.122099383568408,
+      "share_hi": 0.07873721666203924,
+      "share_lo": 0.002895493526851509,
+      "share_median": 0.02661417410181212,
+      "spend_mean_week": 43217.94102564102,
+      "spend_total": 8989331.733333332
+    },
+    {
+      "channel": "Print",
+      "contribution_hi": 20863589.36524712,
+      "contribution_lo": 1422309.1875035171,
+      "contribution_median": 6770343.883819165,
+      "roas_hi": 26.90147780054658,
+      "roas_lo": 1.8339231262322206,
+      "roas_median": 8.72967026450438,
+      "share_hi": 0.055048221039264544,
+      "share_lo": 0.0037527382833889953,
+      "share_median": 0.01786343567752134,
+      "spend_mean_week": 3728.632264957266,
+      "spend_total": 775555.5111111114
+    },
+    {
+      "channel": "Facebook",
+      "contribution_hi": 20850003.93070184,
+      "contribution_lo": 2233431.483635266,
+      "contribution_median": 9574310.978470642,
+      "roas_hi": 46.71779548655112,
+      "roas_lo": 5.004363338850677,
+      "roas_median": 21.45278742888832,
+      "share_hi": 0.05501237610430774,
+      "share_lo": 0.00589287048526755,
+      "share_median": 0.025261654541544245,
+      "spend_mean_week": 2145.657826295471,
+      "spend_total": 446296.8278694579
+    },
+    {
+      "channel": "Search",
+      "contribution_hi": 39924876.380114354,
+      "contribution_lo": 1318885.1716699873,
+      "contribution_median": 12044236.511685178,
+      "roas_hi": 32.44799341701064,
+      "roas_lo": 1.0718925454070027,
+      "roas_median": 9.788666677969575,
+      "share_hi": 0.10534109838256088,
+      "share_lo": 0.003479855799713583,
+      "share_median": 0.031778510501592847,
+      "spend_mean_week": 5915.512820512821,
+      "spend_total": 1230426.6666666667
     }
   ],
   "diagnostics_pass": true,
-  "elapsed_seconds": 59.1,
+  "elapsed_seconds": 456.5,
   "holdout": [
     {
       "coverage_90": 0.9615384615384616,
-      "interval_width_mean": 4409.117488179147,
-      "mape": 0.1928072434583871,
+      "interval_width_mean": 1490180.0497161695,
+      "mape": 0.22293090388354475,
       "model": "Seasonal naive",
       "n_test": 26,
-      "train_weeks": 153
+      "train_weeks": 182
     },
     {
-      "coverage_90": 0.9230769230769231,
-      "interval_width_mean": 1368.454131649164,
-      "mape": 0.07506500337649805,
-      "model": "Ridge regression (alpha 10)",
+      "coverage_90": 1.0,
+      "interval_width_mean": 864498.6770305634,
+      "mape": 0.050611495648717614,
+      "model": "Ridge regression (alpha 1)",
       "n_test": 26,
-      "train_weeks": 153
+      "train_weeks": 182
     },
     {
-      "coverage_90": 0.8461538461538461,
-      "interval_width_mean": 866.7210629333148,
-      "mape": 0.04406776255651569,
+      "coverage_90": 1.0,
+      "interval_width_mean": 956715.0271184372,
+      "mape": 0.07918049896365068,
       "model": "Bayesian MMM",
       "n_test": 26,
-      "train_weeks": 153
+      "train_weeks": 182
     }
   ],
   "holdout_diagnostics_pass": true,
   "layer": "layer_r",
   "sampler": "nutpie",
-  "weeks": 179
+  "weeks": 208
 }

@@ -17,7 +17,6 @@ import pandas as pd
 
 from ambo import diagnostics, evaluate, model
 from ambo.plots import charts
-from ambo.transforms import adstock_weights, hill
 
 
 def load_source(config: dict, data_dir: Path) -> pd.DataFrame:
@@ -32,10 +31,15 @@ def load_source(config: dict, data_dir: Path) -> pd.DataFrame:
     )
     for col, label in src["spend_columns"].items():
         out[f"spend_{label}"] = raw[col].to_numpy(dtype=float)
-    event = np.zeros(len(raw))
-    for col in src.get("event_columns", []):
-        event = np.maximum(event, raw[col].to_numpy(dtype=float))
-    out[config["control"]["column"]] = event
+    if src.get("control_column"):
+        control = raw[src["control_column"]].to_numpy(dtype=float)
+        if src.get("control_scale") == "mean":
+            control = control / control.mean()
+    else:
+        control = np.zeros(len(raw))
+        for col in src.get("event_columns", []):
+            control = np.maximum(control, raw[col].to_numpy(dtype=float))
+    out[config["control"]["column"]] = control
     return out
 
 
@@ -64,52 +68,6 @@ def channel_table(contribs: np.ndarray, md: model.ModelData) -> pd.DataFrame:
                 "roas_hi": float(np.percentile(roas, 95)),
             }
         )
-    return pd.DataFrame(rows)
-
-
-def steady_state_contribution(
-    spend: np.ndarray, decay: np.ndarray, half_sat: np.ndarray, slope: np.ndarray,
-    effect: np.ndarray, spend_mean: float, revenue_mean: float, length: int,
-) -> np.ndarray:
-    """Weekly contribution of a constant weekly spend, per draw. Shape (S, len(spend)).
-
-    Constant spend ``x`` carried with the truncated adstock settles at
-    ``x * sum(decay**i)``; the Hill curve then gives the response.
-    """
-    x = np.asarray(spend, dtype=float)[None, :] / spend_mean
-    carry = np.array([adstock_weights(d, length).sum() for d in decay])[:, None]
-    a = x * carry
-    out = np.empty_like(a)
-    for s in range(a.shape[0]):
-        out[s] = effect[s] * hill(a[s], half_sat[s], slope[s])
-    return out * revenue_mean
-
-
-def response_curves(post: model.Posterior, md: model.ModelData, config: dict) -> pd.DataFrame:
-    rc = config["response_curves"]
-    rows = []
-    for i, ch in enumerate(md.channels):
-        top = float(md.spend[:, i].max()) * float(rc["max_multiple_of_observed"])
-        grid = np.linspace(0.0, top, int(rc["grid_points"]))
-        curve = steady_state_contribution(
-            grid,
-            post.draws["decay"][:, i],
-            post.draws["half_saturation"][:, i],
-            post.draws["slope"][:, i],
-            post.draws["effect"][:, i],
-            md.spend_means[i],
-            md.revenue_mean,
-            md.adstock_length,
-        )
-        for g, med, lo, hi in zip(
-            grid,
-            np.median(curve, axis=0),
-            np.percentile(curve, 5, axis=0),
-            np.percentile(curve, 95, axis=0),
-            strict=True,
-        ):
-            rows.append({"channel": ch, "spend": g, "median": med, "lo": lo, "hi": hi,
-                         "current_spend": float(md.spend[:, i].mean())})
     return pd.DataFrame(rows)
 
 
@@ -143,7 +101,7 @@ def run_layer_r(config_path=None, out_dir=None, data_dir=None) -> dict:
     weekly.to_csv(out / "weekly_contributions.csv", index=False, lineterminator="\n")
     charts.channel_contributions(table, weekly, md.channels, out / "channel_contributions.png",
                                  source)
-    curves = response_curves(post, md, config)
+    curves = model.response_curve_table(post, md, config)
     curves.to_csv(out / "response_curves.csv", index=False, lineterminator="\n")
     charts.response_curves(curves, out / "response_curves.png", source)
     model.write_posterior(post, md, out)
@@ -151,7 +109,7 @@ def run_layer_r(config_path=None, out_dir=None, data_dir=None) -> dict:
     metrics, preds, hold_info, hold_idata = evaluate.holdout(data, config)
     metrics.to_csv(out / "holdout_metrics.csv", index=False, lineterminator="\n")
     preds.to_csv(out / "holdout_predictions.csv", index=False, lineterminator="\n")
-    charts.holdout(preds, metrics, out / "holdout.png", source, money_unit="revenue units")
+    charts.holdout(preds, metrics, out / "holdout.png", source, money_unit="money units")
     hold_diag = hold_info.pop("diagnostics")
     hold_diag.update({"layer": config["layer"], "weeks": int(config["holdout"]["train_weeks"]),
                       "fit": hold_info})

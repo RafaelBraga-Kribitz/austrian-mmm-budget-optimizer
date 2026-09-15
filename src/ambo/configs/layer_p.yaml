@@ -47,6 +47,10 @@ diagnostics:
   ess_min: 400
   divergences_max: 0
 
+response_curves:
+  grid_points: 41
+  max_multiple_of_observed: 1.5   # curves stop at 1.5x the largest observed weekly spend
+
 holdout:
   train_weeks: 130        # fit on weeks 1..130, predict 131..156
   ridge_alphas: [0.1, 1.0, 10.0, 100.0]

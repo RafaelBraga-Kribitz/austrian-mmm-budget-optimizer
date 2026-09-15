@@ -29,7 +29,7 @@ import pymc as pm
 import pytensor.tensor as pt
 
 from ambo import diagnostics
-from ambo.transforms import adstock, adstock_pt, hill, hill_pt
+from ambo.transforms import adstock, adstock_pt, adstock_weights, hill, hill_pt
 
 PARAM_NAMES = (
     "intercept",
@@ -458,3 +458,46 @@ def write_posterior(post: Posterior, md: ModelData, out: Path) -> None:
     with open(out / "model_data.json", "w", encoding="utf-8") as fh:
         json.dump(meta, fh, indent=2, sort_keys=True)
         fh.write("\n")
+
+
+def steady_state_contribution(
+    spend: np.ndarray, decay: np.ndarray, half_sat: np.ndarray, slope: np.ndarray,
+    effect: np.ndarray, spend_mean: float, revenue_mean: float, length: int,
+) -> np.ndarray:
+    """Weekly contribution of a constant weekly spend, per draw. Shape (S, len(spend)).
+
+    Constant spend ``x`` carried with the truncated adstock settles at
+    ``x * sum(decay**i)``; the Hill curve then gives the response. Money units.
+    """
+    x = np.asarray(spend, dtype=float)[None, :] / spend_mean
+    carry = np.array([adstock_weights(d, length).sum() for d in decay])[:, None]
+    a = x * carry
+    out = np.empty_like(a)
+    for s in range(a.shape[0]):
+        out[s] = effect[s] * hill(a[s], half_sat[s], slope[s])
+    return out * revenue_mean
+
+
+def response_curve_table(post: Posterior, md: ModelData, config: dict) -> pd.DataFrame:
+    """Posterior median and 90 percent band of the response at constant weekly spend."""
+    rc = config.get("response_curves", {})
+    n_points = int(rc.get("grid_points", 41))
+    top_mult = float(rc.get("max_multiple_of_observed", 1.5))
+    rows = []
+    for i, ch in enumerate(md.channels):
+        observed_max = float(md.spend[:, i].max())
+        grid = np.linspace(0.0, observed_max * top_mult, n_points)
+        curve = steady_state_contribution(
+            grid, post.draws["decay"][:, i], post.draws["half_saturation"][:, i],
+            post.draws["slope"][:, i], post.draws["effect"][:, i], md.spend_means[i],
+            md.revenue_mean, md.adstock_length,
+        )
+        for g, med, lo, hi in zip(
+            grid, np.median(curve, axis=0), np.percentile(curve, 5, axis=0),
+            np.percentile(curve, 95, axis=0), strict=True,
+        ):
+            rows.append({"channel": ch, "spend": float(g), "median": float(med),
+                         "lo": float(lo), "hi": float(hi),
+                         "current_spend": float(md.spend[:, i].mean()),
+                         "observed_max_spend": observed_max})
+    return pd.DataFrame(rows)

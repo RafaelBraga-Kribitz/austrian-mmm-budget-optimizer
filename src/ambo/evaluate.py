@@ -163,9 +163,67 @@ def attribution_gap(
                 "estimated_share_hi": float(e_hi),
                 "platform_reported_total": platform_totals[ch],
                 "true_contribution_total": ct["contribution_total"],
+                "platform_over_true_ratio": (
+                    platform_totals[ch] / ct["contribution_total"]
+                    if platform_totals[ch] > 0 and ct["contribution_total"] > 0 else None
+                ),
+                "platform_over_true_pct": (
+                    100.0 * (platform_totals[ch] / ct["contribution_total"] - 1.0)
+                    if platform_totals[ch] > 0 and ct["contribution_total"] > 0 else None
+                ),
             }
         )
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# Response-curve recovery
+# ---------------------------------------------------------------------------
+
+
+def true_response_curve(spend: np.ndarray, channel_truth: dict) -> np.ndarray:
+    """Closed-form true response at a constant weekly spend (generator's recursion)."""
+    carry = 1.0 / (1.0 - float(channel_truth["decay"]))
+    a = np.asarray(spend, dtype=float) * carry
+    k = float(channel_truth["half_saturation"])
+    s_ = float(channel_truth["slope"])
+    effect = float(channel_truth["effect"])
+    return float(effect) * a**s_ / (a**s_ + float(k) ** s_)
+
+
+def response_curve_recovery(
+    post: Posterior, md: ModelData, truth: dict, config: dict
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """True curve against the posterior band per channel, plus coverage and error metrics.
+
+    Coverage is the share of grid points up to the largest observed weekly spend
+    whose true value lies inside the 90 percent band. The error is the mean
+    absolute difference between the posterior median and the truth over the same
+    range, as a share of the true curve's maximum there.
+    """
+    curves = model.response_curve_table(post, md, config)
+    curves["true"] = 0.0
+    metrics = []
+    for i, ch in enumerate(md.channels):
+        mask = curves["channel"] == ch
+        sub = curves[mask]
+        true = true_response_curve(sub["spend"].to_numpy(), truth["channel_truth"][ch])
+        curves.loc[mask, "true"] = true
+        observed = sub["spend"].to_numpy() <= float(md.spend[:, i].max()) + 1e-9
+        inside = (true >= sub["lo"].to_numpy()) & (true <= sub["hi"].to_numpy())
+        err = np.abs(sub["median"].to_numpy() - true)
+        top = float(np.max(true[observed])) if observed.any() else 1.0
+        metrics.append(
+            {
+                "channel": ch,
+                "curve_coverage_observed_range": float(inside[observed].mean()),
+                "curve_mae_pct_of_true_max": float(100.0 * err[observed].mean() / top),
+                "observed_max_spend": float(md.spend[:, i].max()),
+                "current_spend": float(md.spend[:, i].mean()),
+            }
+        )
+    curves["inside"] = (curves["true"] >= curves["lo"]) & (curves["true"] <= curves["hi"])
+    return curves, pd.DataFrame(metrics)
 
 
 # ---------------------------------------------------------------------------
