@@ -28,3 +28,6 @@ jobs:
 
       - name: Smoke run of the Layer P pipeline on the tiny config
         run: timeout 180 uv run python -m ambo.run layer_p --config src/ambo/configs/tiny.yaml --out /tmp/smoke/reports --data /tmp/smoke/data
+
+      - name: Execute the walkthrough notebook on the tiny config
+        run: timeout 300 uv run python scripts/build_notebook.py --execute --timeout 280
