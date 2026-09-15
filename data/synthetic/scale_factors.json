@@ -1,0 +1,17 @@
+{
+  "channels": [
+    "tv",
+    "radio",
+    "print",
+    "paid_search",
+    "paid_social"
+  ],
+  "revenue_mean": 90458.33220340361,
+  "spend_means": {
+    "paid_search": 2500.2884615384614,
+    "paid_social": 2230.6666666666665,
+    "print": 4957.066666666667,
+    "radio": 3447.4444444444443,
+    "tv": 8058.944444444444
+  }
+}

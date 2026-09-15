@@ -112,3 +112,17 @@ MD-020 sampled-`s` graph) and the same RED recovery (Spearman 0.600).
 Rung 4 is reverted. Identification attempts stop here (AGENTS §2). The
 reported model is MD-020 + calendar + sampled s + target_accept 0.95.
 MD-071 and recovery gates are not widened.
+
+---
+
+## 2026-09-15 — Layer P reports committed (honest RED)
+
+`python -m ambo.run layer_p` on the ADR-014 graph wrote `reports/` from a
+4×1000 nutpie posterior (seed 42). `posterior.nc` is gitignored;
+`data/synthetic/scale_factors.json` is committed so reports can be
+regenerated with a local netCDF. Attribution-gap export omits offline
+channels (no platform dashboard). `layer_p` exits 1 unless both MD-071 and
+recovery are all-green.
+
+Measured: MD-071 1 divergence; recovery VR-301/306 PASS, VR-302/303/305
+FAIL; holdout MAPE 0.0418 vs naive 0.0784; gain HDI crosses zero.

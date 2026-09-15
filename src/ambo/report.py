@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from ambo.baselines import OLSResult
-from ambo.config import CHANNEL_IDS, CHANNEL_LABELS, REPORTS_DIR
+from ambo.config import CHANNEL_IDS, CHANNEL_LABELS, OFFLINE_CHANNELS, REPORTS_DIR
 from ambo.evaluate import RecoveryResult
 from ambo.optimize import Allocation
 from ambo.plots.theme import apply_theme, tokens
@@ -252,12 +252,17 @@ def write_attribution_gap(
     by_ch = {row.channel: row for row in recovery.channels}
     records = []
     for channel, row in by_ch.items():
-        slice_ = sim_media.loc[sim_media["channel"] == channel]
-        plat = pd.to_numeric(slice_["platform_revenue_eur"], errors="coerce").sum()
-        spend = float(pd.to_numeric(slice_["spend_eur"], errors="coerce").sum())
-        if spend <= 0 or pd.isna(plat):
+        if channel in OFFLINE_CHANNELS:
             continue
-        platform_roas = float(plat) / spend
+        slice_ = sim_media.loc[sim_media["channel"] == channel]
+        plat_raw = pd.to_numeric(slice_["platform_revenue_eur"], errors="coerce")
+        if plat_raw.isna().all():
+            continue
+        plat = float(plat_raw.sum())
+        spend = float(pd.to_numeric(slice_["spend_eur"], errors="coerce").sum())
+        if spend <= 0:
+            continue
+        platform_roas = plat / spend
         records.append(
             {
                 "channel": channel,

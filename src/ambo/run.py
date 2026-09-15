@@ -46,8 +46,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "report":
         return _report()
     _simulate()
-    _fit(args.draws, args.tune, args.chains, args.seed, args.progress)
-    return _report()
+    fit_rc = _fit(args.draws, args.tune, args.chains, args.seed, args.progress)
+    report_rc = _report()
+    return 0 if fit_rc == 0 and report_rc == 0 else 1
 
 
 def _simulate() -> int:

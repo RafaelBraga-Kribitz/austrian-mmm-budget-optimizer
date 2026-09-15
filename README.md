@@ -33,4 +33,7 @@ uv run python -m ambo.run layer_p    # fit + reports (slow; NUTS)
 Numbers in `reports/NUMERIC_SSOT.md` are generated, not typed. If a chart shows
 a ROAS, contribution, or gain without its 90% HDI, the chart is wrong.
 
-Read `docs/LIMITATIONS.md` before the recovery table.
+Read `docs/LIMITATIONS.md` before the recovery table. Layer P recovery on the
+reported posterior is **RED** (see `reports/recovery/RECOVERY_REPORT.md` and
+`reports/NUMERIC_SSOT.md`); MD-071 fails by one divergence
+(`reports/model/diag_P.md`). Those files are generated, not typed.

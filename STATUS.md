@@ -10,8 +10,10 @@ recovery, optimiser, reports — five channels, no Layer R (ADR-012).
 
 ## Current stage
 
-Stage 2+, Layer P pipeline: calendar controls, MD-020 normalised adstock,
-awaiting a matching 4×1000 posterior and recovery report.
+Layer P pipeline on this branch. Matching 4×1000 posterior (MD-020 +
+calendar + sampled s, seed 42): **MD-071 RED** (1 divergence / 4000 draws);
+**recovery RED** (VR-302 / VR-303 / VR-305). Identification attempts and the
+MD-073 ladder are exhausted (ADR-014). Layer R remains unavailable.
 
 ## Done
 
@@ -23,8 +25,12 @@ awaiting a matching 4×1000 posterior and recovery report.
 
 ## Numbers
 
-None from a full NUTS run yet. `python -m ambo.run simulate` writes Layer P CSVs
-and `truth.json`. Full regeneration is `python -m ambo.run layer_p`.
+Generated artifacts, not hand-typed. Canonical file: `reports/NUMERIC_SSOT.md`.
+Diagnostics: `reports/model/diag_P.md` (1 divergence, other MD-071 rows PASS).
+Recovery: `reports/recovery/RECOVERY_REPORT.md` (VR-301 and VR-306 PASS;
+VR-302/303/305 FAIL). Holdout MAPE 0.0418 vs naive 0.0784; 90% coverage 0.885.
+Expected reallocation gain 4.06% of mean weekly revenue, 90% HDI [-1.83, 9.76]
+(crosses zero). TV true ROAS 1.35 sits above its 90% HDI [0.24, 0.98].
 
 ## Blockers
 
@@ -67,9 +73,10 @@ and `truth.json`. Full regeneration is `python -m ambo.run layer_p`.
 
 ## Next action
 
-Regenerate `python -m ambo.run layer_p` on this branch (normalised adstock +
-calendar). Do not merge until the recovery report is honest about remaining
-RED gates. Layer R stays unavailable until a real drop exists.
+Human review of PR #45. Do not merge as “M3 green”: recovery is RED and MD-071
+fails by one divergence. Layer R stays unavailable until a real drop exists.
+Further identification or sampler knobs need a human decision (widen a gate via
+ADR, or accept the honest RED).
 
 ## Inventory
 

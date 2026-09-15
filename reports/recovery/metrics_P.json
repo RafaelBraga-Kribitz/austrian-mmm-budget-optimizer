@@ -1,0 +1,88 @@
+{
+  "all_green": false,
+  "channels": [
+    {
+      "channel": "tv",
+      "in_hdi": false,
+      "mae_pct": 19.415590463173036,
+      "roas_hdi_high": 0.9837589466675323,
+      "roas_hdi_low": 0.2422611195346741,
+      "roas_median": 0.6054638622371735,
+      "true_avg_roas": 1.3533284737857256
+    },
+    {
+      "channel": "radio",
+      "in_hdi": true,
+      "mae_pct": 17.146301801839197,
+      "roas_hdi_high": 2.2905779857593913,
+      "roas_hdi_low": 0.1587354635497918,
+      "roas_median": 1.1478009997232208,
+      "true_avg_roas": 1.4462599870897312
+    },
+    {
+      "channel": "print",
+      "in_hdi": true,
+      "mae_pct": 51.09411034731951,
+      "roas_hdi_high": 3.8815948664867537,
+      "roas_hdi_low": 1.3219599307484202,
+      "roas_median": 2.5836015984170757,
+      "true_avg_roas": 2.057327013646953
+    },
+    {
+      "channel": "paid_search",
+      "in_hdi": true,
+      "mae_pct": 27.685542180962898,
+      "roas_hdi_high": 3.8213540997318445,
+      "roas_hdi_low": 0.00035908290064654637,
+      "roas_median": 1.3653268053950862,
+      "true_avg_roas": 3.0553904026103083
+    },
+    {
+      "channel": "paid_social",
+      "in_hdi": true,
+      "mae_pct": 8.451183099419922,
+      "roas_hdi_high": 4.891953449310872,
+      "roas_hdi_low": 0.16308291334269273,
+      "roas_median": 2.1522622832478913,
+      "true_avg_roas": 3.04081918486721
+    }
+  ],
+  "gate_detail": {
+    "VR-301": "4/5 channels in 90% HDI (need \u2265 4)",
+    "VR-302": "Spearman 0.600 (need \u2265 0.70)",
+    "VR-303": "MAE% median 19.42 (median\u226415, per\u226425)",
+    "VR-305": "half-life ranking failed",
+    "VR-306": "|media share \u0394|=0.0662 (need \u2264 0.10)"
+  },
+  "gates": {
+    "VR-301": true,
+    "VR-302": false,
+    "VR-303": false,
+    "VR-305": false,
+    "VR-306": true
+  },
+  "holdout": {
+    "coverage_90": 0.8846153846153846,
+    "model_mape": 0.041762714424543594,
+    "naive_mape": 0.07842407597531083
+  },
+  "media_share_delta": -0.06620809234153147,
+  "optimizer": {
+    "contribution_hdi": [
+      10875.74468117242,
+      27848.54696191891
+    ],
+    "expected_contribution": 19124.953604684004,
+    "gain_hdi_high": 8825.697104878056,
+    "gain_hdi_low": -1655.445388530723,
+    "gain_mean": 3674.2931985975065,
+    "spends": {
+      "paid_search": 1347.7536443272913,
+      "paid_social": 2607.0356148441556,
+      "print": 4086.291909055204,
+      "radio": 70.19041659501832,
+      "tv": 29.395081844996042
+    }
+  },
+  "spearman": 0.6
+}
