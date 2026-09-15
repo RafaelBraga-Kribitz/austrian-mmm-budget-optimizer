@@ -1,0 +1,33 @@
+{
+  "breakeven_roas": 2.5,
+  "contribution_margin": 0.4,
+  "decision_rule": "Shift budget toward a channel only while the lower bound of its marginal ROAS 90 percent interval stays above the breakeven ROAS, and only if the 10th percentile of the reallocation gain is positive.",
+  "elapsed_seconds": 0.7,
+  "plus_25_percent": {
+    "breakeven_roas": 2.5,
+    "gain_median": 438.07773274452654,
+    "gain_p10": 403.61822629162947,
+    "gain_p90": 477.8508848728489,
+    "gain_pct_of_current_contribution_median": 23.31996101096931,
+    "gain_pct_of_current_contribution_p10": 18.892298093296255,
+    "held_channels": [],
+    "probability_gain_negative": 0.0,
+    "recommend": true,
+    "scenario": "plus_25_percent",
+    "total_budget": 0.5886644613625743
+  },
+  "posterior_draws_used": 500,
+  "same_total": {
+    "breakeven_roas": 2.5,
+    "gain_median": 47.05255971615861,
+    "gain_p10": -15.273559262114773,
+    "gain_p90": 92.84481345775662,
+    "gain_pct_of_current_contribution_median": 2.457007776677138,
+    "gain_pct_of_current_contribution_p10": -0.8364584050693439,
+    "held_channels": [],
+    "probability_gain_negative": 0.146,
+    "recommend": false,
+    "scenario": "same_total",
+    "total_budget": 0.47093156909005945
+  }
+}
