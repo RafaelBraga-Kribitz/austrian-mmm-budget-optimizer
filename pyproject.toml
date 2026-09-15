@@ -1,0 +1,57 @@
+[project]
+name = "ambo"
+version = "0.1.0"
+description = "Austrian MMM and Budget Optimizer: a Bayesian marketing mix model with a budget optimiser"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Rafael Braga-Kribitz", email = "rafaelbragakribitz@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0,<3",
+    "pandas>=2.2,<4",
+    "scipy>=1.13",
+    "pymc>=5.20,<6",
+    "arviz>=0.20",
+    "matplotlib>=3.8",
+    "duckdb>=1.0",
+    "pyyaml>=6",
+    "nutpie>=0.13",
+    "bk-viz",
+]
+
+[project.optional-dependencies]
+notebook = [
+    "jupyter>=1.0",
+    "nbconvert>=7",
+    "ipykernel>=6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.5",
+]
+
+[tool.uv.sources]
+bk-viz = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ambo"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["docs", "notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests"]
+markers = [
+    "slow: full-length sampling runs; excluded from CI with -m 'not slow'",
+]
