@@ -1,0 +1,39 @@
+# AMBO — .gitattributes
+#
+# Restored 2026-09-16 (STATUS D-32), reversing D-03. LF is pinned here rather
+# than left to local git config: core.autocrlf does not travel with the
+# repository. Windows checkouts must not introduce CRLF into CSV or Python.
+
+# Catch-all: normalize everything git considers text to LF on checkin/checkout.
+* text=auto eol=lf
+
+# Explicit text types (belt-and-suspenders over the catch-all).
+*.md      text eol=lf
+*.py      text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.csv     text eol=lf
+*.toml    text eol=lf
+*.json    text eol=lf
+*.sql     text eol=lf
+*.cfg     text eol=lf
+*.ini     text eol=lf
+*.txt     text eol=lf
+*.ipynb   text eol=lf
+Makefile        text eol=lf
+LICENSE         text eol=lf
+.env.example    text eol=lf
+
+# Binary types: never diff, never normalize line endings.
+*.parquet  binary
+*.png      binary
+*.jpg      binary
+*.pbix     binary
+*.nc       binary
+*.duckdb   binary
+*.xlsx     binary
+*.pdf      binary
+
+# Keep generated / binary artifacts out of review diffs.
+uv.lock     -diff
+*.parquet   -diff

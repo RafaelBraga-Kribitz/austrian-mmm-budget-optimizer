@@ -1,6 +1,22 @@
 # STATUS
 
-Run date: 2026-09-15. Working branch: build/ambo. MERGE_TO_MAIN: true.
+Run date: 2026-09-16. Working branch: main. MERGE_TO_MAIN: done (pull requests 46 and 47).
+
+## Decisions recorded 2026-09-16
+
+Rafael chose all six remaining items in session. Defaults were the recommendations;
+none was overridden.
+
+| ID | Choice | What it means |
+|----|--------|----------------|
+| D-28 | Keep contribution margin at 40 percent | Breakeven ROAS stays 2.50. Labeled assumption in `src/ambo/configs/layer_r.yaml`. A real client margin replaces it at intake; until then do not retune the rule. Closes the open question in D-16. |
+| D-29 | Next work is portfolio polish while waiting for the private drop | LIMITATIONS, dashboard handoff, v1 tag, ADRs, branch cleanup. Do not resurrect the GSD warehouse/dbt stack. Do not gray-zone process client files. |
+| D-30 | Delete stale remote branches | Done 2026-09-16: 46 heads removed (`m0-bootstrap`, `build/ambo`, the `-9588` stack, `cursor/layer-p-pipeline-9588`). Remote now has `main` only. GitHub can restore any of them from its closed pull request. |
+| D-31 | This workspace tracks `origin/main` | Local `m0-bootstrap` is abandoned. Untracked leftovers (`.planning/`, `dbt/`, `docs/EXECUTION_BLUEPRINT/`) stay off main. |
+| D-32 | Restore `.gitattributes` | Reverses D-03. Windows checkouts pin LF so CSV and Python stay byte-stable. Source: commit `9318dd1`. |
+| D-33 | File ADRs for the slim-build spec deviations; do not revert | D-05 (five channels), D-11 (matched adstock), D-12 (LogNormal slope), D-14 (26-week holdout), D-06 (Python 3.11). Recorded in `docs/adr/ADR-008_slim-build-spec-deviations.md`. |
+
+**Not on the table.** D-05, D-11, D-12, D-14, D-24, D-27 remain as shipped. Repo stays public.
 
 ## Audit fixes, second session (2026-09-15 evening)
 
@@ -141,7 +157,8 @@ the stronger channel. The next step is to run the same pipeline on real client d
 
 ## Current stage
 
-All six stages done. Awaiting Rafael's review of pull request 46.
+All six stages done and on `main` (merge commits `0be8cbc` and `8e77086`). Open
+pull requests: none. Next stretch is portfolio polish (D-29), not a new model.
 
 ## Done
 
@@ -194,15 +211,9 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
 
 ## Blockers
 
-- Branch deletion is refused in this environment: every git push --delete, in batches
-  or one branch at a time, ends with the remote hanging up (HTTP 403 from the outbound
-  proxy), and the GitHub API tools available here have no delete-branch call. The 44
-  closed-PR branches (43 with the 9588 suffix plus m0-bootstrap) and the closed pull
-  request 45 branch are still on the remote. Rafael can delete them locally with:
-  git fetch --prune && git push origin --delete $(git branch -r | sed 's#origin/##' |
-  grep -E -- '-9588$|^m0-bootstrap$' | tr '\n' ' '). Every one of them belongs to a
-  closed pull request, from which GitHub can restore it.
-- The gh CLI is absent (Stage 0); the GitHub API was used instead with the same outcome.
+- The private agency drop plus written permission is the only remaining external
+  blocker for Layer R on real Austrian client data. D-29 says do not wait idle:
+  polish the public-demo package. AG-002 still forbids gray-zone processing.
 
 ## Decisions taken
 
@@ -286,9 +297,10 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
 
 ## Next action
 
-Rafael confirms the 40 percent contribution margin, deletes the closed-PR branches
-with the command under Blockers, and merges the follow-up pull request if it is not
-already merged.
+Portfolio polish on `main` (D-29): commit the STATUS / `.gitattributes` / ADR-008
+working-tree changes when you want them on GitHub, then LIMITATIONS, dashboard
+handoff, and a v1 tag. Contribution margin stays 40 percent until a real client
+figure exists (D-28). Stale remotes are already gone (D-30).
 
 ## Inventory
 

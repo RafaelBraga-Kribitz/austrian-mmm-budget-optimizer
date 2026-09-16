@@ -20,3 +20,11 @@ reports/**/*.parquet
 # Smoke-profile outputs of the tiny config (CI and the notebook); never reported
 reports/layer_p_tiny/
 data/synthetic_tiny/
+
+# Local leftovers of the earlier planning stack and session tooling; never on main (STATUS D-31)
+.planning/
+.claude/
+.coverage
+dbt/
+docs/EXECUTION_BLUEPRINT/
+data/warehouse/
