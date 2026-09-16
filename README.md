@@ -102,6 +102,10 @@ uv run python -m ambo.run layer_r && uv run python -m ambo.run layer_d
 - Weekly national data cannot separate channels whose spend moves together; the intervals widen accordingly and the optimiser stays inside the bounds set in the config.
 - The optimiser assumes response curves hold at new spend levels, competitors do not react, and a constant weekly spend reaches its steady state.
 
+The full list, with what each limit means for a client engagement, is in
+[LIMITATIONS.md](LIMITATIONS.md); the decisions behind the build are in
+[docs/adr/](docs/adr/README.md) and the dashboard feed in [docs/dashboard_handoff.md](docs/dashboard_handoff.md).
+
 ## What I would do differently with production data
 
 - Geo-level weekly data, so that regional variation in spend identifies the response
@@ -119,4 +123,4 @@ uv run python -m ambo.run layer_r && uv run python -m ambo.run layer_d
 
 ## Status
 
-Built layers: Layer P (synthetic truth and parameter recovery), Layer R (public demo data), Layer D (budget optimiser and decision rule). Everything in this README regenerates from the three commands above. Date: 2026-09-15.
+Built layers: Layer P (synthetic truth and parameter recovery), Layer R (public demo data), Layer D (budget optimiser and decision rule). Everything in this README regenerates from the three commands above. Date: 2026-09-16.

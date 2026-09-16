@@ -49,6 +49,10 @@ uv run python -m ambo.run layer_r && uv run python -m ambo.run layer_d
 
 {{limitations}}
 
+The full list, with what each limit means for a client engagement, is in
+[LIMITATIONS.md](LIMITATIONS.md); the decisions behind the build are in
+[docs/adr/](docs/adr/README.md) and the dashboard feed in [docs/dashboard_handoff.md](docs/dashboard_handoff.md).
+
 ## What I would do differently with production data
 
 - Geo-level weekly data, so that regional variation in spend identifies the response

@@ -297,10 +297,13 @@ Layer D, decision on the Layer R posterior (500 draws, 200 per-draw optimisation
 
 ## Next action
 
-Portfolio polish on `main` (D-29): commit the STATUS / `.gitattributes` / ADR-008
-working-tree changes when you want them on GitHub, then LIMITATIONS, dashboard
-handoff, and a v1 tag. Contribution margin stays 40 percent until a real client
-figure exists (D-28). Stale remotes are already gone (D-30).
+Polish done 2026-09-16 on `main`: decision record committed; `LIMITATIONS.md` at the
+root (eleven items mapped to SPEC-09 section 6, no hand-typed numbers); dashboard feed
+under `reports/exports/` from `scripts/export_dashboard.py` with `docs/dashboard_handoff.md`;
+ADR-007 (audit verdict) added from the audit log and `docs/adr/README.md` indexes the
+records; README links all three; annotated tag `v1.0.0`. What remains is human work:
+the Power BI build and screenshots, and the client drop with written permission.
+Contribution margin stays 40 percent until a real client figure exists (D-28).
 
 ## Inventory
 
