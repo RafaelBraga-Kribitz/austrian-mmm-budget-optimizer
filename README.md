@@ -1,6 +1,6 @@
 # Austrian MMM and Budget Optimizer
 
-![Austrian MMM and Budget Optimizer — Bayesian marketing-mix model validated on known truth, demonstrated on public data, with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
+![Austrian MMM and Budget Optimizer: Bayesian marketing-mix model validated on known truth, demonstrated on public data, with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-blue.svg)](pyproject.toml)
