@@ -1,5 +1,14 @@
 # Austrian MMM and Budget Optimizer
 
+![Incremental contribution per channel on public demo data, with 90 percent intervals](reports/layer_r/channel_contributions.png)
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-uv-blue.svg)](pyproject.toml)
+[![CI](https://img.shields.io/github/check-runs/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/main?label=CI)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions)
+[![Status: Complete](https://img.shields.io/badge/status-Complete-brightgreen)](#status)
+
+**Status:** Complete
+
 For one advertiser, which channels contributed incrementally, how far off were
 platform-reported numbers, and what does a reallocation gain?
 
@@ -8,8 +17,6 @@ Austrian public-holiday calendar as a control, weekly grain, euro and
 contribution-margin logic for an Austrian advertiser. It is validated on synthetic
 data with known truth and demonstrated on public data, pending a client swap-in. No
 Austrian client data was used.
-
-![Incremental contribution per channel on public demo data, with 90 percent intervals](reports/layer_r/channel_contributions.png)
 
 On synthetic data with known truth, the estimated response curves cover the true curves on 91 percent of the observed spend range and 26 of 28 true parameters fall inside their 90 percent intervals; the platform report credits Paid Search with 45 percent more revenue than it really adds, and gives the offline channels nothing.
 
@@ -24,47 +31,6 @@ hypothesis until it has been tested against something outside the platform's own
 reporting. Platform-reported numbers are claims, not measurements, because every
 platform counts the conversions it can see and credits itself for demand that would
 have arrived anyway. The model below is built to test those claims.
-
-## Method
-
-- Data: weekly spend per channel and revenue. Layer P is a synthetic advertiser with 156 weeks and five channels (TV, Radio, Print, Paid Search, Paid Social) whose true parameters are written to data/synthetic/truth.json; Layer R is Robyn's simulated weekly dataset with five named channels in money units (see data/README.md). Public demo data; a real-data swap-in is planned.
-- Adstock: geometric carry-over per channel, so this week's spend keeps working in the following weeks with a decay rate the model estimates.
-- Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation point and a slope, so returns diminish as spend grows.
-- Seasonality and controls: a linear trend, two yearly Fourier pairs, and one control (a public-holiday week indicator on Layer P, competitor sales on Layer R).
-- Priors: weakly informative and identical across channels, on scaled data, so that the estimates come from the data and not from a prior that knows the answer. Each prior and its reasoning is in the model docstring.
-- Sampler: NUTS (nutpie), 2 chains, 1000 tuning and 1000 draws per chain, target acceptance 0.9, raised to 0.99 by the recorded ladder after divergences.
-- Diagnostics: R-hat below 1.01, effective sample size above 400, zero divergences; written to diagnostics.json next to every fit.
-- Holdout protocol: fit on the first 130 weeks, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
-
-## Proof on known truth
-
-![Response curve recovery on synthetic data: true curves against posterior bands](reports/layer_p/response_curve_recovery.png)
-
-Before trusting the model on any advertiser's data, it had to recover a truth it was handed. On the synthetic advertiser the estimated response curves cover the true curves on 91 percent of the grid points inside the observed spend range (worst channel, TV: 56 percent), with a mean error of at most 13.6 percent of the true curve's height. 26 of 28 individual parameters fall inside their 90 percent intervals.
-
-The misses follow a known trade-off, not a bug: 5 of 5 effect sizes and 5 of 5 half-saturation points have medians above the truth, because a curve that rises higher but saturates later fits the same observed weeks. Recovery is therefore judged on curves and shares, which are what a budget decision uses, not on point parameters. Revenue shares are covered for 4 of 5 channels; the exception sits just outside its interval: TV (the largest channel by spend): true share 9.5 percent against an interval of 9.7 to 11.4.
-
-## Results: holdout forecast against two baselines
-
-Layer P, synthetic data, 26 holdout weeks:
-
-| Model | MAPE | 90 percent interval coverage |
-|---|---|---|
-| Seasonal naive | 9.6 percent | 92 percent |
-| Ridge regression | 4.7 percent | 92 percent |
-| Bayesian MMM | 3.0 percent | 85 percent |
-
-The MMM has the lowest point error here. Its case does not rest on that: the baselines say nothing about which channel earned the revenue. Its 90 percent intervals covered 85 percent of holdout weeks, 5 points below nominal, so the intervals are slightly too narrow and the model is a little overconfident; the baselines' wider intervals covered more.
-
-Layer R, public demo data, 26 holdout weeks:
-
-| Model | MAPE | 90 percent interval coverage |
-|---|---|---|
-| Seasonal naive | 22.3 percent | 96 percent |
-| Ridge regression | 5.1 percent | 100 percent |
-| Bayesian MMM | 7.9 percent | 100 percent |
-
-The MMM loses on point error to the ridge regression baseline on this data. That is reported as it comes out: the case for the MMM is interpretability (which channel earned the revenue, with intervals), not always accuracy. Its 90 percent intervals covered 100 percent of holdout weeks, more than the nominal 90, so on this data the intervals are wider than they need to be.
 
 ## Decision
 
@@ -86,13 +52,96 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 
 ![Distribution of the gain from reallocation](reports/layer_d/reallocation_gain.png)
 
+## Explore this project
+
+| Audience | Start here |
+|---|---|
+| Recruiter | [Decision](#decision) and the hero chart |
+| Hiring manager | [Decision](#decision), [Method](#method), and [Validation](#validation) |
+| Technical reviewer | Architecture, Reproduce, and `src/ambo/` |
+| Auditor | [Data](#data), [Validation](#validation), and [Limitations](#limitations) |
+
+## Results
+
+Layer P, synthetic data, 26 holdout weeks:
+
+| Model | MAPE | 90 percent interval coverage |
+|---|---|---|
+| Seasonal naive | 9.6 percent | 92 percent |
+| Ridge regression | 4.7 percent | 92 percent |
+| Bayesian MMM | 3.0 percent | 85 percent |
+
+The MMM has the lowest point error here. Its case does not rest on that: the baselines say nothing about which channel earned the revenue. Its 90 percent intervals covered 85 percent of holdout weeks, 5 points below nominal, so the intervals are slightly too narrow and the model is a little overconfident; the baselines' wider intervals covered more.
+
+Layer R, public demo data, 26 holdout weeks:
+
+| Model | MAPE | 90 percent interval coverage |
+|---|---|---|
+| Seasonal naive | 22.3 percent | 96 percent |
+| Ridge regression | 5.1 percent | 100 percent |
+| Bayesian MMM | 7.9 percent | 100 percent |
+
+The MMM loses on point error to the ridge regression baseline on this data. That is reported as it comes out: the case for the MMM is interpretability (which channel earned the revenue, with intervals), not always accuracy. Its 90 percent intervals covered 100 percent of holdout weeks, more than the nominal 90, so on this data the intervals are wider than they need to be.
+
+## Method
+
+- Adstock: geometric carry-over per channel, so this week's spend keeps working in the following weeks with a decay rate the model estimates.
+- Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation point and a slope, so returns diminish as spend grows.
+- Seasonality and controls: a linear trend, two yearly Fourier pairs, and one control (a public-holiday week indicator on Layer P, competitor sales on Layer R).
+- Priors: weakly informative and identical across channels, on scaled data, so that the estimates come from the data and not from a prior that knows the answer. Each prior and its reasoning is in the model docstring.
+- Sampler: NUTS (nutpie), 2 chains, 1000 tuning and 1000 draws per chain, target acceptance 0.9, raised to 0.99 by the recorded ladder after divergences.
+- Diagnostics: R-hat below 1.01, effective sample size above 400, zero divergences; written to diagnostics.json next to every fit.
+- Holdout protocol: fit on the first 130 weeks, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
+
+## Data
+
+Weekly spend per channel and revenue. No Austrian client data was used.
+
+| Layer | Source | Grain and window | Tag |
+|---|---|---|---|
+| P | Generated advertiser; true parameters in `data/synthetic/truth.json` | Weekly, 156 weeks, five channels (TV, Radio, Print, Paid Search, Paid Social) | `SIMULATED` |
+| R | Robyn simulated weekly dataset (MIT, Meta Platforms); columns and licence in `data/README.md` | Weekly, five named channels in the file's money units | `SIMULATED` |
+| Control, Layer P | Austrian public-holiday week indicator | Weekly | `VERIFIED` |
+| Assumption | Contribution margin 40 percent, breakeven ROAS 2.50, in the Layer R config | Decision rule | `CALIBRATED` |
+
+Layer R amounts are not euros. Shares, ROAS ratios and the breakeven test are the quantities that travel. A real-data swap-in is planned.
+
+## Validation
+
+![Response curve recovery on synthetic data: true curves against posterior bands](reports/layer_p/response_curve_recovery.png)
+
+Before trusting the model on any advertiser's data, it had to recover a truth it was handed. On the synthetic advertiser the estimated response curves cover the true curves on 91 percent of the grid points inside the observed spend range (worst channel, TV: 56 percent), with a mean error of at most 13.6 percent of the true curve's height. 26 of 28 individual parameters fall inside their 90 percent intervals.
+
+The misses follow a known trade-off, not a bug: 5 of 5 effect sizes and 5 of 5 half-saturation points have medians above the truth, because a curve that rises higher but saturates later fits the same observed weeks. Recovery is therefore judged on curves and shares, which are what a budget decision uses, not on point parameters. Revenue shares are covered for 4 of 5 channels; the exception sits just outside its interval: TV (the largest channel by spend): true share 9.5 percent against an interval of 9.7 to 11.4.
+
+Holdout MAPE and interval coverage against two baselines are in Results. Sampler gates are written to `diagnostics.json` next to every fit.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  P["Layer P: recover known truth"] --> R["Layer R: fit on public demo"]
+  R --> D["Layer D: reallocate under the rule"]
+```
+
+Layer P is the validation instrument: a disclosed data-generating process the sampler must recover before Layer R numbers are treated as a decision. Layer R fits the same model on Robyn's public demo file. Layer D takes the Layer R posterior and reallocates spend under the breakeven rule.
+
+| Piece | Role |
+|---|---|
+| PyMC and nutpie | Bayesian MMM, NUTS sampling |
+| uv | Locked install and run |
+| bk-viz | Chart theme |
+
 ## Reproduce
 
-```
+```bash
 uv sync
+uv run pytest -m "not slow"
 uv run python -m ambo.run layer_p
 uv run python -m ambo.run layer_r && uv run python -m ambo.run layer_d
 ```
+
+Numbers in this README are read from `reports/` by `scripts/render_readme.py`. The three layer commands regenerate those artifacts.
 
 ## Limitations
 
@@ -121,6 +170,37 @@ The full list, with what each limit means for a client engagement, is in
   platform exports reconciled to the ad accounts, and outliers explained before they
   enter the fit.
 
+## Repository structure
+
+| Path | Responsibility |
+|---|---|
+| `src/ambo/` | Model, sampler, optimiser, charts, configs |
+| `data/` | Layer P synthetic advertiser and Layer R public demo file |
+| `reports/` | Layer P, R and D artifacts that the README is rendered from |
+| `tests/` | Recovery, transforms, optimiser, and the README-numbers gate |
+| `docs/` | Charter, specs, ADRs, dashboard handoff |
+| `notebooks/` | Walkthrough notebook |
+
 ## Status
 
-Built layers: Layer P (synthetic truth and parameter recovery), Layer R (public demo data), Layer D (budget optimiser and decision rule). Everything in this README regenerates from the three commands above. Date: 2026-09-16.
+**Status:** Complete
+
+Built layers: Layer P (synthetic truth and parameter recovery), Layer R (public demo data), Layer D (budget optimiser and decision rule). Everything in this README regenerates from the three commands above. Last validated: 2026-09-16.
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
+
+## Author
+
+<table>
+  <tr>
+    <td>
+      <strong>Rafael Braga-Kribitz</strong><br />
+      Seiersberg-Pirka, Austria · Portfolio project, 2026<br />
+      <a href="https://www.linkedin.com/in/rafaelbragakribitz/">LinkedIn</a>
+      ·
+      <a href="mailto:rafaelbragakribitz@gmail.com">rafaelbragakribitz@gmail.com</a>
+    </td>
+  </tr>
+</table>
