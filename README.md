@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-blue.svg)](pyproject.toml)
-[![CI](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/check-runs/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/main?label=CI)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions)
 [![Status: Complete](https://img.shields.io/badge/status-Complete-brightgreen)](#status)
 
 **Status:** Complete
