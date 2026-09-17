@@ -1,0 +1,84 @@
+{
+  "output": "C:\\Users\\Benutzer1\\Dev\\portfolio-readme-work\\austrian-mmm-budget-optimizer\\docs\\assets\\hero.png",
+  "width": 1600,
+  "height": 640,
+  "mode": "light",
+  "fonts": "Söhne from C:\\Users\\Benutzer1\\Dev\\braga-design-system-template\\public\\fonts",
+  "title_size": 112,
+  "descriptor_size": 34,
+  "attempts": 2,
+  "blocks": {
+    "kind": {
+      "bbox": [
+        72,
+        72,
+        488,
+        104
+      ],
+      "lines": [
+        "BRAGA · ANALYTICAL PROJECT"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "status": {
+      "bbox": [
+        1400,
+        72,
+        1528,
+        104
+      ],
+      "lines": [
+        "COMPLETE"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "facts": {
+      "bbox": [
+        72,
+        542,
+        876,
+        570
+      ],
+      "lines": [
+        "LICENSE  MIT  ·  RUNTIME  Python >=3.11  ·  CI  GitHub Actions"
+      ],
+      "font": "SohneMono-Buch.otf"
+    },
+    "title": {
+      "bbox": [
+        72,
+        128,
+        1478,
+        356
+      ],
+      "lines": [
+        "Austrian MMM and Budget",
+        "Optimizer"
+      ],
+      "font": "Sohne-Fett.otf"
+    },
+    "descriptor": {
+      "bbox": [
+        72,
+        384,
+        1197,
+        474
+      ],
+      "lines": [
+        "Bayesian marketing-mix model validated on known truth, demonstrated on",
+        "public data, with a breakeven-gated budget reallocation rule."
+      ],
+      "font": "Sohne-Buch.otf"
+    }
+  },
+  "guardrails": [
+    "safe-area",
+    "wrap-and-shrink",
+    "line-length",
+    "no-overlap",
+    "glyph-coverage-per-char",
+    "contrast>=4.5",
+    "pixel-scan"
+  ],
+  "validated": true
+}

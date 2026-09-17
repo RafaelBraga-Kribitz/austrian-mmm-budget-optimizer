@@ -1,6 +1,6 @@
 # Austrian MMM and Budget Optimizer
 
-![Incremental contribution per channel on public demo data, with 90 percent intervals](reports/layer_r/channel_contributions.png)
+![Austrian MMM and Budget Optimizer — Bayesian marketing-mix model validated on known truth, demonstrated on public data, with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-blue.svg)](pyproject.toml)
@@ -31,6 +31,8 @@ hypothesis until it has been tested against something outside the platform's own
 reporting. Platform-reported numbers are claims, not measurements, because every
 platform counts the conversions it can see and credits itself for demand that would
 have arrived anyway. The model below is built to test those claims.
+
+![Incremental contribution per channel on public demo data, with 90 percent intervals](reports/layer_r/channel_contributions.png)
 
 ## Decision
 
@@ -195,6 +197,13 @@ MIT License. See [LICENSE](LICENSE).
 
 <table>
   <tr>
+    <td width="110">
+      <img
+        src="docs/assets/Author_MDS_Rafael_Braga-Kribitz_kroped.png"
+        alt="Rafael Braga-Kribitz"
+        width="96"
+      />
+    </td>
     <td>
       <strong>Rafael Braga-Kribitz</strong><br />
       Seiersberg-Pirka, Austria · Portfolio project, 2026<br />
