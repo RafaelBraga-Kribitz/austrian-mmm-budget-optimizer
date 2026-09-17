@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-blue.svg)](pyproject.toml)
+[![CI](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions/workflows/ci.yml)
+[![Status: Complete](https://img.shields.io/badge/status-Complete-brightgreen)](#status)
 
 **Status:** Complete
 
@@ -54,10 +56,10 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 
 | Audience | Start here |
 |---|---|
-| Recruiter | Decision and the hero chart |
-| Hiring manager | Decision, Method, and Validation |
+| Recruiter | [Decision](#decision) and the hero chart |
+| Hiring manager | [Decision](#decision), [Method](#method), and [Validation](#validation) |
 | Technical reviewer | Architecture, Reproduce, and `src/ambo/` |
-| Auditor | Data, Validation, and Limitations |
+| Auditor | [Data](#data), [Validation](#validation), and [Limitations](#limitations) |
 
 ## Results
 
