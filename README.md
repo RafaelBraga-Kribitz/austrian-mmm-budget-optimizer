@@ -121,7 +121,7 @@ Holdout MAPE and interval coverage against two baselines are in Results. Sampler
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
   P["Layer P: recover known truth"] --> R["Layer R: fit on public demo"]
   R --> D["Layer D: reallocate under the rule"]
 ```
