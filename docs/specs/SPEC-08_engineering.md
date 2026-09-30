@@ -1,5 +1,7 @@
 # SPEC-08 — Engineering, Tooling, CI (AMBO)
 
+> **Not all of this spec was built.** The repository layout in section 2, the Makefile, pre-commit and the six-job CI were not built. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Requirement IDs: `EB-xxx`. Same engineering culture as the sibling repos; the
 MMM-specific additions are the sampling-compute strategy (§6) and the leak scan.
 

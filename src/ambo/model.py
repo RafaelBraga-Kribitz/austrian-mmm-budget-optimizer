@@ -262,6 +262,11 @@ def fit(model: pm.Model, sampling: dict) -> tuple[az.InferenceData, dict]:
         idata, sampler = _sample(model, sampling, tune, draws)
         elapsed = time.time() - start
         info.update(sampler=sampler, tune=tune, draws=draws, elapsed_seconds=round(elapsed, 1))
+        wanted = str(sampling.get("sampler", "pymc"))
+        if sampler != wanted:
+            note = f"{wanted} unavailable, used {sampler}"
+            if note not in info["deviations"]:
+                info["deviations"].append(note)
         if cap and elapsed > cap and attempt < 2:
             info["deviations"].append(
                 f"fit took {elapsed / 60:.1f} minutes, above the cap of {cap / 60:.0f}; "
@@ -378,12 +383,6 @@ class Posterior:
     @property
     def n(self) -> int:
         return int(self.draws["intercept"].shape[0])
-
-    def subset(self, n: int, seed: int = 0) -> Posterior:
-        """A deterministic random subset of ``n`` draws."""
-        rng = np.random.default_rng(seed)
-        idx = np.sort(rng.choice(self.n, size=min(n, self.n), replace=False))
-        return Posterior({k: v[idx] for k, v in self.draws.items()}, self.channels)
 
 
 def extract(idata: az.InferenceData) -> Posterior:

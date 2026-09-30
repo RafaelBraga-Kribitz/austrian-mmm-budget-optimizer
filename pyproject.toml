@@ -1,6 +1,6 @@
 [project]
 name = "ambo"
-version = "0.1.0"
+version = "1.1.0"
 description = "Austrian MMM and Budget Optimizer: a Bayesian marketing mix model with a budget optimiser"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -32,7 +32,7 @@ dev = [
 ]
 
 [tool.uv.sources]
-bk-viz = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz" }
+bk-viz = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz", rev = "8a059085d3c6275272fe34a0dfa29d3d5e608e5b" }
 
 [build-system]
 requires = ["hatchling"]

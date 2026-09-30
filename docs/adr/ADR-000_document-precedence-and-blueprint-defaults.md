@@ -4,9 +4,12 @@
 - **Date:** 2026-08-04
 - **Deciders:** Rafael Braga-Kribitz
 - **Supersedes:** —
-- **Related:** `PROJECT_CHARTER.md` §7 (authority), `docs/SPEC-09_governance_quality.md`
+- **Related:** `docs/archive/PROJECT_CHARTER.md` §7 (authority), `docs/specs/SPEC-09_governance_quality.md`
   GB-201/GB-202, the execution blueprint's master plan §5 (BP-D block — internal, not
-  published), `.planning/INGEST-CONFLICTS.md` (WARNING 1, WARNING 7, INFO 3)
+  published), `docs/archive/agents/planning/INGEST-CONFLICTS.md` (WARNING 1, WARNING 7, INFO 3)
+- **Note (2026-09-30):** paths above updated after the charter and planning files were
+  archived under `docs/archive/`. The charter is no longer maintained; ADR-009 lists the
+  spec sections that were never built.
 
 ---
 

@@ -7,7 +7,7 @@ on:
   pull_request:
     paths: ["README.md", "LICENSE*", "docs/assets/**", ".github/workflows/readme-quality.yml"]
   push:
-    branches: [main, master]
+    branches: [main]
     paths: ["README.md", "LICENSE*", "docs/assets/**"]
   workflow_dispatch:
 

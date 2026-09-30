@@ -1,5 +1,7 @@
 # SPEC-06 — Decision Layer: Budget Optimizer & Attribution Gap
 
+> **Not all of this spec was built.** `src/ambo/decide/` and the Layer R attribution gap were not built; the optimiser is `src/ambo/optimize.py`. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Answers Q3 and Q4. Requirement IDs: `DC-xxx`. Code in `src/ambo/decide/`
 (`optimizer.py`, `attribution_gap.py`, `scenarios.py`). Consumes committed thinned
 posteriors (MD-051) and marts — never refits.

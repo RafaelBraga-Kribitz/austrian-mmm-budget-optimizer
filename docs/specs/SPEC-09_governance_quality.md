@@ -1,5 +1,7 @@
 # SPEC-09 — Governance & Quality (AMBO, deliberately lightweight)
 
+> **Not all of this spec was built.** The SSOT scripts (section 3) and the layer-order and prior-freeze checks (section 5) were not built and will not be. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Requirement IDs: `GB-xxx`. Same cap as the sibling projects: the mechanisms below are
 ALL the governance there is. This repo's signature mechanisms are the **layer-order
 proof** and the **prior freeze** (§5) plus the **leak scan** (SPEC-02 AG-045).

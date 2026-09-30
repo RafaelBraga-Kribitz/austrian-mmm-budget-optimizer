@@ -103,10 +103,13 @@ def run_layer_r(config_path=None, out_dir=None, data_dir=None) -> dict:
                                  source)
     curves = model.response_curve_table(post, md, config)
     curves.to_csv(out / "response_curves.csv", index=False, lineterminator="\n")
-    charts.response_curves(curves, out / "response_curves.png", source)
+    charts.response_curves(
+        curves, out / "response_curves.png", source,
+        float(config.get("response_curves", {}).get("max_multiple_of_observed", 1.5)),
+    )
     model.write_posterior(post, md, out)
 
-    metrics, preds, hold_info, hold_idata = evaluate.holdout(data, config)
+    metrics, preds, hold_info = evaluate.holdout(data, config)
     metrics.to_csv(out / "holdout_metrics.csv", index=False, lineterminator="\n")
     preds.to_csv(out / "holdout_predictions.csv", index=False, lineterminator="\n")
     charts.holdout(preds, metrics, out / "holdout.png", source, money_unit="money units")

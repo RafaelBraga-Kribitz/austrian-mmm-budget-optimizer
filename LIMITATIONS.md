@@ -12,7 +12,8 @@ implementation error (a reversed convolution, a scaling bug, a leaking holdout).
 says nothing about model-misspecification error on a real advertiser, whose response
 may not be Hill-shaped and whose carry-over may not be geometric. The real next step
 is calibration against lift tests (geo experiments or channel holdouts), which the
-charter keeps out of scope for this version.
+archived charter (`docs/archive/PROJECT_CHARTER.md`) kept out of scope for this
+version.
 
 Artifacts: `reports/layer_p/response_curve_recovery.png`, `response_curve_metrics.csv`,
 `parameter_recovery.csv`, `contribution_recovery.csv`.
@@ -45,9 +46,12 @@ README will say so.
 The public file has 208 weeks; a real client window is expected to be shorter. On both,
 channels with few active weeks carry wide intervals on decay, half-saturation and
 slope, and those parameters lean on the priors. `reports/layer_r/posterior_summary.csv`
-shows which. A prior-sensitivity refit (weak versus elicited priors, SPEC-05 VR-501)
-is not implemented in this version; until it is, the honest reading is that for thinly
-flighted channels the response curve beyond observed spend is largely the prior.
+shows which. Priors live in the `priors` block of each config
+(`src/ambo/configs/layer_p.yaml`, `layer_r.yaml`, `tiny.yaml`); none is elicited. A
+prior-sensitivity refit (the weak-versus-elicited comparison of SPEC-05 VR-501, whose
+separate prior files were never built, ADR-009) is not implemented in this version;
+until it is, the honest reading is that for thinly flighted channels the response
+curve beyond observed spend is largely the prior.
 
 ## 5. The gain is an in-sample counterfactual
 
@@ -64,10 +68,10 @@ D-28: forty percent until a real client figure exists).
 ## 6. Brand search
 
 Brand search correlates with revenue because it is demand, not a cause of it. The
-charter therefore models it but never lets the optimiser move budget into it. None of
-the five channels in this version is a brand-search line, so the exclusion has nothing
-to attach to yet; at client intake it becomes binding wherever a brand-search channel
-exists (ADR-008).
+design (SPEC-06 DC-203) therefore models it but never lets the optimiser move budget
+into it. None of the five channels in this version is a brand-search line, so the
+exclusion has nothing to attach to yet; at client intake it becomes binding wherever
+a brand-search channel exists (ADR-008).
 
 ## 7. Promotions and other omitted drivers
 

@@ -16,9 +16,15 @@ build/
 data/cache/
 reports/**/trace/
 reports/**/*.parquet
+# Layer P draws feed nothing downstream (the recovery tables and charts are committed);
+# Layer R draws stay committed because they are Layer D's input, so layer_d reruns
+# without refitting Layer R.
+reports/layer_p/posterior_draws.csv
 
 # Smoke-profile outputs of the tiny config (CI and the notebook); never reported
 reports/layer_p_tiny/
+reports/layer_r_tiny/
+reports/layer_d_tiny/
 data/synthetic_tiny/
 
 # Local leftovers of the earlier planning stack and session tooling; never on main (STATUS D-31)

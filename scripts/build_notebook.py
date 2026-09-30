@@ -5,6 +5,13 @@ budget) and shows the four Layer P charts with a short interpretation each. Cell
 outputs are saved by the execution step so the notebook reads without a kernel.
 
     uv run python scripts/build_notebook.py --execute
+    uv run python scripts/build_notebook.py --check
+
+Outputs are committed on purpose, so the notebook reads on GitHub without a kernel.
+They come from the tiny profile and are illustrations, never reported numbers, so they
+are not compared with a rerun. ``--check`` compares the committed cells with the cells
+defined here and exits 1 when they differ, so the notebook cannot drift from this
+builder; CI runs it before executing the notebook.
 """
 
 from __future__ import annotations
@@ -130,6 +137,22 @@ def build() -> None:
     print(f"wrote {PATH} with {len(CELLS)} cells")
 
 
+def check() -> int:
+    """0 when the committed notebook has exactly the cells defined in CELLS, else 1."""
+    if not PATH.exists():
+        print(f"{PATH} is missing; run scripts/build_notebook.py --execute")
+        return 1
+    nb = nbformat.read(PATH, as_version=4)
+    committed = [(c.cell_type, c.source) for c in nb.cells]
+    expected = [(c.cell_type, c.source) for c in CELLS]
+    if committed != expected:
+        print(f"{PATH} differs from the cells in scripts/build_notebook.py; rebuild it with "
+              "--execute")
+        return 1
+    print(f"{PATH} matches its builder ({len(CELLS)} cells)")
+    return 0
+
+
 def execute(timeout: int) -> None:
     cmd = [
         sys.executable, "-m", "jupyter", "nbconvert", "--to", "notebook", "--execute",
@@ -145,7 +168,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--timeout", type=int, default=600)
+    parser.add_argument("--check", action="store_true",
+                        help="compare the committed notebook with its builder, write nothing")
     args = parser.parse_args()
+    if args.check:
+        sys.exit(check())
     build()
     if args.execute:
         execute(args.timeout)

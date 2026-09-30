@@ -2,13 +2,13 @@ name: ci
 
 on:
   push:
-    branches: [main, build/ambo]
+    branches: [main]
   pull_request:
 
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +28,15 @@ jobs:
 
       - name: Smoke run of the Layer P pipeline on the tiny config
         run: timeout 180 uv run python -m ambo.run layer_p --config src/ambo/configs/tiny.yaml --out /tmp/smoke/reports --data /tmp/smoke/data
+
+      - name: Smoke run of Layer R on the tiny Layer R config
+        run: timeout 420 uv run python -m ambo.run layer_r --config src/ambo/configs/tiny_layer_r.yaml --out /tmp/smoke/layer_r
+
+      - name: Smoke run of Layer D on the tiny Layer R posterior
+        run: timeout 120 uv run python -m ambo.run layer_d --config src/ambo/configs/tiny_layer_r.yaml --data /tmp/smoke/layer_r --out /tmp/smoke/layer_d
+
+      - name: Committed notebook matches its builder
+        run: uv run python scripts/build_notebook.py --check
 
       - name: Execute the walkthrough notebook on the tiny config
         run: timeout 300 uv run python scripts/build_notebook.py --execute --timeout 280

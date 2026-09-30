@@ -1,5 +1,7 @@
 # SPEC-01 — Ground-Truth Simulator (Layer P)
 
+> **Not all of this spec was built.** `src/ambo/simulate/`, the three scenarios, `config/scenarios/` and the `make` targets were not built; the generator is `src/ambo/synth.py`. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Defines the EXACT data-generating process (DGP) for "AlpenTrek GmbH", a fictional
 Graz-based outdoor-gear e-tailer. Everything here is DISCLOSED by design — the point
 is that truth is known. Requirement IDs: `SIM-xxx`. Code in `src/ambo/simulate/`.

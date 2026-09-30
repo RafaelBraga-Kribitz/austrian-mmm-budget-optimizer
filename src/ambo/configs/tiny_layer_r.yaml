@@ -1,0 +1,68 @@
+# Tiny Layer R profile for CI: the public dataset through the same model as
+# layer_r.yaml with a small sampling budget, then Layer D on its posterior. It proves
+# the Layer R and Layer D code paths run end to end; its numbers are never reported.
+
+layer: layer_r
+title: "Layer R smoke profile (tiny)"
+output_dir: reports/layer_r_tiny
+data_dir: data/layer_r
+
+source:
+  file: dt_simulated_weekly.csv
+  date_column: DATE
+  revenue_column: revenue
+  spend_columns: {tv_S: "TV", ooh_S: "Out-of-home", print_S: "Print", facebook_S: "Facebook", search_S: "Search"}
+  control_column: competitor_sales_B
+  control_scale: mean
+
+channels: ["TV", "Out-of-home", "Print", "Facebook", "Search"]
+control:
+  name: "Competitor sales (index)"
+  column: competitor_sales
+
+model:
+  adstock_length: 8
+  fourier_order: 2
+  fourier_period: 52.18
+
+priors:
+  decay: {dist: beta, a: 2.0, b: 3.0}
+  half_saturation: {dist: gamma, shape: 2.0, rate: 1.0}
+  slope: {dist: lognormal, mu: 0.0, sigma: 0.5}
+  effect: {dist: halfnormal, sigma: 0.3}
+  intercept: {dist: normal, mu: 1.0, sigma: 0.5}
+  trend: {dist: normal, mu: 0.0, sigma: 0.3}
+  seasonality: {dist: normal, mu: 0.0, sigma: 0.2}
+  control: {dist: normal, mu: 0.0, sigma: 0.2}
+  noise: {dist: halfnormal, sigma: 0.1}
+
+sampling:
+  sampler: nutpie
+  chains: 2
+  tune: 100
+  draws: 100
+  target_accept: 0.9
+  seed: 42
+  max_minutes: 5
+  ladder: false           # one fit per model, as in tiny.yaml
+
+diagnostics:
+  rhat_max: 1.10
+  ess_min: 40
+  divergences_max: 10
+
+holdout:
+  train_weeks: 182
+  ridge_alphas: [0.1, 1.0, 10.0, 100.0]
+
+response_curves:
+  grid_points: 21
+  max_multiple_of_observed: 1.5
+
+decision:
+  contribution_margin: 0.40
+  bound_share: 0.50
+  scenarios: {same_total: 1.0, plus_25_percent: 1.25}
+  extra_budget_per_year: 200000
+  posterior_draws: 50
+  per_draw_optimisations: 10

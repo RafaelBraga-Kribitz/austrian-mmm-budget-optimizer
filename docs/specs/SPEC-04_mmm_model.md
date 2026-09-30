@@ -1,5 +1,7 @@
 # SPEC-04 — The MMM (raw PyMC): Math, Priors, Sampling, Diagnostics
 
+> **Not all of this spec was built.** `src/ambo/model/`, `config/priors_*.yaml`, prior elicitation and `docs/PRIOR_ELICITATION.md` were not built; the model is `src/ambo/model.py` with priors in the YAML configs. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Requirement IDs: `MD-xxx`. Code in `src/ambo/model/` (`mmm.py` model builder,
 `transforms.py` scaling, `diagnostics.py`, `posterior_io.py`). One model definition
 serves ALL layers/scenarios — only data + prior YAML differ.

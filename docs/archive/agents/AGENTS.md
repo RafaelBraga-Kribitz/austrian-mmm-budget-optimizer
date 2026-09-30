@@ -1,3 +1,5 @@
+> **Archived 2026-09-30.** This file describes the abandoned planning stack (STATUS D-29, D-31) and references paths that were never built. Live governance is ADR-000, ADR-007, ADR-008 and ADR-009 in `docs/adr/`.
+
 # AGENTS.md — Build Playbook for AI Agents (AMBO)
 
 You are an AI coding agent (Sonnet-class or better) building the Austrian MMM & Budget

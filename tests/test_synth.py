@@ -91,3 +91,16 @@ def test_independent_transforms_match_the_model_reference():
     np.testing.assert_allclose(synth.adstock_recursive(x, 0.5), adstock(x, 0.5, len(x)))
     a = np.array([0.0, 1.0, 2.0, 4.0, 8.0])
     np.testing.assert_allclose(synth.hill_curve(a, 2.0, 1.3), hill(a, 2.0, 1.3))
+
+
+def test_fourier_setup_follows_the_model_block(config):
+    other = dict(config, model=dict(config["model"], fourier_period=50.0))
+    result = synth.generate(other)
+    assert result.truth["baseline"]["fourier_period"] == 50.0
+    assert not result.data["revenue"].equals(synth.generate(config).data["revenue"])
+
+
+def test_fourier_order_must_match_the_seasonality_truth(config):
+    other = dict(config, model=dict(config["model"], fourier_order=3))
+    with pytest.raises(ValueError, match="fourier_order"):
+        synth.generate(other)

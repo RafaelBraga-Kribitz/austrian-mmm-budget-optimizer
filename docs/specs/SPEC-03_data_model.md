@@ -1,5 +1,7 @@
 # SPEC-03 — Data Model (DuckDB + dbt) (AMBO)
 
+> **This spec was not built** and will not be: there is no DuckDB and dbt warehouse. The model reads CSV directly; the BI feed is `reports/exports/`. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Between `data/synthetic|real_anon/` and modeling. Requirement IDs: `AD-xxx`.
 Deliberately the smallest warehouse of the three portfolio projects — weekly grain,
 two layers, one modeling matrix each.
