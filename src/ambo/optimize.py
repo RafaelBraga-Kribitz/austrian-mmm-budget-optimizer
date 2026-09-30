@@ -45,11 +45,14 @@ class ResponseSet:
     spend_means: np.ndarray  # (C,)
     revenue_mean: float
     current: np.ndarray  # (C,) current average weekly spend
-    carry: np.ndarray = None  # (D, C) steady-state adstock multiplier
+    carry: np.ndarray | None = None  # (D, C) steady-state adstock multiplier
 
     def __post_init__(self):
         if self.carry is None:
-            self.carry = np.zeros_like(self.decay)
+            raise ValueError(
+                "ResponseSet needs carry, the steady-state adstock multiplier per draw and "
+                "channel; without it every contribution would be zero"
+            )
 
     @property
     def n_draws(self) -> int:
@@ -212,7 +215,10 @@ def apply_decision_rule(rs: ResponseSet, x: np.ndarray, total: float, lower: np.
             held.append(rs.channels[i])
             upper[i] = rs.current[i]
         if np.all(upper <= rs.current + 1e-9) and total > rs.current.sum() + 1e-9:
-            break  # nothing may grow, the extra budget has no home under the rule
+            # nothing may grow, the extra budget has no home under the rule: every
+            # channel stays at its current spend and the extra is left unallocated
+            x = rs.current.copy()
+            break
         x = _solve(rs, min(total, upper.sum()), lower, upper, seed=seed)
     increases = [i for i in range(len(rs.channels)) if x[i] > rs.current[i] * (1 + 1e-9)]
     marg_lo = np.percentile(rs.marginal(x), LO, axis=0)
@@ -289,7 +295,7 @@ RULE_SENTENCE = (
 
 
 def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: float,
-                     extra_year: float = 0.0) -> str:
+                     extra_year: float = 0.0, multiplier: float | None = None) -> str:
     extra = plus.total - base.total
     delta = plus.recommended - rs.current
     inc = np.maximum(delta, 0)
@@ -308,7 +314,12 @@ def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: fl
             f"once euro-denominated data is used."
         )
     else:
-        title = "# If the advertiser gets 25 percent more budget, where does it go?"
+        if multiplier is None:
+            multiplier = plus.total / base.total
+        title = (
+            f"# If the advertiser gets {100 * (multiplier - 1):.0f} percent more budget, "
+            "where does it go?"
+        )
         framing = (
             f"Current weekly budget: {base.total:,.3f}. Scenario budget: {plus.total:,.3f} "
             f"(extra {extra:,.3f})."
@@ -354,14 +365,30 @@ def next_budget_note(rs: ResponseSet, base: Scenario, plus: Scenario, margin: fl
     return "\n".join(lines)
 
 
-def run_layer_d(config_path=None, out_dir=None) -> dict:
+def next_budget_filename(extra_year: float) -> str:
+    """``next_200k.md`` for 200,000 extra per year; ``next_budget.md`` without a fixed amount."""
+    if extra_year > 0:
+        return f"next_{extra_year / 1000:g}k.md"
+    return "next_budget.md"
+
+
+def run_layer_d(config_path=None, out_dir=None, layer_r_dir=None) -> dict:
+    """Optimise on the Layer R posterior.
+
+    ``layer_r_dir`` is where Layer R wrote ``posterior_draws.csv`` and ``model_data.json``
+    (default: the config's ``output_dir``, which is where ``layer_r`` writes without
+    ``--out``). The scenarios named by ``decision.base_scenario`` (default ``same_total``)
+    and ``decision.extra_scenario`` (default ``plus_25_percent``) must exist in
+    ``decision.scenarios``; the extra scenario is replaced by ``plus_extra_budget`` when
+    ``extra_budget_per_year`` is set.
+    """
     from ambo.plots import charts
     from ambo.run import load_config
 
     t_start = time.time()
     config = load_config(config_path, "layer_r.yaml")
     dec = config["decision"]
-    layer_r_dir = Path(config["output_dir"])
+    layer_r_dir = Path(layer_r_dir or config["output_dir"])
     out = Path(out_dir or "reports/layer_d")
     out.mkdir(parents=True, exist_ok=True)
     rs_full = load_response_set(layer_r_dir)
@@ -370,6 +397,14 @@ def run_layer_d(config_path=None, out_dir=None) -> dict:
     breakeven = 1.0 / margin
     seed = int(config["sampling"]["seed"])
     multipliers = {name: float(mult) for name, mult in dec["scenarios"].items()}
+    base_name = str(dec.get("base_scenario", "same_total"))
+    extra_name = str(dec.get("extra_scenario", "plus_25_percent"))
+    missing = [n for n in (base_name, extra_name) if n not in multipliers]
+    if missing:
+        raise KeyError(
+            f"decision.scenarios has no {', '.join(missing)}; name the scenarios with "
+            f"decision.base_scenario and decision.extra_scenario (found: {sorted(multipliers)})"
+        )
     extra_year = float(dec.get("extra_budget_per_year", 0) or 0)
     if extra_year > 0:
         weekly_total = float(rs.current.sum())
@@ -378,11 +413,11 @@ def run_layer_d(config_path=None, out_dir=None) -> dict:
     for name, mult in multipliers.items():
         scenarios[name] = run_scenario(
             rs, mult, float(dec["bound_share"]), breakeven,
-            n_per_draw=max(200, int(dec.get("per_draw_optimisations", 200))), seed=seed,
+            n_per_draw=int(dec.get("per_draw_optimisations", 200)), seed=seed,
             name=name,
         )
-    base = scenarios["same_total"]
-    plus = scenarios.get("plus_extra_budget", scenarios["plus_25_percent"])
+    base = scenarios[base_name]
+    plus = scenarios.get("plus_extra_budget", scenarios[extra_name])
     table = pd.concat([reallocation_table(rs, sc) for sc in scenarios.values()], ignore_index=True)
     table.to_csv(out / "reallocation_table.csv", index=False, lineterminator="\n")
     gains = pd.DataFrame({name: sc.gain for name, sc in scenarios.items()})
@@ -400,8 +435,9 @@ def run_layer_d(config_path=None, out_dir=None) -> dict:
         fh.write("\n")
     source = f"{config['title']}; python -m ambo.run layer_d"
     charts.reallocation_gain(base.gain, base.contribution_current, out / "reallocation_gain.png",
-                             source)
-    (out / "next_200k.md").write_text(
-        next_budget_note(rs, base, plus, margin, extra_year), encoding="utf-8"
+                             source, bound_share=float(dec["bound_share"]))
+    (out / next_budget_filename(extra_year)).write_text(
+        next_budget_note(rs, base, plus, margin, extra_year, multipliers[plus.name]),
+        encoding="utf-8",
     )
     return summary

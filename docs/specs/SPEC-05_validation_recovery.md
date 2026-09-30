@@ -1,5 +1,7 @@
 # SPEC-05 — Validation & Recovery Testing
 
+> **Not all of this spec was built.** `src/ambo/validate/`, `reports/recovery/RECOVERY_REPORT.md`, the sensitivity suite and golden bands were not built; evaluation is `src/ambo/evaluate.py`. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 The credibility engine (Q1). Requirement IDs: `VR-xxx`. Code in `src/ambo/validate/`.
 Layer R results are publishable ONLY after §3 passes (Charter E-2).
 

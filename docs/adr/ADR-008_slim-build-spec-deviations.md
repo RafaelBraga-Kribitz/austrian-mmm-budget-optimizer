@@ -49,3 +49,6 @@ STATUS D-29 forbids resurrecting it during polish.
 - Intake of real data is a mapping exercise onto whatever channels the drop
   contains, recorded in a later ADR (reserved GB-202 slot ADR-002), not a
   silent rename back to SPEC-01 names.
+
+Note (2026-09-30): the reserved slot ADR-002 named above will not be used. The intake
+mapping decision takes the next free ADR number (ADR-009, `docs/adr/README.md`).

@@ -44,14 +44,14 @@ def parameter_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
     fig.subplots_adjust(left=0.09, right=0.98, top=0.86, bottom=0.16, wspace=0.95)
     families = [
         ("Adstock decay", "Adstock decay\nshare of the effect carried\ninto next week",
-         "decay", 1.0, "{:.2f}"),
+         1.0, "{:.2f}"),
         ("Saturation",
          "Saturation\nhalf-saturation as a multiple of\naverage weekly spend, and slope",
-         "value", 1.0, "{:.2f}"),
+         1.0, "{:.2f}"),
         ("Coefficients", "Effect at saturation and baseline\nEUR thousand per week",
-         "eur_k", 1000.0, "{:.1f}"),
+         1000.0, "{:.1f}"),
     ]
-    for ax, (family, heading, _kind, scale, fmt) in zip(axes, families, strict=True):
+    for ax, (family, heading, scale, fmt) in zip(axes, families, strict=True):
         sub = table[table["family"] == family].reset_index(drop=True)
         y = np.arange(len(sub))
         _dot_interval(ax, y, sub["median"] / scale, sub["lo"] / scale, sub["hi"] / scale,
@@ -181,7 +181,8 @@ def channel_contributions(
     return theme.save(fig, path)
 
 
-def response_curves(curves: pd.DataFrame, path: Path, source: str) -> Path:
+def response_curves(curves: pd.DataFrame, path: Path, source: str,
+                    max_multiple_of_observed: float = 1.5) -> Path:
     """Spend versus incremental weekly revenue per channel, with 90% band and current spend."""
     channels = list(dict.fromkeys(curves["channel"]))
     fig, axes = theme.new_figure(height_px=700, ncols=len(channels), sharey=False)
@@ -209,13 +210,14 @@ def response_curves(curves: pd.DataFrame, path: Path, source: str) -> Path:
     theme.footer(
         fig, source,
         note="Line: posterior median response at a constant weekly spend. Band: 90% interval. "
-             "Curves stop at 1.5 times the largest observed weekly spend.",
+             f"Curves stop at {max_multiple_of_observed:g} times the largest observed weekly "
+             "spend.",
     )
     return theme.save(fig, path)
 
 
 def reallocation_gain(gain: np.ndarray, contribution_current: np.ndarray, path: Path,
-                      source: str) -> Path:
+                      source: str, bound_share: float = 0.5) -> Path:
     """Distribution of the weekly gain from reallocation, 10th percentile marked."""
     fig, ax = theme.new_figure(height_px=700)
     fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.22)
@@ -241,7 +243,8 @@ def reallocation_gain(gain: np.ndarray, contribution_current: np.ndarray, path: 
     theme.footer(
         fig, source,
         note=f"Probability the reallocation loses money: {100 * np.mean(gain < 0):.1f}%. "
-             "Constant-spend steady state; channels bounded to plus or minus 50% of current spend.",
+             "Constant-spend steady state; channels bounded to plus or minus "
+             f"{100 * bound_share:.0f}% of current spend.",
     )
     return theme.save(fig, path)
 

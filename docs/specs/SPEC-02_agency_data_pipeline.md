@@ -1,5 +1,7 @@
 # SPEC-02 — Agency Data Pipeline (Layer R): Permission, Anonymization, Intake
 
+> **This spec was not built.** No agency intake exists (`src/ambo/intake/`, `data/real_anon/`, `scripts/leak_scan.py`). The permission rule and anonymisation recipe stand as the protocol for a client drop. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Turns private agency exports into publishable REAL-ANON weekly series. Requirement
 IDs: `AG-xxx`. Code in `src/ambo/intake/`. This spec is also a published document —
 the anonymization protocol being public (minus secrets) is part of the portfolio's

@@ -66,6 +66,8 @@ decision:
   contribution_margin: 0.40
   bound_share: 0.50             # each channel may move at most 50 percent of its current spend
   scenarios: {same_total: 1.0, plus_25_percent: 1.25}
+  # base_scenario / extra_scenario name the two scenarios above that the artifacts
+  # compare; they default to same_total and plus_25_percent
   extra_budget_per_year: 200000 # the "next 200k" question, spread over 52 weeks
   posterior_draws: 500
   per_draw_optimisations: 200

@@ -231,13 +231,11 @@ def response_curve_recovery(
 # ---------------------------------------------------------------------------
 
 
-def holdout(
-    data: pd.DataFrame, config: dict
-) -> tuple[pd.DataFrame, pd.DataFrame, dict, object]:
+def holdout(data: pd.DataFrame, config: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """Fit on the first ``train_weeks`` rows, forecast the rest with actual spend.
 
-    Returns the metrics table (one row per model), the week-level predictions,
-    the fit record and the holdout InferenceData for diagnostics.
+    Returns the metrics table (one row per model), the week-level predictions and
+    the fit record, whose ``diagnostics`` key holds the holdout fit's gate results.
     """
     train_weeks = int(config["holdout"]["train_weeks"])
     md_full = model.prepare(data, config, train_weeks=train_weeks)
@@ -277,4 +275,4 @@ def holdout(
         preds[f"{key}_yhat"] = f.yhat
         preds[f"{key}_lo"] = f.lo
         preds[f"{key}_hi"] = f.hi
-    return metrics, preds, info, idata
+    return metrics, preds, info

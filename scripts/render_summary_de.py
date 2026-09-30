@@ -3,7 +3,10 @@
 Only runs when Layer D has produced reports/layer_d/decision.json; every number is
 read from the artifacts. Values are recorded in reports/summary_de_values.json.
 
-    uv run python scripts/render_summary_de.py --date 2026-09-15
+    uv run python scripts/render_summary_de.py [--date 2026-09-16]
+
+Without --date the "Stand" is the last-validated date of the README render
+(reports/readme_values.json), so the two documents always carry the same date.
 """
 
 from __future__ import annotations
@@ -35,14 +38,19 @@ def num(x: float, digits: int = 2) -> str:
     return f"{float(x):.{digits}f}".replace(".", ",")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=date.today().isoformat())
-    args = parser.parse_args()
+def readme_date() -> str:
+    path = REPORTS / "readme_values.json"
+    if path.exists():
+        with open(path, encoding="utf-8") as fh:
+            stamp = json.load(fh).get("status_date")
+        if stamp:
+            return stamp
+    return date.today().isoformat()
+
+
+def render(run_date: str) -> str:
+    VALUES.clear()
     decision_path = REPORTS / "layer_d" / "decision.json"
-    if not decision_path.exists():
-        print("Layer D has not run; docs/summary_de.md is left for a later stage")
-        return 0
     with open(decision_path, encoding="utf-8") as fh:
         dec = json.load(fh)
     with open(REPORTS / "layer_p" / "run_info.json", encoding="utf-8") as fh:
@@ -52,7 +60,7 @@ def main() -> int:
     channels = pd.read_csv(REPORTS / "layer_r" / "channel_contributions.csv")
     table = pd.read_csv(REPORTS / "layer_d" / "reallocation_table.csv")
     same = dec["same_total"]
-    plus = dec["plus_25_percent"]
+    plus = dec.get("plus_25_percent")
 
     covered = v("p_covered", p_info["parameters_covered"])
     total = v("p_total", p_info["parameters_total"])
@@ -74,7 +82,10 @@ def main() -> int:
     p_neg = v("d_p_neg", pct(same["probability_gain_negative"]))
     breakeven = v("d_breakeven", num(dec["breakeven_roas"]))
     margin = v("d_margin", pct(dec["contribution_margin"], 0))
-    p25 = v("d_p25_gain", num(plus["gain_pct_of_current_contribution_median"], 1))
+    plus_sentence = ""
+    if plus:
+        p25 = v("d_p25_gain", num(plus["gain_pct_of_current_contribution_median"], 1))
+        plus_sentence = f" Mit 25 Prozent mehr Budget liegt der Median-Gewinn bei {p25} Prozent."
     extra = dec.get("plus_extra_budget")
     extra_sentence = ""
     if extra:
@@ -88,7 +99,7 @@ def main() -> int:
         "wird empfohlen" if same["recommend"]
         else "wird nach der Entscheidungsregel nicht empfohlen"
     )
-    when = v("date", args.date)
+    when = v("date", run_date)
 
     text = f"""# Zusammenfassung für Entscheider
 
@@ -117,7 +128,7 @@ vorgesehen. Es wurden keine österreichischen Kundendaten verwendet.
 **Entscheidung (Layer D).** Bei gleichem Gesamtbudget: {"; ".join(moves)}. Erwarteter
 Gewinn im Median {gain_med} Prozent des heutigen Medienbeitrags, 10. Perzentil
 {gain_p10} Prozent, Wahrscheinlichkeit eines Verlusts {p_neg} Prozent. Die Umschichtung
-{verdict}. Mit 25 Prozent mehr Budget liegt der Median-Gewinn bei {p25} Prozent.{extra_sentence}
+{verdict}.{plus_sentence}{extra_sentence}
 
 **Regel.** Budget wird nur in einen Kanal verschoben, solange die untere Grenze des
 90-Prozent-Intervalls seines Grenz-ROAS über dem Breakeven-ROAS von {breakeven} liegt
@@ -128,6 +139,18 @@ und nur, wenn das 10. Perzentil des Umschichtungsgewinns positiv ist.
 nur unscharf; das Modell setzt eine feste Wirkungsform voraus; Kalibrierung gegen
 Lift-Tests, Geo-Daten und Wettbewerberausgaben stehen für Produktionsdaten aus.
 """
+    return text
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", default=None,
+                        help="Stand date (default: the README's last-validated date)")
+    args = parser.parse_args()
+    if not (REPORTS / "layer_d" / "decision.json").exists():
+        print("Layer D has not run; docs/summary_de.md is left for a later stage")
+        return 0
+    text = render(args.date or readme_date())
     (ROOT / "docs" / "summary_de.md").write_text(text, encoding="utf-8")
     with open(REPORTS / "summary_de_values.json", "w", encoding="utf-8") as fh:
         json.dump(VALUES, fh, indent=2, sort_keys=True, ensure_ascii=False)

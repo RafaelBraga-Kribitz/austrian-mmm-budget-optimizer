@@ -1,6 +1,6 @@
 # Zusammenfassung für Entscheider
 
-Stand: 2026-09-15. Alle Zahlen stammen aus den Artefakten unter reports/ und werden von
+Stand: 2026-09-16. Alle Zahlen stammen aus den Artefakten unter reports/ und werden von
 scripts/render_summary_de.py eingesetzt.
 
 **Frage.** Welche Kanäle haben für einen Werbetreibenden tatsächlich zusätzlichen Umsatz

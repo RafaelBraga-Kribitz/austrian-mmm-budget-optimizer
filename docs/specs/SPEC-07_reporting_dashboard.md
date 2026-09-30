@@ -1,5 +1,7 @@
 # SPEC-07 — Reporting, Dashboard, README (AMBO)
 
+> **Not all of this spec was built.** Executive charts, `reports/NUMERIC_SSOT.md`, `reports/EXEC_SUMMARY.md` and `dashboards/` were not built as specified. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+
 Requirement IDs: `RB-xxx`.
 
 ---

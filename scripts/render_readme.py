@@ -5,7 +5,11 @@ here; nothing is typed by hand. The values inserted are recorded in
 reports/readme_values.json so tests/test_readme_numbers.py can check that the README
 contains no number the reports do not.
 
-    uv run python scripts/render_readme.py [--date 2026-09-15]
+    uv run python scripts/render_readme.py [--date 2026-09-16]
+
+The template holds every hand-written section; only the {{placeholders}} are filled
+from reports/. Pass --date when the pipeline has been rerun; without it the date of
+the committed render is kept.
 """
 
 from __future__ import annotations
@@ -16,6 +20,8 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
+
+from ambo.optimize import next_budget_filename
 
 ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "reports"
@@ -139,32 +145,47 @@ def headline(p: dict, r: dict, dd: dict) -> tuple[str, str, str]:
     return chart, alt, "\n\n".join(lines)
 
 
-def method_bullets(p: dict) -> str:
-    diag = p["diag"] if p else {}
+def _fit_phrase(layer: str, diag: dict, key: str) -> str:
+    """Target acceptance and draws of the reported fit, and how the ladder got there."""
+    fit = diag.get("fit", {})
+    ta = v(f"m_ta_{key}", fit.get("target_accept", ""))
+    draws = v(f"m_draws_{key}", fit.get("draws", ""))
+    attempts = diag.get("attempts", [])
+    if len(attempts) > 1:
+        n = v(f"m_attempts_{key}", len(attempts))
+        return f"{layer} at target acceptance {ta} with {draws} draws per chain (attempt {n})"
+    return f"{layer} at target acceptance {ta} with {draws} draws per chain (first attempt)"
+
+
+def method_bullets(p: dict, r: dict) -> str:
+    diag = p["diag"] if p else (r["diag"] if r else {})
     fit = diag.get("fit", {})
     thresholds = diag.get("thresholds", {})
-    weeks = v("m_weeks", p["info"]["weeks"]) if p else ""
-    train = v("m_train", int(p["metrics"]["train_weeks"].iloc[0])) if p else ""
     sampler = v("m_sampler", fit.get("sampler", ""))
     chains = v("m_chains", fit.get("chains", ""))
     tune = v("m_tune", fit.get("tune", ""))
-    draws = v("m_draws", fit.get("draws", ""))
     attempts = diag.get("attempts", [])
-    first_ta = v("m_ta_start", attempts[0]["target_accept"]) if attempts else ""
-    ta = v("m_ta", fit.get("target_accept", ""))
-    ladder = (
-        f"target acceptance {first_ta}, raised to {ta} by the recorded ladder after divergences"
-        if attempts and len(attempts) > 1 else f"target acceptance {ta}"
-    )
+    first_ta = v("m_ta_start", attempts[0]["target_accept"] if attempts else
+                 fit.get("target_accept", ""))
+    first_draws = v("m_draws_start", attempts[0]["draws"] if attempts else fit.get("draws", ""))
+    fits = []
+    if p:
+        fits.append(_fit_phrase("Layer P", p["diag"], "p"))
+    if r:
+        fits.append(_fit_phrase("Layer R", r["diag"], "r"))
     rhat = v("m_rhat", thresholds.get("rhat_max", ""))
     ess = v("m_ess", int(thresholds.get("ess_min", 0)))
+    splits = []
+    if p:
+        train = v("m_train_p", int(p["metrics"]["train_weeks"].iloc[0]))
+        weeks = v("m_weeks_p", p["info"]["weeks"])
+        splits.append(f"the first {train} of {weeks} weeks on Layer P")
+    if r:
+        train = v("m_train_r", int(r["metrics"]["train_weeks"].iloc[0]))
+        weeks = v("m_weeks_r", r["info"]["weeks"])
+        splits.append(f"the first {train} of {weeks} weeks on Layer R")
     return "\n".join(
         [
-            f"- Data: weekly spend per channel and revenue. Layer P is a synthetic advertiser "
-            f"with {weeks} weeks and five channels (TV, Radio, Print, Paid Search, Paid Social) "
-            f"whose true parameters are written to data/synthetic/truth.json; Layer R is Robyn's "
-            f"simulated weekly dataset with five named channels in money units (see "
-            f"data/README.md). Public demo data; a real-data swap-in is planned.",
             "- Adstock: geometric carry-over per channel, so this week's spend keeps working in "
             "the following weeks with a decay rate the model estimates.",
             "- Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation "
@@ -174,15 +195,48 @@ def method_bullets(p: dict) -> str:
             "- Priors: weakly informative and identical across channels, on scaled data, so that "
             "the estimates come from the data and not from a prior that knows the answer. Each "
             "prior and its reasoning is in the model docstring.",
-            f"- Sampler: NUTS ({sampler}), {chains} chains, {tune} tuning and {draws} draws per "
-            f"chain, {ladder}.",
+            f"- Sampler: NUTS ({sampler}), {chains} chains, {tune} tuning draws, starting at "
+            f"target acceptance {first_ta} with {first_draws} draws per chain. When a gate fails, "
+            f"a recorded ladder raises the target acceptance and then the draws; the reported "
+            f"fits ran {' and '.join(fits)}.",
             f"- Diagnostics: R-hat below {rhat}, effective sample size above {ess}, zero "
             f"divergences; written to diagnostics.json next to every fit.",
-            f"- Holdout protocol: fit on the first {train} weeks, forecast the rest with the "
+            f"- Holdout protocol: fit on {' and '.join(splits)}, forecast the rest with the "
             f"actual spend, and report MAPE and 90 percent interval coverage against a "
             f"seasonal-naive and a ridge-regression baseline.",
         ]
     )
+
+
+def data_table(p: dict, r: dict, dd: dict) -> str:
+    rows = ["| Layer | Source | Grain and window | Tag |", "|---|---|---|---|"]
+    if p:
+        weeks = v("data_weeks_p", p["info"]["weeks"])
+        rows.append(
+            "| P | Generated advertiser; true parameters in `data/synthetic/truth.json` | "
+            f"Weekly, {weeks} weeks, five channels (TV, Radio, Print, Paid Search, Paid Social) "
+            "| `SIMULATED` |"
+        )
+    if r:
+        weeks = v("data_weeks_r", r["info"]["weeks"])
+        rows.append(
+            "| R | Robyn simulated weekly dataset (MIT, Meta Platforms); columns and licence in "
+            f"`data/README.md` | Weekly, {weeks} weeks, five named channels in the file's money "
+            "units | `SIMULATED` |"
+        )
+    rows.append(
+        "| Control, Layer P | Austrian public-holiday week indicator | Weekly | `VERIFIED` |"
+    )
+    if dd:
+        dec = dd["decision"]
+        margin = v("data_margin", pct(dec["contribution_margin"], 0))
+        breakeven = v("data_breakeven", num(dec["breakeven_roas"]))
+        rows.append(
+            f"| Assumption | Contribution margin {margin} percent, breakeven ROAS {breakeven}, a "
+            "placeholder in the Layer R config until a client margin is supplied | Decision rule "
+            "| `ASSUMPTION` |"
+        )
+    return "\n".join(rows)
 
 
 def proof_section(p: dict) -> str:
@@ -379,7 +433,8 @@ def decision_section(dd: dict, run_date: date) -> str:
             f"With {extra} more per year, spread over 52 weeks, media contribution rises by a "
             f"median {e_gain} percent (10th percentile {e_p10} percent); the rule says "
             f"{e_verdict}. Where the extra budget goes, channel by channel, and how likely that "
-            f"call is wrong, is in reports/layer_d/next_200k.md.",
+            f"call is wrong, is in reports/layer_d/"
+            f"{next_budget_filename(dec['extra_budget_per_year'])}.",
         ]
     text += [
         "",
@@ -428,11 +483,12 @@ def status_line(p: dict, r: dict, dd: dict, run_date: date) -> str:
     when = v("status_date", run_date.isoformat())
     return (
         f"Built layers: {', '.join(layers) if layers else 'none yet'}. Everything in this README "
-        f"regenerates from the three commands above. Date: {when}."
+        f"regenerates from the three commands above. Last validated: {when}."
     )
 
 
 def render(run_date: date) -> str:
+    VALUES.clear()
     p, r, dd = layer_p_values(), layer_r_values(), layer_d_values()
     chart, alt, lines = headline(p, r, dd)
     template = (ROOT / "scripts" / "readme_template.md").read_text(encoding="utf-8")
@@ -440,7 +496,8 @@ def render(run_date: date) -> str:
         "headline_chart": chart,
         "headline_alt": alt,
         "headline_lines": lines,
-        "method_bullets": method_bullets(p),
+        "method_bullets": method_bullets(p, r),
+        "data_table": data_table(p, r, dd),
         "proof_section": proof_section(p),
         "holdout_section": holdout_section(p, r),
         "decision_section": decision_section(dd, run_date),
@@ -450,14 +507,27 @@ def render(run_date: date) -> str:
     text = template
     for key, value in fills.items():
         text = text.replace("{{" + key + "}}", value)
+    if "{{" in text:
+        raise ValueError("readme_template.md has a placeholder the renderer does not fill")
     return text
+
+
+def last_date() -> date:
+    """The date of the committed render, so a rerun without --date reproduces it."""
+    values = REPORTS / "readme_values.json"
+    if values.exists():
+        stamp = read_json(values).get("status_date")
+        if stamp:
+            return date.fromisoformat(stamp)
+    return date.today()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=date.today().isoformat())
+    parser.add_argument("--date", default=None,
+                        help="last-validated date (default: the date of the committed render)")
     args = parser.parse_args()
-    run_date = date.fromisoformat(args.date)
+    run_date = date.fromisoformat(args.date) if args.date else last_date()
     text = render(run_date)
     (ROOT / "README.md").write_text(text, encoding="utf-8")
     REPORTS.mkdir(exist_ok=True)

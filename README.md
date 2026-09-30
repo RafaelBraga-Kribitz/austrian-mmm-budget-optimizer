@@ -60,7 +60,7 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 |---|---|
 | Recruiter | [Decision](#decision) and the hero chart |
 | Hiring manager | [Decision](#decision), [Method](#method), and [Validation](#validation) |
-| Technical reviewer | Architecture, Reproduce, and `src/ambo/` |
+| Technical reviewer | [Architecture](#architecture), [Reproduce](#reproduce), and `src/ambo/` |
 | Auditor | [Data](#data), [Validation](#validation), and [Limitations](#limitations) |
 
 ## Results
@@ -91,9 +91,9 @@ The MMM loses on point error to the ridge regression baseline on this data. That
 - Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation point and a slope, so returns diminish as spend grows.
 - Seasonality and controls: a linear trend, two yearly Fourier pairs, and one control (a public-holiday week indicator on Layer P, competitor sales on Layer R).
 - Priors: weakly informative and identical across channels, on scaled data, so that the estimates come from the data and not from a prior that knows the answer. Each prior and its reasoning is in the model docstring.
-- Sampler: NUTS (nutpie), 2 chains, 1000 tuning and 1000 draws per chain, target acceptance 0.9, raised to 0.99 by the recorded ladder after divergences.
+- Sampler: NUTS (nutpie), 2 chains, 1000 tuning draws, starting at target acceptance 0.9 with 1000 draws per chain. When a gate fails, a recorded ladder raises the target acceptance and then the draws; the reported fits ran Layer P at target acceptance 0.99 with 1000 draws per chain (attempt 3) and Layer R at target acceptance 0.95 with 2000 draws per chain (attempt 3).
 - Diagnostics: R-hat below 1.01, effective sample size above 400, zero divergences; written to diagnostics.json next to every fit.
-- Holdout protocol: fit on the first 130 weeks, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
+- Holdout protocol: fit on the first 130 of 156 weeks on Layer P and the first 182 of 208 weeks on Layer R, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
 
 ## Data
 
@@ -102,9 +102,9 @@ Weekly spend per channel and revenue. No Austrian client data was used.
 | Layer | Source | Grain and window | Tag |
 |---|---|---|---|
 | P | Generated advertiser; true parameters in `data/synthetic/truth.json` | Weekly, 156 weeks, five channels (TV, Radio, Print, Paid Search, Paid Social) | `SIMULATED` |
-| R | Robyn simulated weekly dataset (MIT, Meta Platforms); columns and licence in `data/README.md` | Weekly, five named channels in the file's money units | `SIMULATED` |
+| R | Robyn simulated weekly dataset (MIT, Meta Platforms); columns and licence in `data/README.md` | Weekly, 208 weeks, five named channels in the file's money units | `SIMULATED` |
 | Control, Layer P | Austrian public-holiday week indicator | Weekly | `VERIFIED` |
-| Assumption | Contribution margin 40 percent, breakeven ROAS 2.50, in the Layer R config | Decision rule | `CALIBRATED` |
+| Assumption | Contribution margin 40 percent, breakeven ROAS 2.50, a placeholder in the Layer R config until a client margin is supplied | Decision rule | `ASSUMPTION` |
 
 Layer R amounts are not euros. Shares, ROAS ratios and the breakeven test are the quantities that travel. A real-data swap-in is planned.
 
@@ -141,9 +141,10 @@ uv sync
 uv run pytest -m "not slow"
 uv run python -m ambo.run layer_p
 uv run python -m ambo.run layer_r && uv run python -m ambo.run layer_d
+uv run python scripts/render_readme.py
 ```
 
-Numbers in this README are read from `reports/` by `scripts/render_readme.py`. The three layer commands regenerate those artifacts.
+This README is rendered from `scripts/readme_template.md` by `scripts/render_readme.py`, which reads every number from `reports/`. The three layer commands regenerate those artifacts; `tests/test_readme_numbers.py` fails when the committed README, memo or German summary no longer match what the renderers produce.
 
 ## Limitations
 
@@ -179,8 +180,9 @@ The full list, with what each limit means for a client engagement, is in
 | `src/ambo/` | Model, sampler, optimiser, charts, configs |
 | `data/` | Layer P synthetic advertiser and Layer R public demo file |
 | `reports/` | Layer P, R and D artifacts that the README is rendered from |
+| `scripts/` | README, memo and German summary renderers, notebook builder, dashboard export |
 | `tests/` | Recovery, transforms, optimiser, and the README-numbers gate |
-| `docs/` | Charter, specs, ADRs, dashboard handoff |
+| `docs/` | Specs, ADRs, dashboard handoff, build log |
 | `notebooks/` | Walkthrough notebook |
 
 ## Status

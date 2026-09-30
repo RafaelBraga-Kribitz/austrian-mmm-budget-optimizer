@@ -14,7 +14,9 @@ The adstock and Hill functions here are written independently of ``ambo.transfor
 evidence, not a tautology.
 
 Every parameter comes from the ``synthetic`` block of the YAML config and is written
-to ``truth.json`` next to the data. The generator is seeded and deterministic.
+to ``truth.json`` next to the data. The seasonal period and the number of Fourier
+pairs come from the ``model`` block, so the generator and the model share them. The
+generator is seeded and deterministic.
 """
 
 from __future__ import annotations
@@ -83,11 +85,11 @@ def fourier_terms(weeks: int, order: int, period: float = WEEKS_PER_YEAR) -> np.
     return np.column_stack(cols)
 
 
-def _seasonal_index(weeks: int) -> np.ndarray:
+def _seasonal_index(weeks: int, period: float = WEEKS_PER_YEAR) -> np.ndarray:
     """Demand index in [0, 1] peaking in the Advent weeks (first Fourier pair, phase shifted)."""
     t = np.arange(1, weeks + 1, dtype=float)
     # peak near ISO week 49 when the window starts in the first week of January
-    return 0.5 * (1.0 + np.cos(2.0 * np.pi * (t - 49.0) / WEEKS_PER_YEAR))
+    return 0.5 * (1.0 + np.cos(2.0 * np.pi * (t - 49.0) / period))
 
 
 # ---------------------------------------------------------------------------
@@ -96,11 +98,12 @@ def _seasonal_index(weeks: int) -> np.ndarray:
 
 
 def _burst_schedule(
-    weeks: int, burst_weeks: int, bursts_per_year: int, season: np.ndarray, rng: np.random.Generator
+    weeks: int, burst_weeks: int, bursts_per_year: int, season: np.ndarray,
+    rng: np.random.Generator, period: float = WEEKS_PER_YEAR,
 ) -> np.ndarray:
     """0/1 mask of flighted campaign weeks: bursts favour high-season weeks."""
     mask = np.zeros(weeks, dtype=float)
-    n_bursts = int(round(bursts_per_year * weeks / WEEKS_PER_YEAR))
+    n_bursts = int(round(bursts_per_year * weeks / period))
     candidates = np.arange(0, weeks - burst_weeks + 1)
     # sample burst starts without overlap, weighted toward the demand season
     weights = 0.3 + season[candidates]
@@ -120,15 +123,17 @@ def _burst_schedule(
     return mask
 
 
-def generate_spend(channel_cfg: dict, weeks: int, rng: np.random.Generator) -> np.ndarray:
+def generate_spend(
+    channel_cfg: dict, weeks: int, rng: np.random.Generator, period: float = WEEKS_PER_YEAR
+) -> np.ndarray:
     """Weekly spend for one channel in whole euros."""
     spec = channel_cfg["spend"]
-    season = _seasonal_index(weeks)
+    season = _seasonal_index(weeks, period)
     level = float(spec["level"]) * (1.0 + float(spec.get("seasonal", 0.0)) * season)
     draw = rng.normal(level, float(spec["sd"]), size=weeks)
     if spec["pattern"] == "flighted":
         mask = _burst_schedule(
-            weeks, int(spec["burst_weeks"]), int(spec["bursts_per_year"]), season, rng
+            weeks, int(spec["burst_weeks"]), int(spec["bursts_per_year"]), season, rng, period
         )
         draw = draw * mask
     elif spec["pattern"] == "always_on":
@@ -156,10 +161,11 @@ def generate(config: dict) -> SyntheticResult:
     rng = np.random.default_rng(int(synth["seed"]))
     starts = week_starts(synth["start"], weeks)
     holiday = holiday_flag(starts)
+    period, order = _fourier_setup(config)
 
     base_cfg = synth["baseline"]
     t_over_t = np.arange(1, weeks + 1, dtype=float) / weeks
-    fourier = fourier_terms(weeks, len(base_cfg["seasonality"]) // 2)
+    fourier = fourier_terms(weeks, order, period)
     seasonality = fourier @ np.asarray(base_cfg["seasonality"], dtype=float)
     baseline = (
         float(base_cfg["intercept"])
@@ -172,7 +178,7 @@ def generate(config: dict) -> SyntheticResult:
     contrib: dict[str, np.ndarray] = {}
     for name in channels:
         ch = synth["channels"][name]
-        spend[name] = generate_spend(ch, weeks, rng)
+        spend[name] = generate_spend(ch, weeks, rng, period)
         a = adstock_recursive(spend[name], float(ch["decay"]))
         contrib[name] = float(ch["effect"]) * hill_curve(
             a, float(ch["half_saturation"]), float(ch["slope"])
@@ -216,6 +222,20 @@ def generate(config: dict) -> SyntheticResult:
 
     truth = _truth_record(config, spend, contrib, platform, revenue, baseline)
     return SyntheticResult(data=data, truth=truth, contributions=contributions)
+
+
+def _fourier_setup(config: dict) -> tuple[float, int]:
+    """Seasonal period and Fourier order from the ``model`` block, checked against the truth."""
+    model_cfg = config.get("model", {})
+    period = float(model_cfg.get("fourier_period", WEEKS_PER_YEAR))
+    seasonality = config["synthetic"]["baseline"]["seasonality"]
+    order = int(model_cfg.get("fourier_order", len(seasonality) // 2))
+    if len(seasonality) != 2 * order:
+        raise ValueError(
+            f"synthetic.baseline.seasonality has {len(seasonality)} values; model.fourier_order "
+            f"{order} needs {2 * order} (sin1, cos1, sin2, cos2, ...)"
+        )
+    return period, order
 
 
 def _truth_record(
@@ -267,7 +287,7 @@ def _truth_record(
             "seasonality": [float(v) for v in synth["baseline"]["seasonality"]],
             "control": float(synth["baseline"]["control"]),
             "noise_sigma": float(synth["baseline"]["noise_sigma"]),
-            "fourier_period": WEEKS_PER_YEAR,
+            "fourier_period": _fourier_setup(config)[0],
         },
         "channel_truth": per_channel,
         "totals": {

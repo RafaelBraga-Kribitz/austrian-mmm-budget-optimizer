@@ -1,9 +1,13 @@
 """Command-line entry point.
 
     python -m ambo.run layer_p [--config path] [--out dir] [--data dir]
+    python -m ambo.run layer_r [--config path] [--out dir] [--data dir]
+    python -m ambo.run layer_d [--config path] [--out dir] [--data dir]
 
 Layer P regenerates the synthetic data, fits the model, writes diagnostics, the
 recovery tables and charts, and the holdout comparison, all deterministically.
+Layer R reads the public dataset from ``--data``. Layer D reads the Layer R
+posterior from ``--data`` (the directory Layer R wrote with ``--out``).
 """
 
 from __future__ import annotations
@@ -21,7 +25,7 @@ import pandas as pd
 import yaml
 
 from ambo import __version__, diagnostics, evaluate, model, synth
-from ambo.model import fit_with_ladder  # noqa: F401  (re-exported for callers)
+from ambo.model import fit_with_ladder
 from ambo.plots import charts
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -77,7 +81,7 @@ def run_layer_p(config_path=None, out_dir=None, data_dir=None) -> dict:
     charts.response_curve_recovery(curves, out / "response_curve_recovery.png", source)
 
     # 4. holdout against the two baselines
-    metrics, preds, hold_info, hold_idata = evaluate.holdout(data, config)
+    metrics, preds, hold_info = evaluate.holdout(data, config)
     metrics.to_csv(out / "holdout_metrics.csv", index=False, lineterminator="\n")
     preds.to_csv(out / "holdout_predictions.csv", index=False, lineterminator="\n")
     charts.holdout(preds, metrics, out / "holdout.png", source)
@@ -138,7 +142,11 @@ def main(argv=None) -> int:
     parser.add_argument("layer", choices=["layer_p", "layer_r", "layer_d"])
     parser.add_argument("--config", default=None, help="YAML config path (default: packaged)")
     parser.add_argument("--out", default=None, help="output directory (default: from config)")
-    parser.add_argument("--data", default=None, help="data directory (default: from config)")
+    parser.add_argument(
+        "--data", default=None,
+        help="input directory (default: from config): where layer_p writes the synthetic "
+             "data, where layer_r reads the dataset, where layer_d reads the Layer R output",
+    )
     args = parser.parse_args(argv)
     if args.layer == "layer_p":
         numbers = run_layer_p(args.config, args.out, args.data)
@@ -149,7 +157,7 @@ def main(argv=None) -> int:
     else:
         from ambo.optimize import run_layer_d
 
-        numbers = run_layer_d(args.config, args.out)
+        numbers = run_layer_d(args.config, args.out, args.data)
     print(json.dumps(numbers, indent=2, default=str))
     return 0
 

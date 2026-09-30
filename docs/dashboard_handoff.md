@@ -24,6 +24,11 @@ the dataset's units until real client data replaces the public demo file.
   scenario's total.
 - `contributions_weekly.csv` is long: one row per week and channel, plus a `Baseline`
   row per week without an interval.
+- `proof_attribution_gap.csv` (a copy of `reports/layer_p/attribution_gap.csv`) leaves
+  `platform_over_true_ratio` and `platform_over_true_pct` empty for TV, Radio and Print
+  by design. Offline channels receive no platform credit (`platform_reported_total` is
+  0), so the ratio is undefined. Show these cells as blank or "no platform report",
+  not as zero, and do not filter the rows out: their `gap_pp` is the under-credit.
 - `proof_sampler_gates.csv` records the last attempt of the recorded ladder per fit;
   `attempts` says how many fits it took to pass.
 
@@ -43,5 +48,5 @@ the dataset's units until real client data replaces the public demo file.
    artifacts under `reports/`).
 2. `uv run python scripts/export_dashboard.py`.
 3. Point the BI tool at `reports/exports/` and refresh.
-4. Screenshots go to `docs/assets/dashboard_p1.png` to `dashboard_p4.png`; the `.pbix`
-   file, if committed, goes to `docs/assets/` as well.
+4. Screenshots and the `.pbix` file are not committed yet. The dashboard itself is
+   still to be built (STATUS, open items).
