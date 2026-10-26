@@ -110,7 +110,7 @@ The MMM loses on point error to the ridge regression baseline on this data. That
 - Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation point and a slope, so returns diminish as spend grows.
 - Seasonality and controls: a linear trend, two yearly Fourier pairs, and one control (a public-holiday week indicator on Layer P, competitor sales on Layer R).
 - Priors: weakly informative and identical across channels, on scaled data, so that the estimates come from the data and not from a prior that knows the answer. Each prior and its reasoning is in the model docstring.
-- Sampler: the No-U-Turn Sampler, NUTS (nutpie), 2 chains, 1000 tuning draws, starting at target acceptance 0.9 with 1000 draws per chain. When a gate fails, a recorded ladder raises the target acceptance and then the draws; the reported fits ran Layer P at target acceptance 0.99 with 1000 draws per chain (attempt 3) and Layer R at target acceptance 0.95 with 2000 draws per chain (attempt 3).
+- Sampler: the No-U-Turn Sampler, NUTS (nutpie), 2 chains, 1000 tuning draws, starting at target acceptance 0.9 with 1000 draws per chain. When a gate fails, a recorded ladder raises the target acceptance and then the draws; the reported fits ran Layer P at target acceptance 0.95 with 2000 draws per chain (attempt 3) and Layer R at target acceptance 0.95 with 2000 draws per chain (attempt 3).
 - Diagnostics: R-hat below 1.01, effective sample size above 400, zero divergences; written to diagnostics.json next to every fit.
 - Holdout protocol: fit on the first 130 of 156 weeks on Layer P and the first 182 of 208 weeks on Layer R, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
 
@@ -131,7 +131,7 @@ Layer R amounts are not euros. Shares, ROAS ratios and the breakeven test are th
 
 ![Response curve recovery on synthetic data: true curves against posterior bands](reports/layer_p/response_curve_recovery.png)
 
-Before trusting the model on any advertiser's data, it had to recover a truth it was handed. On the synthetic advertiser the estimated response curves cover the true curves on 91 percent of the grid points inside the observed spend range (worst channel, TV: 56 percent), with a mean error of at most 13.6 percent of the true curve's height. 26 of 28 individual parameters fall inside their 90 percent intervals.
+Before trusting the model on any advertiser's data, it had to recover a truth it was handed. On the synthetic advertiser the estimated response curves cover the true curves on 91 percent of the grid points inside the observed spend range (worst channel, TV: 56 percent), with a mean error of at most 13.7 percent of the true curve's height. 26 of 28 individual parameters fall inside their 90 percent intervals.
 
 The misses follow a known trade-off, not a bug: 5 of 5 effect sizes and 5 of 5 half-saturation points have medians above the truth, because a curve that rises higher but saturates later fits the same observed weeks. Recovery is therefore judged on curves and shares, which are what a budget decision uses, not on point parameters. Revenue shares are covered for 4 of 5 channels; the exception sits just outside its interval: TV (the largest channel by spend): true share 9.5 percent against an interval of 9.7 to 11.4.
 
