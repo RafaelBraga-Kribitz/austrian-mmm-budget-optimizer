@@ -135,9 +135,9 @@ Before trusting the model on any advertiser's data, it had to recover a truth it
 
 The misses follow a known trade-off, not a bug: 5 of 5 effect sizes and 5 of 5 half-saturation points have medians above the truth, because a curve that rises higher but saturates later fits the same observed weeks. Recovery is therefore judged on curves and shares, which are what a budget decision uses, not on point parameters. Revenue shares are covered for 4 of 5 channels; the exception sits just outside its interval: TV (the largest channel by spend): true share 9.5 percent against an interval of 9.7 to 11.4.
 
-![Platform-reported against true incremental revenue share per channel on synthetic data](reports/layer_p/attribution_gap.png)
+![Per channel on synthetic data: share of platform-attributed revenue in the platform report against true share of incremental media contribution](reports/layer_p/attribution_gap.png)
 
-*Share of revenue the platform report credits to each channel (hollow dot) against the true incremental share (filled dot), synthetic advertiser. The report over-credits Paid Search +24.8 and Paid Social +17.5 percentage points and gives the offline channels nothing, although their true shares are TV 28.3, Print 7.1, Radio 6.8 percent.*
+*Each channel's share of platform-attributed revenue in the platform report (hollow dot) against its true share of incremental media contribution (filled dot), synthetic advertiser; the two shares use different denominators, neither is total revenue. The report over-credits Paid Search +24.8 and Paid Social +17.5 percentage points and gives the offline channels nothing, although their true shares are TV 28.3, Print 7.1, Radio 6.8 percent.*
 
 Holdout MAPE and interval coverage against two baselines are in Results. Sampler gates are written to `diagnostics.json` next to every fit.
 

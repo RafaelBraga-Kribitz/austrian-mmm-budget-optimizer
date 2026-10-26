@@ -364,8 +364,10 @@ def proof_section(p: dict) -> str:
         for _, row in under.iterrows()
     )
     gap_caption = (
-        f"*Share of revenue the platform report credits to each channel (hollow dot) against "
-        f"the true incremental share (filled dot), synthetic advertiser. The report "
+        f"*Each channel's share of platform-attributed revenue in the platform report (hollow "
+        f"dot) against its true share of incremental media contribution (filled dot), synthetic "
+        f"advertiser; the two shares use different denominators, neither is total revenue. The "
+        f"report "
         f"over-credits {over_bits} percentage points and gives the offline channels nothing, "
         f"although their true shares are {under_bits} percent.*"
     )
@@ -384,8 +386,9 @@ def proof_section(p: dict) -> str:
             f"truth, because a curve that rises higher but saturates later fits the same "
             f"observed weeks. Recovery is therefore judged on curves and shares, which are what "
             f"a budget decision uses, not on point parameters. {share_sentence}",
-            "![Platform-reported against true incremental revenue share per channel on "
-            "synthetic data](reports/layer_p/attribution_gap.png)",
+            "![Per channel on synthetic data: share of platform-attributed revenue in the "
+            "platform report against true share of incremental media contribution]"
+            "(reports/layer_p/attribution_gap.png)",
             gap_caption,
         ]
     )
