@@ -20,6 +20,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 from ambo.optimize import next_budget_filename
 
@@ -100,8 +101,64 @@ def layer_d_values() -> dict:
 # ---------------------------------------------------------------------------
 
 
+def _answer_line(dd: dict) -> str:
+    """The budget recommendation in one paragraph, first on the page, read from Layer D."""
+    dec = dd["decision"]
+    same = dec["same_total"]
+    table = dd["table"]
+    rows = table[table["scenario"] == "same_total"]
+    breakeven = v("a_breakeven", num(dec["breakeven_roas"]))
+    # the move cap is a config setting, not an artifact
+    with open(ROOT / "src" / "ambo" / "configs" / "layer_r.yaml", encoding="utf-8") as fh:
+        cap = 100 * float(yaml.safe_load(fh)["decision"]["bound_share"])
+    ups, downs, holds, capped = [], [], [], []
+    for _, row in rows.iterrows():
+        ch = row["channel"]
+        if bool(row["held_by_rule"]):
+            holds.append(ch)
+        elif row["delta_pct"] > 0.5:
+            ups.append(f"{ch} ({v('a_delta_' + ch, signed(row['delta_pct']))} percent)")
+            if abs(row["delta_pct"] - cap) < 0.5:
+                capped.append(ch)
+        elif row["delta_pct"] < -0.5:
+            mr = v("a_mr_" + ch, num(row["marginal_roas_current_median"]))
+            downs.append(
+                f"{ch} ({v('a_delta_' + ch, signed(row['delta_pct']))} percent; it returns "
+                f"{mr} per extra unit of spend, below the breakeven {breakeven})"
+            )
+    med = v("a_gain_median", num(same["gain_pct_of_current_contribution_median"], 1))
+    p10 = v("a_gain_p10", num(same["gain_pct_of_current_contribution_p10"], 1))
+    p_neg = v("a_p_neg", pct(same["probability_gain_negative"]))
+    draws = v("a_draws", dec["posterior_draws_used"])
+    move = []
+    if downs:
+        move.append("move weekly budget out of " + " and ".join(downs))
+    if ups:
+        move.append("into " + " and ".join(ups))
+    verb = "Recommendation" if same["recommend"] else "No shift recommended"
+    text = f"**{verb} (public demo data, same total budget):** " + " ".join(move)
+    if holds:
+        text += (
+            "; hold " + " and ".join(holds) + ", because the lower end of their marginal return "
+            "interval falls below the breakeven return on ad spend (ROAS)"
+        )
+    if capped:
+        text += (
+            "; " + " and ".join(capped) + " stop at the cap the config puts on any channel's "
+            f"move, {v('a_cap', f'{cap:.0f}')} percent of its current spend"
+        )
+    text += (
+        f". Expected gain: median {med} percent of current media contribution, 10th percentile "
+        f"{p10} percent, probability of a loss {p_neg} percent across {draws} posterior draws. "
+        "The demo file's amounts are not euros, so the recommendation is stated in percent."
+    )
+    return text
+
+
 def headline(p: dict, r: dict, dd: dict) -> tuple[str, str, str]:
     lines = []
+    if dd:
+        lines.append(_answer_line(dd))
     if p:
         info = p["info"]
         cov = v("p_curve_cov", pct(info["curve_coverage_mean"], 0))
@@ -127,15 +184,6 @@ def headline(p: dict, r: dict, dd: dict) -> tuple[str, str, str]:
             "On the public demo data (five named channels), the share of revenue each channel "
             "drives is " + "; ".join(parts) + "."
         )
-    if dd:
-        same = dd["decision"]["same_total"]
-        verdict = "recommended" if same["recommend"] else "not recommended under the decision rule"
-        med = v("d_gain_median", num(same["gain_pct_of_current_contribution_median"], 1))
-        p10 = v("d_gain_p10", num(same["gain_pct_of_current_contribution_p10"], 1))
-        lines.append(
-            f"Reallocating the same budget gains {med} percent of current media contribution "
-            f"(10th percentile {p10} percent); the shift is {verdict}."
-        )
     if r:
         chart = "reports/layer_r/channel_contributions.png"
         alt = "Incremental contribution per channel on public demo data, with 90 percent intervals"
@@ -143,6 +191,32 @@ def headline(p: dict, r: dict, dd: dict) -> tuple[str, str, str]:
         chart = "reports/layer_p/response_curve_recovery.png"
         alt = "Response curve recovery on synthetic data: true curves against posterior bands"
     return chart, alt, "\n\n".join(lines)
+
+
+def headline_caption(r: dict) -> str:
+    """Caption under the primary chart: what it shows and what to take from it."""
+    if not r:
+        return (
+            "*Orange: true response curve; black: posterior median; band: 90 percent interval. "
+            "The model is judged on whether the band covers the orange line.*"
+        )
+    ch = r["channels"]
+    top = ch.loc[ch["share_median"].idxmax()]
+    widest = ch.loc[(ch["share_hi"] - ch["share_lo"]).idxmax()]
+    name = top["channel"]
+    med = v("c_top_share", pct(top["share_median"]))
+    lo = v("c_top_lo", pct(top["share_lo"]))
+    hi = v("c_top_hi", pct(top["share_hi"]))
+    weeks = v("c_weeks", r["info"]["weeks"])
+    wname = widest["channel"]
+    wlo = v("c_wide_lo", pct(widest["share_lo"]))
+    whi = v("c_wide_hi", pct(widest["share_hi"]))
+    return (
+        f"*Left: share of revenue each channel drives, median and 90 percent interval. "
+        f"{name} drives the largest share, {med} percent ({lo} to {hi}); {wname} has the widest "
+        f"interval ({wlo} to {whi} percent), so its median alone is not a basis for moving "
+        f"budget. Right: weekly contribution per channel over the {weeks} weeks.*"
+    )
 
 
 def _fit_phrase(layer: str, diag: dict, key: str) -> str:
@@ -195,8 +269,9 @@ def method_bullets(p: dict, r: dict) -> str:
             "- Priors: weakly informative and identical across channels, on scaled data, so that "
             "the estimates come from the data and not from a prior that knows the answer. Each "
             "prior and its reasoning is in the model docstring.",
-            f"- Sampler: NUTS ({sampler}), {chains} chains, {tune} tuning draws, starting at "
-            f"target acceptance {first_ta} with {first_draws} draws per chain. When a gate fails, "
+            f"- Sampler: the No-U-Turn Sampler, NUTS ({sampler}), {chains} chains, {tune} "
+            f"tuning draws, starting at target acceptance {first_ta} with {first_draws} draws "
+            f"per chain. When a gate fails, "
             f"a recorded ladder raises the target acceptance and then the draws; the reported "
             f"fits ran {' and '.join(fits)}.",
             f"- Diagnostics: R-hat below {rhat}, effective sample size above {ess}, zero "
@@ -277,6 +352,25 @@ def proof_section(p: dict) -> str:
             f"just outside its interval: " + "; ".join(bits) + "."
         )
     worst = cur.loc[cur["curve_coverage_observed_range"].idxmin(), "channel"]
+    gap = p["gap"]
+    over = gap[gap["gap_pp"] > 0].sort_values("gap_pp", ascending=False)
+    under = gap[gap["platform_share"] == 0].sort_values("gap_pp")
+    over_bits = " and ".join(
+        f"{row['channel']} {v('pg_over_' + row['channel'], signed(row['gap_pp'], 1))}"
+        for _, row in over.iterrows()
+    )
+    under_bits = ", ".join(
+        f"{row['channel']} {v('pg_true_' + row['channel'], pct(row['true_share']))}"
+        for _, row in under.iterrows()
+    )
+    gap_caption = (
+        f"*Each channel's share of platform-attributed revenue in the platform report (hollow "
+        f"dot) against its true share of incremental media contribution (filled dot), synthetic "
+        f"advertiser; the two shares use different denominators, neither is total revenue. The "
+        f"report "
+        f"over-credits {over_bits} percentage points and gives the offline channels nothing, "
+        f"although their true shares are {under_bits} percent.*"
+    )
     return "\n\n".join(
         [
             "![Response curve recovery on synthetic data: true curves against posterior bands]"
@@ -292,6 +386,10 @@ def proof_section(p: dict) -> str:
             f"truth, because a curve that rises higher but saturates later fits the same "
             f"observed weeks. Recovery is therefore judged on curves and shares, which are what "
             f"a budget decision uses, not on point parameters. {share_sentence}",
+            "![Per channel on synthetic data: share of platform-attributed revenue in the "
+            "platform report against true share of incremental media contribution]"
+            "(reports/layer_p/attribution_gap.png)",
+            gap_caption,
         ]
     )
 
@@ -306,12 +404,32 @@ def holdout_table(metrics: pd.DataFrame, key: str) -> str:
     return "\n".join(rows)
 
 
+def holdout_heading(m: pd.DataFrame, key: str, label: str) -> str:
+    """A finding-first H3: who wins on holdout error, with both numbers."""
+    mmm = m[m["model"] == "Bayesian MMM"].iloc[0]
+    others = m[m["model"] != "Bayesian MMM"]
+    best = others.loc[others["mape"].idxmin()]
+    best_name = best["model"].split(" (")[0].lower()
+    mmm_mape = v(f"hh_{key}_mmm", pct(mmm["mape"]))
+    best_mape = v(f"hh_{key}_best", pct(best["mape"]))
+    if mmm["mape"] <= best["mape"]:
+        return (f"### {label}: the MMM has the lowest holdout error, {mmm_mape} percent "
+                f"against {best_mape} percent for {best_name}")
+    return (f"### {label}: {best_name} beats the MMM on holdout error, {best_mape} percent "
+            f"against {mmm_mape} percent")
+
+
 def holdout_section(p: dict, r: dict) -> str:
-    out = []
+    out = [
+        "Each model is fitted on the earlier weeks and forecasts the last weeks it has not "
+        "seen. Error is the mean absolute percentage error (MAPE); coverage is how often the "
+        "actual week fell inside the model's 90 percent interval."
+    ]
     if p:
         m = p["metrics"]
         n_test = v("h_p_ntest", int(m["n_test"].iloc[0]))
         out.append(
+            holdout_heading(m, "p", "Synthetic data (Layer P)") + "\n\n"
             f"Layer P, synthetic data, {n_test} holdout weeks:\n\n"
             + holdout_table(m, "p") + "\n\n" + verdict_sentence(m, "p")
         )
@@ -319,10 +437,11 @@ def holdout_section(p: dict, r: dict) -> str:
         m = r["metrics"]
         n_test = v("h_r_ntest", int(m["n_test"].iloc[0]))
         out.append(
+            holdout_heading(m, "r", "Public demo data (Layer R)") + "\n\n"
             f"Layer R, public demo data, {n_test} holdout weeks:\n\n"
             + holdout_table(m, "r") + "\n\n" + verdict_sentence(m, "r")
         )
-    return "\n\n".join(out) if out else "No holdout results yet."
+    return "\n\n".join(out) if len(out) > 1 else "No holdout results yet."
 
 
 def verdict_sentence(m: pd.DataFrame, key: str) -> str:
@@ -436,9 +555,18 @@ def decision_section(dd: dict, run_date: date) -> str:
             f"call is wrong, is in reports/layer_d/"
             f"{next_budget_filename(dec['extra_budget_per_year'])}.",
         ]
+    draws = v("d_draws", dec["posterior_draws_used"])
+    if s["probability_gain_negative"] == 0:
+        spread = f"None of the {draws} posterior draws shows a loss"
+    else:
+        spread = f"{p_neg} percent of the {draws} posterior draws show a loss"
     text += [
         "",
         "![Distribution of the gain from reallocation](reports/layer_d/reallocation_gain.png)",
+        "",
+        f"*Gain from moving the same budget, one bar per posterior draw. {spread}; the orange "
+        f"line is the 10th percentile ({gain_p10} percent), the dashed line the median "
+        f"({gain_med} percent).*",
     ]
     return "\n".join(text)
 
@@ -452,8 +580,8 @@ def limitations(p: dict, r: dict) -> str:
         "- One model form (geometric adstock, Hill saturation, additive baseline) is assumed; "
         "recovery on Layer P shows the sampler recovers that form, not that reality has it.",
         "- Effect size and half-saturation trade off against each other, so individual point "
-        "parameters are recovered less well than curves and shares; the proof section states "
-        "the direction of that bias.",
+        "parameters are recovered less well than curves and shares; the Validation section "
+        "states the direction of that bias.",
         "- Weekly national data cannot separate channels whose spend moves together; the "
         "intervals widen accordingly and the optimiser stays inside the bounds set in the config.",
         "- The optimiser assumes response curves hold at new spend levels, competitors do not "
@@ -496,6 +624,7 @@ def render(run_date: date) -> str:
         "headline_chart": chart,
         "headline_alt": alt,
         "headline_lines": lines,
+        "headline_caption": headline_caption(r),
         "method_bullets": method_bullets(p, r),
         "data_table": data_table(p, r, dd),
         "proof_section": proof_section(p),

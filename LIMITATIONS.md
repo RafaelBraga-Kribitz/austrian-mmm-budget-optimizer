@@ -25,8 +25,8 @@ higher but saturates later fits the same observed weeks. On Layer P the medians 
 sit above the truth for every channel, and one channel's revenue share falls just
 outside its interval. Recovery is therefore judged on curves at observed spend and on
 shares, which are what a budget decision uses, not on point parameters. README.md,
-section "Proof on known truth", states the direction and size of this bias from the
-artifacts.
+section [Validation](README.md#validation), states the direction and size of this bias
+from the artifacts.
 
 ## 3. No real client data yet, and what anonymisation will change
 

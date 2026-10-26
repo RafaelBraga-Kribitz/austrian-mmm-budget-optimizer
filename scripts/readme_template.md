@@ -9,8 +9,11 @@
 
 **Status:** Complete
 
-For one advertiser, which channels contributed incrementally, how far off were
-platform-reported numbers, and what does a reallocation gain?
+For one advertiser, a Bayesian marketing mix model (MMM) answers three questions:
+which channels contributed incrementally, how far off were platform-reported numbers,
+and what does a reallocation of the same budget gain?
+
+{{headline_lines}}
 
 "Austrian" names the setting the model is built for, not the data behind it: the
 Austrian public-holiday calendar as a control, weekly grain, euro and
@@ -18,7 +21,21 @@ contribution-margin logic for an Austrian advertiser. It is validated on synthet
 data with known truth and demonstrated on public data, pending a client swap-in. No
 Austrian client data was used.
 
-{{headline_lines}}
+![{{headline_alt}}]({{headline_chart}})
+
+{{headline_caption}}
+
+## Decision
+
+{{decision_section}}
+
+Reconsider this recommendation if the real contribution margin is lower than the
+assumed one: breakeven ROAS is 1 divided by the margin, so a lower margin raises the
+bar every channel must clear and can close the gate on a channel the rule currently
+lets grow. Reconsider it as well if a lift test (a geo experiment or a channel
+holdout) measures an incremental effect outside the model's interval for that channel.
+
+## Why this project
 
 Contribution profit is the north star, not revenue: a channel that returns less
 than the breakeven return on ad spend destroys margin however large its revenue
@@ -26,13 +43,7 @@ looks. Customer acquisition cost is fully loaded or it is fiction. Attribution i
 hypothesis until it has been tested against something outside the platform's own
 reporting. Platform-reported numbers are claims, not measurements, because every
 platform counts the conversions it can see and credits itself for demand that would
-have arrived anyway. The model below is built to test those claims.
-
-![{{headline_alt}}]({{headline_chart}})
-
-## Decision
-
-{{decision_section}}
+have arrived anyway. The model in this repository is built to test those claims.
 
 ## Explore this project
 

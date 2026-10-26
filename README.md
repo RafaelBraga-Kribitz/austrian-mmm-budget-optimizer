@@ -9,8 +9,15 @@
 
 **Status:** Complete
 
-For one advertiser, which channels contributed incrementally, how far off were
-platform-reported numbers, and what does a reallocation gain?
+For one advertiser, a Bayesian marketing mix model (MMM) answers three questions:
+which channels contributed incrementally, how far off were platform-reported numbers,
+and what does a reallocation of the same budget gain?
+
+**Recommendation (public demo data, same total budget):** move weekly budget out of Out-of-home (-20 percent; it returns 0.75 per extra unit of spend, below the breakeven 2.50) into TV (+50 percent) and Facebook (+50 percent); hold Print and Search, because the lower end of their marginal return interval falls below the breakeven return on ad spend (ROAS); TV and Facebook stop at the cap the config puts on any channel's move, 50 percent of its current spend. Expected gain: median 15.1 percent of current media contribution, 10th percentile 8.8 percent, probability of a loss 0.0 percent across 500 posterior draws. The demo file's amounts are not euros, so the recommendation is stated in percent.
+
+On synthetic data with known truth, the estimated response curves cover the true curves on 91 percent of the observed spend range and 26 of 28 true parameters fall inside their 90 percent intervals; the platform report credits Paid Search with 45 percent more revenue than it really adds, and gives the offline channels nothing.
+
+On the public demo data (five named channels), the share of revenue each channel drives is TV 6.0 percent (3.5 to 10.0); Out-of-home 2.7 percent (0.3 to 7.9); Print 1.8 percent (0.4 to 5.5); Facebook 2.5 percent (0.6 to 5.5); Search 3.2 percent (0.3 to 10.5).
 
 "Austrian" names the setting the model is built for, not the data behind it: the
 Austrian public-holiday calendar as a control, weekly grain, euro and
@@ -18,21 +25,9 @@ contribution-margin logic for an Austrian advertiser. It is validated on synthet
 data with known truth and demonstrated on public data, pending a client swap-in. No
 Austrian client data was used.
 
-On synthetic data with known truth, the estimated response curves cover the true curves on 91 percent of the observed spend range and 26 of 28 true parameters fall inside their 90 percent intervals; the platform report credits Paid Search with 45 percent more revenue than it really adds, and gives the offline channels nothing.
-
-On the public demo data (five named channels), the share of revenue each channel drives is TV 6.0 percent (3.5 to 10.0); Out-of-home 2.7 percent (0.3 to 7.9); Print 1.8 percent (0.4 to 5.5); Facebook 2.5 percent (0.6 to 5.5); Search 3.2 percent (0.3 to 10.5).
-
-Reallocating the same budget gains 15.1 percent of current media contribution (10th percentile 8.8 percent); the shift is recommended.
-
-Contribution profit is the north star, not revenue: a channel that returns less
-than the breakeven return on ad spend destroys margin however large its revenue
-looks. Customer acquisition cost is fully loaded or it is fiction. Attribution is a
-hypothesis until it has been tested against something outside the platform's own
-reporting. Platform-reported numbers are claims, not measurements, because every
-platform counts the conversions it can see and credits itself for demand that would
-have arrived anyway. The model below is built to test those claims.
-
 ![Incremental contribution per channel on public demo data, with 90 percent intervals](reports/layer_r/channel_contributions.png)
+
+*Left: share of revenue each channel drives, median and 90 percent interval. TV drives the largest share, 6.0 percent (3.5 to 10.0); Search has the widest interval (0.3 to 10.5 percent), so its median alone is not a basis for moving budget. Right: weekly contribution per channel over the 208 weeks.*
 
 ## Decision
 
@@ -54,6 +49,24 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 
 ![Distribution of the gain from reallocation](reports/layer_d/reallocation_gain.png)
 
+*Gain from moving the same budget, one bar per posterior draw. None of the 500 posterior draws shows a loss; the orange line is the 10th percentile (8.8 percent), the dashed line the median (15.1 percent).*
+
+Reconsider this recommendation if the real contribution margin is lower than the
+assumed one: breakeven ROAS is 1 divided by the margin, so a lower margin raises the
+bar every channel must clear and can close the gate on a channel the rule currently
+lets grow. Reconsider it as well if a lift test (a geo experiment or a channel
+holdout) measures an incremental effect outside the model's interval for that channel.
+
+## Why this project
+
+Contribution profit is the north star, not revenue: a channel that returns less
+than the breakeven return on ad spend destroys margin however large its revenue
+looks. Customer acquisition cost is fully loaded or it is fiction. Attribution is a
+hypothesis until it has been tested against something outside the platform's own
+reporting. Platform-reported numbers are claims, not measurements, because every
+platform counts the conversions it can see and credits itself for demand that would
+have arrived anyway. The model in this repository is built to test those claims.
+
 ## Explore this project
 
 | Audience | Start here |
@@ -65,6 +78,10 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 
 ## Results
 
+Each model is fitted on the earlier weeks and forecasts the last weeks it has not seen. Error is the mean absolute percentage error (MAPE); coverage is how often the actual week fell inside the model's 90 percent interval.
+
+### Synthetic data (Layer P): the MMM has the lowest holdout error, 3.0 percent against 4.7 percent for ridge regression
+
 Layer P, synthetic data, 26 holdout weeks:
 
 | Model | MAPE | 90 percent interval coverage |
@@ -74,6 +91,8 @@ Layer P, synthetic data, 26 holdout weeks:
 | Bayesian MMM | 3.0 percent | 85 percent |
 
 The MMM has the lowest point error here. Its case does not rest on that: the baselines say nothing about which channel earned the revenue. Its 90 percent intervals covered 85 percent of holdout weeks, 5 points below nominal, so the intervals are slightly too narrow and the model is a little overconfident; the baselines' wider intervals covered more.
+
+### Public demo data (Layer R): ridge regression beats the MMM on holdout error, 5.1 percent against 7.9 percent
 
 Layer R, public demo data, 26 holdout weeks:
 
@@ -91,7 +110,7 @@ The MMM loses on point error to the ridge regression baseline on this data. That
 - Saturation: a Hill curve per channel on the adstocked spend, with a half-saturation point and a slope, so returns diminish as spend grows.
 - Seasonality and controls: a linear trend, two yearly Fourier pairs, and one control (a public-holiday week indicator on Layer P, competitor sales on Layer R).
 - Priors: weakly informative and identical across channels, on scaled data, so that the estimates come from the data and not from a prior that knows the answer. Each prior and its reasoning is in the model docstring.
-- Sampler: NUTS (nutpie), 2 chains, 1000 tuning draws, starting at target acceptance 0.9 with 1000 draws per chain. When a gate fails, a recorded ladder raises the target acceptance and then the draws; the reported fits ran Layer P at target acceptance 0.99 with 1000 draws per chain (attempt 3) and Layer R at target acceptance 0.95 with 2000 draws per chain (attempt 3).
+- Sampler: the No-U-Turn Sampler, NUTS (nutpie), 2 chains, 1000 tuning draws, starting at target acceptance 0.9 with 1000 draws per chain. When a gate fails, a recorded ladder raises the target acceptance and then the draws; the reported fits ran Layer P at target acceptance 0.99 with 1000 draws per chain (attempt 3) and Layer R at target acceptance 0.95 with 2000 draws per chain (attempt 3).
 - Diagnostics: R-hat below 1.01, effective sample size above 400, zero divergences; written to diagnostics.json next to every fit.
 - Holdout protocol: fit on the first 130 of 156 weeks on Layer P and the first 182 of 208 weeks on Layer R, forecast the rest with the actual spend, and report MAPE and 90 percent interval coverage against a seasonal-naive and a ridge-regression baseline.
 
@@ -115,6 +134,10 @@ Layer R amounts are not euros. Shares, ROAS ratios and the breakeven test are th
 Before trusting the model on any advertiser's data, it had to recover a truth it was handed. On the synthetic advertiser the estimated response curves cover the true curves on 91 percent of the grid points inside the observed spend range (worst channel, TV: 56 percent), with a mean error of at most 13.6 percent of the true curve's height. 26 of 28 individual parameters fall inside their 90 percent intervals.
 
 The misses follow a known trade-off, not a bug: 5 of 5 effect sizes and 5 of 5 half-saturation points have medians above the truth, because a curve that rises higher but saturates later fits the same observed weeks. Recovery is therefore judged on curves and shares, which are what a budget decision uses, not on point parameters. Revenue shares are covered for 4 of 5 channels; the exception sits just outside its interval: TV (the largest channel by spend): true share 9.5 percent against an interval of 9.7 to 11.4.
+
+![Per channel on synthetic data: share of platform-attributed revenue in the platform report against true share of incremental media contribution](reports/layer_p/attribution_gap.png)
+
+*Each channel's share of platform-attributed revenue in the platform report (hollow dot) against its true share of incremental media contribution (filled dot), synthetic advertiser; the two shares use different denominators, neither is total revenue. The report over-credits Paid Search +24.8 and Paid Social +17.5 percentage points and gives the offline channels nothing, although their true shares are TV 28.3, Print 7.1, Radio 6.8 percent.*
 
 Holdout MAPE and interval coverage against two baselines are in Results. Sampler gates are written to `diagnostics.json` next to every fit.
 
@@ -150,7 +173,7 @@ This README is rendered from `scripts/readme_template.md` by `scripts/render_rea
 
 - Layer R runs on Robyn's simulated weekly dataset: five named channels and revenue in the dataset's money units, whose currency its authors do not name. Shares, ROAS ratios and the breakeven test are meaningful; the amounts are not euros. No Austrian client data was used; a real-data swap-in is planned.
 - One model form (geometric adstock, Hill saturation, additive baseline) is assumed; recovery on Layer P shows the sampler recovers that form, not that reality has it.
-- Effect size and half-saturation trade off against each other, so individual point parameters are recovered less well than curves and shares; the proof section states the direction of that bias.
+- Effect size and half-saturation trade off against each other, so individual point parameters are recovered less well than curves and shares; the Validation section states the direction of that bias.
 - Weekly national data cannot separate channels whose spend moves together; the intervals widen accordingly and the optimiser stays inside the bounds set in the config.
 - The optimiser assumes response curves hold at new spend levels, competitors do not react, and a constant weekly spend reaches its steady state.
 
