@@ -49,7 +49,7 @@ With 200000 more per year, spread over 52 weeks, media contribution rises by a m
 
 ![Distribution of the gain from reallocation](reports/layer_d/reallocation_gain.png)
 
-*Gain from moving the same budget, one bar per posterior draw. None of the 500 posterior draws shows a loss; the orange line is the 10th percentile (8.8 percent), the dashed line the median (15.1 percent).*
+*Gain from moving the same budget, one bar per posterior draw. None of the 500 posterior draws shows a loss; the blue line is the 10th percentile (8.8 percent), the dashed line the median (15.1 percent).*
 
 Reconsider this recommendation if the real contribution margin is lower than the
 assumed one: breakeven ROAS is 1 divided by the margin, so a lower margin raises the
