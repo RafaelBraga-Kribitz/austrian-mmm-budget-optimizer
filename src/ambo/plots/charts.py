@@ -1,6 +1,10 @@
 """The report charts. Each function takes a table produced by ``ambo.evaluate`` or
 ``ambo.optimize`` and writes one PNG. No chart carries a title that repeats the
-caption; the panel headings say what the axis shows."""
+caption; the panel headings say what the axis shows.
+
+Colour follows the Braga design system (``ambo.plots.theme``): structure in ink and
+greys, the one highlight (``accent``, the ultramarine ``hl``) on the series or mark
+the chart is about, every label in ink or ink-2."""
 
 from __future__ import annotations
 
@@ -15,15 +19,16 @@ DOT = 6.0
 
 
 def _dot_interval(ax, y, med, lo, hi, true=None, label_fmt="{:.2f}"):
-    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    ink, accent = theme.color("ink"), theme.color("accent")
     ax.hlines(y, lo, hi, color=ink, lw=theme.HAIRLINE_PT * 1.5, zorder=2)
     ax.plot(med, y, "o", color=ink, ms=DOT, zorder=3)
     if true is not None:
         ax.plot(true, y, "x", color=accent, ms=9, mew=2.0, zorder=4)
+    fp = theme.font("mono", "regular", "mono-sm")
     for yi, hi_i, m_i in zip(y, hi, med, strict=True):
         ax.annotate(label_fmt.format(m_i), xy=(hi_i, yi), xytext=(6, 0),
                     textcoords="offset points", va="center", ha="left",
-                    color=mid, fontsize=8, family="monospace")
+                    color=theme.color("ink-2"), fontproperties=fp)
 
 
 def _panel_setup(ax, heading: str, labels, xlabel: str):
@@ -31,17 +36,17 @@ def _panel_setup(ax, heading: str, labels, xlabel: str):
     ax.set_yticks(range(len(labels)))
     ax.set_yticklabels(labels)
     ax.invert_yaxis()
-    ax.set_xlabel(xlabel, color=theme.color("mid"))
-    ax.set_title(heading, loc="left", color=theme.color("ink"), fontsize=11, pad=10)
+    theme.axis_label(ax, x=xlabel)
+    theme.heading(ax, heading)
     ax.margins(x=0.25)
 
 
 def parameter_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
-    """Three panels: adstock decay, saturation, coefficients. True value as orange cross."""
+    """Three panels: adstock decay, saturation, coefficients. True value as blue cross."""
     fig, axes = theme.new_figure(
         height_px=900, ncols=3, gridspec_kw={"width_ratios": [1, 1.25, 1.4]}
     )
-    fig.subplots_adjust(left=0.09, right=0.98, top=0.86, bottom=0.16, wspace=0.95)
+    fig.subplots_adjust(left=0.10, right=0.98, top=0.86, bottom=0.18, wspace=1.0)
     families = [
         ("Adstock decay", "Adstock decay\nshare of the effect carried\ninto next week",
          1.0, "{:.2f}"),
@@ -62,7 +67,7 @@ def parameter_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
     covered = int(table["covered"].sum())
     theme.footer(
         fig, source,
-        note=f"Line: 90% posterior interval. Dot: posterior median. Orange cross: true value. "
+        note=f"Line: 90% posterior interval. Dot: posterior median. Blue cross: true value. "
              f"{covered} of {len(table)} true values fall inside their interval.",
     )
     return theme.save(fig, path)
@@ -70,7 +75,7 @@ def parameter_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
 
 def contribution_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
     fig, ax = theme.new_figure(height_px=700)
-    fig.subplots_adjust(left=0.16, right=0.92, top=0.88, bottom=0.20)
+    fig.subplots_adjust(left=0.16, right=0.92, top=0.88, bottom=0.24)
     y = np.arange(len(table))
     _dot_interval(ax, y, 100 * table["share_median"], 100 * table["share_lo"],
                   100 * table["share_hi"], 100 * table["true_share_of_revenue"], "{:.1f}%")
@@ -80,7 +85,7 @@ def contribution_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
     covered = int(table["covered"].sum())
     theme.footer(
         fig, source,
-        note=f"Line: 90% posterior interval. Dot: posterior median. Orange cross: true share. "
+        note=f"Line: 90% posterior interval. Dot: posterior median. Blue cross: true share. "
              f"{covered} of {len(table)} channels covered.",
     )
     return theme.save(fig, path)
@@ -89,7 +94,7 @@ def contribution_recovery(table: pd.DataFrame, path: Path, source: str) -> Path:
 def attribution_gap(table: pd.DataFrame, path: Path, source: str) -> Path:
     """Dumbbell: platform-reported share versus true incremental share per channel."""
     fig, ax = theme.new_figure(height_px=700)
-    fig.subplots_adjust(left=0.16, right=0.92, top=0.88, bottom=0.22)
+    fig.subplots_adjust(left=0.16, right=0.92, top=0.88, bottom=0.26)
     ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
     worst = int(table["abs_gap_pp"].idxmax())
     for i, row in table.iterrows():
@@ -102,13 +107,14 @@ def attribution_gap(table: pd.DataFrame, path: Path, source: str) -> Path:
         right = max(row["true_share"], row["platform_share"]) * 100
         ax.annotate(f"{row['gap_pp']:+.1f} pp", xy=(right, i), xytext=(8, 0),
                     textcoords="offset points", va="center", ha="left",
-                    color=accent if i == worst else mid, fontsize=9, family="monospace")
+                    color=ink if i == worst else theme.color("ink-2"),
+                    fontproperties=theme.font("mono", "medium" if i == worst else "regular"))
     _panel_setup(ax, "Share of attributed revenue, percent: filled dot = true incremental, "
                      "hollow dot = platform-reported", table["channel"].tolist(), "")
     theme.footer(
         fig, source,
         note="Gap in percentage points, platform minus truth. Offline channels receive no "
-             "platform credit at all. Orange marks the largest gap.",
+             "platform credit at all. Blue marks the largest gap.",
     )
     return theme.save(fig, path)
 
@@ -117,7 +123,7 @@ def holdout(preds: pd.DataFrame, metrics: pd.DataFrame, path: Path, source: str,
             money_unit: str = "EUR thousand") -> Path:
     """Test window: actual revenue, the MMM forecast with its 90% band, and both baselines."""
     fig, ax = theme.new_figure(height_px=800)
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.88, bottom=0.20)
+    fig.subplots_adjust(left=0.08, right=0.97, top=0.88, bottom=0.22)
     ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
     x = preds["week"].to_numpy()
     scale = 1000.0 if money_unit == "EUR thousand" else 1.0
@@ -128,10 +134,9 @@ def holdout(preds: pd.DataFrame, metrics: pd.DataFrame, path: Path, source: str,
     ax.plot(x, preds["bayesian_mmm_yhat"] / scale, color=accent, lw=2.0, zorder=3)
     ax.plot(x, preds["actual"] / scale, color=ink, lw=1.75, zorder=4)
     theme.hairlines(ax)
-    ax.set_title("Holdout weeks: actual revenue (black), MMM forecast (orange) with 90% band, "
-                 f"seasonal naive (dashed), ridge (dotted). {money_unit} per week",
-                 loc="left", color=ink, fontsize=11, pad=10)
-    ax.set_xlabel("Week", color=mid)
+    theme.heading(ax, "Holdout weeks: actual revenue (black), MMM forecast (blue) with 90% "
+                      f"band, seasonal naive (dashed), ridge (dotted). {money_unit} per week")
+    theme.axis_label(ax, x="Week")
     lines = []
     for _, r in metrics.iterrows():
         lines.append(
@@ -148,34 +153,43 @@ def channel_contributions(
     fig, (ax_left, ax_right) = theme.new_figure(
         height_px=800, ncols=2, gridspec_kw={"width_ratios": [1, 1.6]}
     )
-    fig.subplots_adjust(left=0.12, right=0.97, top=0.88, bottom=0.20, wspace=0.45)
-    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    fig.subplots_adjust(left=0.12, right=0.97, top=0.88, bottom=0.22, wspace=0.45)
+    ink, ink2, accent = theme.color("ink"), theme.color("ink-2"), theme.color("accent")
     y = np.arange(len(table))
     _dot_interval(ax_left, y, 100 * table["share_median"], 100 * table["share_lo"],
                   100 * table["share_hi"], None, "{:.1f}%")
     best = int(table["share_median"].idxmax())
     ax_left.plot(100 * table.loc[best, "share_median"], best, "o", color=accent, ms=DOT + 1,
                  zorder=5)
-    _panel_setup(ax_left, "Share of revenue driven by each channel, percent",
+    _panel_setup(ax_left, "Share of revenue driven by each channel,\npercent",
                  table["channel"].tolist(), "")
     theme.guide(ax_left, 0.0, "v")
     x = weekly["week"].to_numpy()
-    styles = [(ink, "-"), (mid, (0, (3, 3))), (ink, (0, (1, 2))), (mid, "-"), (ink, (0, (5, 2)))]
-    for i, ch in enumerate(channels):
-        col, ls = styles[i % len(styles)]
+    # The channel that earned the highlight on the left keeps it on the right; the
+    # others are structure greys told apart by line style.
+    best_channel = table.loc[best, "channel"]
+    styles = [(ink, "-"), (ink2, (0, (3, 3))), (ink, (0, (1, 2))), (ink2, "-"),
+              (ink, (0, (5, 2)))]
+    k = 0
+    for ch in channels:
+        if ch == best_channel:
+            col, ls = accent, "-"
+        else:
+            col, ls = styles[k % len(styles)]
+            k += 1
         ax_right.fill_between(x, weekly[f"{ch} lo"] / 1000.0, weekly[f"{ch} hi"] / 1000.0,
                               color=theme.color("surface-3"), lw=0, zorder=1)
-        ax_right.plot(x, weekly[f"{ch} median"] / 1000.0, color=col, ls=ls, lw=1.6, zorder=3,
-                      label=ch)
-    ax_right.legend(loc="upper right", frameon=False, fontsize=9, labelcolor=ink)
+        ax_right.plot(x, weekly[f"{ch} median"] / 1000.0, color=col, ls=ls, lw=1.6,
+                      zorder=4 if ch == best_channel else 3, label=ch)
+    ax_right.legend(loc="upper right", frameon=False, prop=theme.font(), labelcolor=ink)
     theme.hairlines(ax_right)
-    ax_right.set_title("Weekly incremental contribution per channel, thousand, "
-                       "median line and 90% band", loc="left", color=ink, fontsize=11, pad=10)
-    ax_right.set_xlabel("Week", color=mid)
+    theme.heading(ax_right, "Weekly incremental contribution per channel, thousand,\n"
+                            "median line and 90% band")
+    theme.axis_label(ax_right, x="Week")
     ax_right.margins(x=0.03)
     theme.footer(
         fig, source,
-        note="Left: line = 90% posterior interval, dot = median; orange marks the largest share. "
+        note="Left: line = 90% posterior interval, dot = median; blue marks the largest share. "
              "Right: contribution in the data's money units, thousands.",
     )
     return theme.save(fig, path)
@@ -188,8 +202,8 @@ def response_curves(curves: pd.DataFrame, path: Path, source: str,
     fig, axes = theme.new_figure(height_px=700, ncols=len(channels), sharey=False)
     if len(channels) == 1:
         axes = [axes]
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.22, wspace=0.35)
-    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.26, wspace=0.35)
+    ink, accent = theme.color("ink"), theme.color("accent")
     for ax, ch in zip(axes, channels, strict=True):
         sub = curves[curves["channel"] == ch]
         x = sub["spend"] / 1000.0
@@ -200,12 +214,13 @@ def response_curves(curves: pd.DataFrame, path: Path, source: str,
         ax.axvline(current, color=accent, lw=1.5, zorder=2)
         ax.annotate("current average\nweekly spend", xy=(current, 1.0),
                     xycoords=("data", "axes fraction"), xytext=(5, -4),
-                    textcoords="offset points", ha="left", va="top", color=accent, fontsize=8)
+                    textcoords="offset points", ha="left", va="top",
+                    color=theme.color("ink-2"), fontproperties=theme.font("mono", size="mono-sm"))
         theme.hairlines(ax)
-        ax.set_title(ch, loc="left", color=ink, fontsize=11, pad=10)
-        ax.set_xlabel("Weekly spend, thousand", color=mid)
+        theme.heading(ax, ch)
+        theme.axis_label(ax, x="Weekly spend, thousand")
         if ax is axes[0]:
-            ax.set_ylabel("Incremental revenue per week, thousand", color=mid)
+            theme.axis_label(ax, y="Incremental revenue per week, thousand")
         ax.margins(x=0.02)
     theme.footer(
         fig, source,
@@ -220,26 +235,24 @@ def reallocation_gain(gain: np.ndarray, contribution_current: np.ndarray, path: 
                       source: str, bound_share: float = 0.5) -> Path:
     """Distribution of the weekly gain from reallocation, 10th percentile marked."""
     fig, ax = theme.new_figure(height_px=700)
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.22)
-    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.26)
+    ink, accent = theme.color("ink"), theme.color("accent")
     rel = 100.0 * gain / contribution_current
     p10, p50 = np.percentile(rel, 10), np.median(rel)
     ax.hist(rel, bins=40, color=theme.color("surface-3"), edgecolor=ink, linewidth=0.4, zorder=2)
     theme.guide(ax, 0.0, "v")
     ax.axvline(p10, color=accent, lw=2.0, zorder=3)
     ax.annotate(f"10th percentile {p10:+.1f}%", xy=(p10, 1.0), xycoords=("data", "axes fraction"),
-                xytext=(6, -4), textcoords="offset points", ha="left", va="top", color=accent,
-                fontsize=9, family="monospace")
+                xytext=(-6, -4), textcoords="offset points", ha="right", va="top", color=ink,
+                fontproperties=theme.font("mono", "medium"))
     ax.axvline(p50, color=ink, lw=1.2, ls=(0, (3, 3)), zorder=3)
     ax.annotate(f"median {p50:+.1f}%", xy=(p50, 0.88), xycoords=("data", "axes fraction"),
                 xytext=(6, 0), textcoords="offset points", ha="left", va="top", color=ink,
-                fontsize=9, family="monospace")
+                fontproperties=theme.font())
     theme.hairlines(ax)
-    ax.set_title("Gain from reallocating the same total budget, percent of current weekly "
-                 "media contribution, one bar per posterior draw",
-                 loc="left", color=ink, fontsize=11, pad=10)
-    ax.set_xlabel("Gain, percent", color=mid)
-    ax.set_ylabel("Posterior draws", color=mid)
+    theme.heading(ax, "Gain from reallocating the same total budget, percent of current weekly "
+                      "media contribution, one bar per posterior draw")
+    theme.axis_label(ax, x="Gain, percent", y="Posterior draws")
     theme.footer(
         fig, source,
         note=f"Probability the reallocation loses money: {100 * np.mean(gain < 0):.1f}%. "
@@ -250,13 +263,13 @@ def reallocation_gain(gain: np.ndarray, contribution_current: np.ndarray, path: 
 
 
 def response_curve_recovery(curves: pd.DataFrame, path: Path, source: str) -> Path:
-    """Per channel: true response curve (orange) against the posterior median and 90% band."""
+    """Per channel: true response curve (blue) against the posterior median and 90% band."""
     channels = list(dict.fromkeys(curves["channel"]))
     fig, axes = theme.new_figure(height_px=640, ncols=len(channels))
     if len(channels) == 1:
         axes = [axes]
-    fig.subplots_adjust(left=0.06, right=0.99, top=0.84, bottom=0.24, wspace=0.35)
-    ink, mid, accent = theme.color("ink"), theme.color("mid"), theme.color("accent")
+    fig.subplots_adjust(left=0.06, right=0.99, top=0.84, bottom=0.28, wspace=0.35)
+    ink, accent = theme.color("ink"), theme.color("accent")
     for ax, name in zip(axes, channels, strict=True):
         sub = curves[curves["channel"] == name]
         x = sub["spend"] / 1000.0
@@ -267,14 +280,14 @@ def response_curve_recovery(curves: pd.DataFrame, path: Path, source: str) -> Pa
         observed = float(sub["observed_max_spend"].iloc[0]) / 1000.0
         theme.guide(ax, observed, "v")
         theme.hairlines(ax)
-        ax.set_title(name, loc="left", color=ink, fontsize=11, pad=8)
-        ax.set_xlabel("Weekly spend, EUR thousand", color=mid)
+        theme.heading(ax, name, pad=8)
+        theme.axis_label(ax, x="Weekly spend, EUR thousand")
         if ax is axes[0]:
-            ax.set_ylabel("Incremental revenue per week, EUR thousand", color=mid)
+            theme.axis_label(ax, y="Incremental revenue per week, EUR thousand")
         ax.margins(x=0.02)
     theme.footer(
         fig, source,
-        note="Orange: true response curve. Black: posterior median. Band: 90% interval. "
+        note="Blue: true response curve. Black: posterior median. Band: 90% interval. "
              "Dashed line: largest observed weekly spend; beyond it the model extrapolates.",
     )
     return theme.save(fig, path)

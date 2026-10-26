@@ -70,7 +70,7 @@ CELLS = [
     ),
     new_markdown_cell(
         "## 4. Parameter recovery\n\nEach line is a 90 percent posterior interval, the dot "
-        "its median, the orange cross the true value. Offline channels with flighted spend "
+        "its median, the blue cross the true value. Offline channels with flighted spend "
         "recover tightly; always-on channels with steadier spend carry wider intervals, which "
         "is the honest answer when the data moves little."
     ),
@@ -80,7 +80,7 @@ CELLS = [
         "rec[['family', 'parameter', 'true', 'median', 'lo', 'hi', 'covered']]"
     ),
     new_markdown_cell(
-        "## 4b. Response curves against the truth\n\nThe orange line is the true response "
+        "## 4b. Response curves against the truth\n\nThe blue line is the true response "
         "curve of the generator, the black line the posterior median and the band its 90 "
         "percent interval. This is the test a budget decision depends on: the curve at "
         "observed spend, not the individual parameters behind it."

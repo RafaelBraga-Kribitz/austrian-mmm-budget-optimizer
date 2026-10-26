@@ -15,7 +15,7 @@ dependencies = [
     "matplotlib>=3.8",
     "pyyaml>=6",
     "nutpie>=0.13",
-    "bk-viz",
+    "bk-viz @ git+https://github.com/RafaelBraga-Kribitz/bk-viz@fe8125a3043f49a798ef24740b23f81c46863562",
 ]
 
 [project.optional-dependencies]
@@ -31,12 +31,13 @@ dev = [
     "ruff>=0.5",
 ]
 
-[tool.uv.sources]
-bk-viz = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz", rev = "8a059085d3c6275272fe34a0dfa29d3d5e608e5b" }
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# bk-viz is a git dependency (a direct reference), which hatchling only accepts with this flag.
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ambo"]
