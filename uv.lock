@@ -48,7 +48,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "arviz", specifier = ">=0.20" },
-    { name = "bk-viz", git = "https://github.com/RafaelBraga-Kribitz/bk-viz?rev=8a059085d3c6275272fe34a0dfa29d3d5e608e5b" },
+    { name = "bk-viz", git = "https://github.com/RafaelBraga-Kribitz/bk-viz?rev=fe8125a3043f49a798ef24740b23f81c46863562" },
     { name = "ipykernel", marker = "extra == 'notebook'", specifier = ">=6" },
     { name = "jupyter", marker = "extra == 'notebook'", specifier = ">=1.0" },
     { name = "matplotlib", specifier = ">=3.8" },
@@ -292,8 +292,8 @@ wheels = [
 
 [[package]]
 name = "bk-viz"
-version = "1.0.0"
-source = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz?rev=8a059085d3c6275272fe34a0dfa29d3d5e608e5b#8a059085d3c6275272fe34a0dfa29d3d5e608e5b" }
+version = "2.0.0"
+source = { git = "https://github.com/RafaelBraga-Kribitz/bk-viz?rev=fe8125a3043f49a798ef24740b23f81c46863562#fe8125a3043f49a798ef24740b23f81c46863562" }
 dependencies = [
     { name = "fonttools" },
     { name = "matplotlib" },

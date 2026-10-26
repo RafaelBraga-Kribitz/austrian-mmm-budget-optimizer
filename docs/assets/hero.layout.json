@@ -1,0 +1,100 @@
+{
+  "output": "hero.png",
+  "width": 1600,
+  "height": 640,
+  "mode": "light",
+  "fonts": "BKribitz (design-system checkout)",
+  "design_system": "braga 2.1.0 (D-051)",
+  "status_state": "complete",
+  "title_size": 96,
+  "descriptor_size": 28,
+  "attempts": 14,
+  "blocks": {
+    "wordmark": {
+      "bbox": [
+        72,
+        72,
+        180,
+        107
+      ],
+      "lines": [
+        "BRAGA"
+      ],
+      "font": "BKribitz-800.woff2"
+    },
+    "kind": {
+      "bbox": [
+        194,
+        76,
+        506,
+        106
+      ],
+      "lines": [
+        "·  ANALYTICAL PROJECT"
+      ],
+      "font": "BKribitzMono-400.woff2"
+    },
+    "status": {
+      "bbox": [
+        1410,
+        76,
+        1528,
+        106
+      ],
+      "lines": [
+        "COMPLETE"
+      ],
+      "font": "BKribitzMono-400.woff2"
+    },
+    "facts": {
+      "bbox": [
+        72,
+        538,
+        998,
+        568
+      ],
+      "lines": [
+        "LICENSE  MIT  ·  RUNTIME  Python >=3.11  ·  CI  GitHub Actions"
+      ],
+      "font": "BKribitzMono-400.woff2"
+    },
+    "title": {
+      "bbox": [
+        72,
+        136,
+        1282,
+        336
+      ],
+      "lines": [
+        "Austrian MMM and Budget",
+        "Optimizer"
+      ],
+      "font": "BKribitz-700.woff2"
+    },
+    "descriptor": {
+      "bbox": [
+        72,
+        368,
+        851,
+        485
+      ],
+      "lines": [
+        "Bayesian marketing-mix model validated on known truth,",
+        "demonstrated on public data, with a breakeven-gated budget",
+        "reallocation rule."
+      ],
+      "font": "BKribitz-400.woff2"
+    }
+  },
+  "guardrails": [
+    "safe-area",
+    "wrap-and-shrink",
+    "line-length",
+    "no-overlap",
+    "glyph-coverage-per-char",
+    "contrast>=4.5",
+    "pixel-scan",
+    "no-accent"
+  ],
+  "validated": true
+}

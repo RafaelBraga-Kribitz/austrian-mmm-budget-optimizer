@@ -197,8 +197,8 @@ def headline_caption(r: dict) -> str:
     """Caption under the primary chart: what it shows and what to take from it."""
     if not r:
         return (
-            "*Orange: true response curve; black: posterior median; band: 90 percent interval. "
-            "The model is judged on whether the band covers the orange line.*"
+            "*Blue: true response curve; black: posterior median; band: 90 percent interval. "
+            "The model is judged on whether the band covers the blue line.*"
         )
     ch = r["channels"]
     top = ch.loc[ch["share_median"].idxmax()]
@@ -564,7 +564,7 @@ def decision_section(dd: dict, run_date: date) -> str:
         "",
         "![Distribution of the gain from reallocation](reports/layer_d/reallocation_gain.png)",
         "",
-        f"*Gain from moving the same budget, one bar per posterior draw. {spread}; the orange "
+        f"*Gain from moving the same budget, one bar per posterior draw. {spread}; the blue "
         f"line is the 10th percentile ({gain_p10} percent), the dashed line the median "
         f"({gain_med} percent).*",
     ]
