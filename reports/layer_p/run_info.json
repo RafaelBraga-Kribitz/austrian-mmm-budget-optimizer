@@ -3,9 +3,9 @@
   "coverage_share": 0.9285714285714286,
   "curve_coverage_mean": 0.9111111111111111,
   "curve_coverage_min": 0.5555555555555556,
-  "curve_mae_pct_max": 13.564643329097223,
+  "curve_mae_pct_max": 13.71759942091862,
   "diagnostics_pass": true,
-  "elapsed_seconds": 907.3,
+  "elapsed_seconds": 656.6,
   "holdout": [
     {
       "coverage_90": 0.9230769230769231,
@@ -25,8 +25,8 @@
     },
     {
       "coverage_90": 0.8461538461538461,
-      "interval_width_mean": 12145.819713691728,
-      "mape": 0.02987393093669278,
+      "interval_width_mean": 12191.265003264973,
+      "mape": 0.029939516641446364,
       "model": "Bayesian MMM",
       "n_test": 26,
       "train_weeks": 130
@@ -40,13 +40,13 @@
   "parameters_total": 28,
   "sampler": "nutpie",
   "versions": {
-    "ambo": "0.1.0",
+    "ambo": "1.1.0",
     "arviz": "0.23.4",
-    "numpy": "2.4.6",
-    "nutpie": "0.16.8",
+    "numpy": "2.5.3",
+    "nutpie": "0.16.11",
     "pandas": "3.0.5",
     "pymc": "5.28.5",
-    "python": "3.11.15"
+    "python": "3.13.17"
   },
   "weeks": 156
 }

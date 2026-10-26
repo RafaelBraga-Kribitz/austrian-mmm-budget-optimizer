@@ -420,3 +420,27 @@ Pull request 45 (parallel build) was closed per ADR-007; pull request 46 (build/
 was merged to main. Branch deletion is pending on Rafael's side (see Blockers).
 
 > **[Stale 2026-09-30]** Branch deletion was done on 2026-09-16 (D-30).
+
+---
+
+### 2026-10-26 — Re-verification of the published figures after the 2026-09-30 fixes
+
+The 2026-09-30 audit fixes changed the optimiser (`optimize.py`, items 27 to 31) and the
+synthetic generator (item 30) after the Layer P and Layer D outputs were produced on
+2026-09-15. Both layers were re-run on the current code to check whether the published
+figures still hold. Layer R was not refitted: its model diff since 2026-09-15 only logs
+sampler deviations, passes a chart parameter and removes an unused method.
+
+- **Layer D** (`python -m ambo.run layer_d`, committed Layer R draws): every figure in
+  `decision.json` and `reallocation_table.csv` reproduces; the largest difference is
+  floating-point noise (about 1e-14). Outputs left as committed.
+- **Layer P** (`python -m ambo.run layer_p`, full refit): response-curve coverage 91
+  percent (worst channel TV, 56 percent), 26 of 28 parameters inside their 90 percent
+  intervals, holdout and attribution-gap headlines unchanged. Two technical details
+  moved: the largest curve error is 13.7 percent of the true curve's height (was 13.6),
+  and the fit converged on its third attempt at target acceptance 0.95 with 2000 draws
+  per chain. Outputs committed and the README re-rendered.
+
+Conclusion: the published decision (same budget, out of Out-of-home into TV and
+Facebook, median gain 15.1 percent, 10th percentile 8.8 percent) stands on the current
+code. `pytest -m "not slow"`: 60 passed; README gate PASS_WITH_EXCELLENCE.
