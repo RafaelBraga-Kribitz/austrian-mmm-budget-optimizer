@@ -1,0 +1,152 @@
+/// ROAS and revenue share per channel with 90 percent intervals, Layer R (roas_summary.csv).
+table RoasSummary
+	lineageTag: d86a516c-ced0-586d-bc1d-f1a887735d15
+
+	/// Return on ad spend over the whole window: contribution divided by spend, posterior median. Per channel; blank on totals. Equals roas_median in reports/layer_r/channel_contributions.csv.
+	measure 'ROAS, median' = SELECTEDVALUE ( RoasSummary[roas_median] )
+		formatString: 0.00
+		displayFolder: ROAS
+		lineageTag: 27326838-0e98-5139-9f4f-f4b2d6abf55d
+
+	/// Lower end (5th percentile) of the 90 percent ROAS interval.
+	measure 'ROAS, lo' = SELECTEDVALUE ( RoasSummary[roas_lo] )
+		formatString: 0.00
+		displayFolder: ROAS
+		lineageTag: 7f4d109b-afb1-5f2a-85fd-067c17909571
+
+	/// Upper end (95th percentile) of the 90 percent ROAS interval.
+	measure 'ROAS, hi' = SELECTEDVALUE ( RoasSummary[roas_hi] )
+		formatString: 0.00
+		displayFolder: ROAS
+		lineageTag: 32d92aca-0aac-503d-b385-507fbca95fcd
+
+	/// Share of revenue the channel drives, posterior median. Equals the revenue shares in the README headline (share_median in channel_contributions.csv).
+	measure 'Revenue share, median' = SELECTEDVALUE ( RoasSummary[share_median] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Share of revenue
+		lineageTag: 669c68c9-3600-5beb-8cfd-aaa03b81a982
+
+	/// Lower end (5th percentile) of the 90 percent interval of the revenue share.
+	measure 'Revenue share, lo' = SELECTEDVALUE ( RoasSummary[share_lo] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Share of revenue
+		lineageTag: 172482e4-c83c-50e0-96fe-d208d3564570
+
+	/// Upper end (95th percentile) of the 90 percent interval of the revenue share.
+	measure 'Revenue share, hi' = SELECTEDVALUE ( RoasSummary[share_hi] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Share of revenue
+		lineageTag: d21be102-b289-52a3-950f-30a775e95617
+
+	/// Spend over the whole window, in the dataset's money units (not euros). Additive across channels.
+	measure 'Total spend' = SUM ( RoasSummary[spend_total] )
+		formatString: #,0
+		displayFolder: Spend
+		lineageTag: aa8ca45d-02ca-5f0c-ac3a-886471a16e1a
+
+	column channel
+		dataType: string
+		isHidden
+		lineageTag: d17f3f3e-ede8-5ed4-8954-b58f7ec91fdd
+		summarizeBy: none
+		sourceColumn: channel
+
+	column spend_total
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 497a4d82-9497-55da-bfab-50763abb4103
+		summarizeBy: none
+		sourceColumn: spend_total
+
+	column spend_mean_week
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 1a4edbd4-d69d-5347-81e4-129859e0c3ba
+		summarizeBy: none
+		sourceColumn: spend_mean_week
+
+	column contribution_median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: c66ab690-e9a7-5914-80c8-ce82dd5ab34a
+		summarizeBy: none
+		sourceColumn: contribution_median
+
+	column contribution_lo
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: b039fe96-f65e-5b9b-9631-34591febc8de
+		summarizeBy: none
+		sourceColumn: contribution_lo
+
+	column contribution_hi
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 28ca2df1-c305-527a-bd8d-d91c90f0aca9
+		summarizeBy: none
+		sourceColumn: contribution_hi
+
+	column share_median
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 8b37e93f-f66f-5681-a557-5485ad435129
+		summarizeBy: none
+		sourceColumn: share_median
+
+	column share_lo
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 4e92ef08-e69a-5a6a-bb13-db25d6b5a0fc
+		summarizeBy: none
+		sourceColumn: share_lo
+
+	column share_hi
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 5514d9a1-6999-5f3e-8699-17a7f860c69e
+		summarizeBy: none
+		sourceColumn: share_hi
+
+	column roas_median
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 40872235-ffbb-5fa3-9cee-313635c341df
+		summarizeBy: none
+		sourceColumn: roas_median
+
+	column roas_lo
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: ae44e3b6-41ce-5273-91ad-ca53b4e9d9c2
+		summarizeBy: none
+		sourceColumn: roas_lo
+
+	column roas_hi
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: b9911593-145f-51d3-9e83-42763180380a
+		summarizeBy: none
+		sourceColumn: roas_hi
+
+	partition RoasSummary = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "roas_summary.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"channel", type text}, {"spend_total", type number}, {"spend_mean_week", type number}, {"contribution_median", type number}, {"contribution_lo", type number}, {"contribution_hi", type number}, {"share_median", type number}, {"share_lo", type number}, {"share_hi", type number}, {"roas_median", type number}, {"roas_lo", type number}, {"roas_hi", type number}}, "en-US")
+				in
+				    Typed

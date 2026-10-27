@@ -1,0 +1,103 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "p4_footer",
+  "position": {
+    "x": 24,
+    "y": 666,
+    "z": 14000,
+    "height": 50,
+    "width": 1232,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Source: reports/exports/proof_parameter_recovery.csv, proof_response_curves.csv, proof_attribution_gap.csv, proof_sampler_gates.csv, holdout_metrics.csv (Layer P synthetic advertiser with disclosed truth; holdout on both layers). Tag: SIMULATED. Intervals are 90 percent (5th to 95th percentile of the posterior draws).",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "9pt",
+                      "color": "#5A5C61"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Platform shares and true shares use different denominators; neither is total revenue. Offline channels receive no platform credit, so their platform-over-true ratio is undefined and shown as \"no platform report\", not as zero.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "9pt",
+                      "color": "#5A5C61"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Provenance footer: reports/exports/proof_parameter_recovery.csv, proof_response_curves.csv, proof_attribution_gap.csv, proof_sampler_gates.csv, hol...'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+relationship caf469c3-82c6-5c92-86f5-f1f77222cf93
+	fromColumn: Allocation.scenario
+	toColumn: Gain.scenario
+
+relationship 1486a2c0-d795-5a23-a413-58e2bdb264f5
+	fromColumn: Allocation.channel
+	toColumn: Channel.channel
+
+relationship 23a08488-22cc-5c14-9030-6b25c203ce61
+	fromColumn: ContributionsWeekly.channel
+	toColumn: Channel.channel
+
+relationship 5f1ca8e8-511a-5819-a5eb-07496b8cfc04
+	fromColumn: ContributionsWeekly.week_start
+	toColumn: Calendar.Date
+
+relationship 39345196-507b-5e1a-a027-d4cea6920299
+	fromColumn: RoasSummary.channel
+	toColumn: Channel.channel
+
+relationship e7386d9d-25e2-58dd-81ba-ac18b1a50723
+	fromColumn: ResponseCurves.channel
+	toColumn: Channel.channel

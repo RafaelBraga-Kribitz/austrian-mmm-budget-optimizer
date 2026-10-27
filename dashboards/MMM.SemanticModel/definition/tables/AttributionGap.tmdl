@@ -1,0 +1,143 @@
+/// Layer P platform-reported against true shares (proof_attribution_gap.csv).
+table AttributionGap
+	lineageTag: d1ab59f0-fd2a-59e8-9ed5-cf6025b88227
+
+	/// Channel's share of platform-attributed revenue in the simulated platform report. Offline channels receive no platform credit, so their share is zero by design.
+	measure 'Platform share' = IF ( HASONEVALUE ( AttributionGap[channel] ), SUM ( AttributionGap[platform_share] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Attribution gap
+		lineageTag: 2548b674-4762-5ee8-b61c-775ac109ba15
+
+	/// Channel's true share of incremental media contribution in the synthetic advertiser. Different denominator from Platform share; neither is total revenue.
+	measure 'True share' = IF ( HASONEVALUE ( AttributionGap[channel] ), SUM ( AttributionGap[true_share] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Attribution gap
+		lineageTag: 59365bf9-9ab0-58a4-98cb-92f9c3b40889
+
+	/// Platform share minus true share, in percentage points. Negative values are under-credit; for offline channels this is the whole true share.
+	measure 'Gap (percentage points)' = IF ( HASONEVALUE ( AttributionGap[channel] ), SUM ( AttributionGap[gap_pp] ) )
+		formatString: +0.0;-0.0;0.0
+		displayFolder: Attribution gap
+		lineageTag: d4a070a6-17f7-5bbc-a8e8-c33589ba057d
+
+	/// Platform-reported revenue over true incremental revenue minus one. Undefined for offline channels, which receive no platform credit: shown as "no platform report", never as zero. Paid Search equals the over-credit stated in the README.
+	measure 'Platform over true' =
+			VAR Pct = SELECTEDVALUE ( AttributionGap[platform_over_true_pct] )
+			RETURN
+			    IF (
+			        HASONEVALUE ( AttributionGap[channel] ),
+			        IF (
+			            ISBLANK ( Pct ),
+			            "no platform report",
+			            FORMAT ( DIVIDE ( Pct, 100 ), "+0.0%;-0.0%;0.0%" )
+			        )
+			    )
+		displayFolder: Attribution gap
+		lineageTag: e93dddeb-902b-5428-9494-52ef067c3d02
+
+	/// Layer P channel (synthetic advertiser).
+	column channel
+		dataType: string
+		lineageTag: c12f49e6-f179-5a3d-b849-f7dbc5743c2d
+		summarizeBy: none
+		sourceColumn: channel
+
+	column platform_share
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 1638e9f2-8dd2-5663-9773-12de6680ea64
+		summarizeBy: none
+		sourceColumn: platform_share
+
+	column true_share
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: baf5134c-e567-5dfe-bfa1-ece0a6a4cc41
+		summarizeBy: none
+		sourceColumn: true_share
+
+	column gap_pp
+		dataType: double
+		isHidden
+		formatString: +0.0;-0.0;0.0
+		lineageTag: 814012bc-7813-5ab1-8778-e9195b20b360
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column abs_gap_pp
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: 3f9c4c07-9fe8-5e2c-9d73-b59c60e596e5
+		summarizeBy: none
+		sourceColumn: abs_gap_pp
+
+	column estimated_share_median
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 5441e6a1-4b64-52e4-9635-6c64fbbc1faf
+		summarizeBy: none
+		sourceColumn: estimated_share_median
+
+	column estimated_share_lo
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 37f7e279-141d-50c5-951b-e53746540c6a
+		summarizeBy: none
+		sourceColumn: estimated_share_lo
+
+	column estimated_share_hi
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 0e9b7216-2379-5540-a4c6-42e7ba732d86
+		summarizeBy: none
+		sourceColumn: estimated_share_hi
+
+	column platform_reported_total
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 6b1157c7-1467-538f-8ad4-64d7d139e712
+		summarizeBy: none
+		sourceColumn: platform_reported_total
+
+	column true_contribution_total
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: b15d53bc-f49f-5a1d-945b-bcfd41e663c0
+		summarizeBy: none
+		sourceColumn: true_contribution_total
+
+	column platform_over_true_ratio
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: db62bdc5-d928-5d54-b169-38349d31f116
+		summarizeBy: none
+		sourceColumn: platform_over_true_ratio
+
+	column platform_over_true_pct
+		dataType: double
+		isHidden
+		formatString: +0.0;-0.0;0.0
+		lineageTag: 10ba90e2-8829-55f1-942d-71f492d39103
+		summarizeBy: none
+		sourceColumn: platform_over_true_pct
+
+	partition AttributionGap = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "proof_attribution_gap.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"channel", type text}, {"platform_share", type number}, {"true_share", type number}, {"gap_pp", type number}, {"abs_gap_pp", type number}, {"estimated_share_median", type number}, {"estimated_share_lo", type number}, {"estimated_share_hi", type number}, {"platform_reported_total", type number}, {"true_contribution_total", type number}, {"platform_over_true_ratio", type number}, {"platform_over_true_pct", type number}}, "en-US")
+				in
+				    Typed

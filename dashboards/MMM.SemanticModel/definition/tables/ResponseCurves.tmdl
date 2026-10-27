@@ -1,0 +1,110 @@
+/// Layer R response curves per channel with 90 percent bands (response_curves.csv).
+table ResponseCurves
+	lineageTag: 2fca1a63-02bf-58a4-9628-d9e2032b55e7
+
+	/// Weekly contribution at the grid spend, posterior median, in the dataset's money units, at the steady state of a constant weekly spend. One channel must be in context.
+	measure 'Response, median' = IF ( HASONEVALUE ( Channel[channel] ), SUM ( ResponseCurves[median] ) )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: 3d251a04-d2f0-5cfd-9f75-714edb82fc60
+
+	/// Lower end (5th percentile) of the 90 percent band of the response curve.
+	measure 'Response, lo' = IF ( HASONEVALUE ( Channel[channel] ), SUM ( ResponseCurves[lo] ) )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: 91670e42-4a7d-50e2-8390-3820c380b9a5
+
+	/// Upper end (95th percentile) of the 90 percent band of the response curve.
+	measure 'Response, hi' = IF ( HASONEVALUE ( Channel[channel] ), SUM ( ResponseCurves[hi] ) )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: 17d436e8-e2f9-531f-9ad3-e261de624476
+
+	/// The median curve up to the last grid point at or below the channel's current weekly spend, blank beyond it. Drawn on top of the full curve, its end marks where the channel stands today.
+	measure 'Response up to current spend' =
+			VAR GridSpend = MAX ( ResponseCurves[spend] )
+			VAR Current = MAX ( ResponseCurves[current_spend] )
+			RETURN
+			    IF ( GridSpend <= Current, [Response, median] )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: ff3f1087-b2bf-54d2-b227-41e999f5829e
+
+	/// The channel's current average weekly spend, in the dataset's money units.
+	measure 'Current weekly spend (curve)' = IF ( HASONEVALUE ( Channel[channel] ), MAX ( ResponseCurves[current_spend] ) )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: fc671d37-c39a-5aac-8cc3-c3272846f4b1
+
+	/// Largest weekly spend in the data. Beyond it the curve is an extrapolation of the fitted Hill shape.
+	measure 'Largest observed weekly spend' = IF ( HASONEVALUE ( Channel[channel] ), MAX ( ResponseCurves[observed_max_spend] ) )
+		formatString: #,0
+		displayFolder: Response curve
+		lineageTag: d0cd0c4a-b2a0-5fb7-8c1d-0ba672e563bf
+
+	column channel
+		dataType: string
+		isHidden
+		lineageTag: 16d9a76a-8482-5e24-b035-c65fbf307f12
+		summarizeBy: none
+		sourceColumn: channel
+
+	/// Weekly spend on the curve grid, in the dataset's money units. The grid ends at 1.5 times the largest observed weekly spend.
+	column spend
+		dataType: double
+		formatString: #,0
+		lineageTag: 833bf0f4-b2a6-5a3c-b41f-3ce712071e67
+		summarizeBy: none
+		sourceColumn: spend
+
+	column median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 9646053d-2e84-5da3-8136-ba53d9d30591
+		summarizeBy: none
+		sourceColumn: median
+
+	column lo
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: aae381d0-e63c-545a-b70f-08c2a42b6e1d
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 770e3897-6ebe-5d65-ad46-cb7f24f75d6d
+		summarizeBy: none
+		sourceColumn: hi
+
+	column current_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: b69e5405-330f-508a-8347-d685b571f707
+		summarizeBy: none
+		sourceColumn: current_spend
+
+	column observed_max_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 4986fd6c-83be-543f-80e9-5293395124cf
+		summarizeBy: none
+		sourceColumn: observed_max_spend
+
+	partition ResponseCurves = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "response_curves.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"channel", type text}, {"spend", type number}, {"median", type number}, {"lo", type number}, {"hi", type number}, {"current_spend", type number}, {"observed_max_spend", type number}}, "en-US")
+				in
+				    Typed

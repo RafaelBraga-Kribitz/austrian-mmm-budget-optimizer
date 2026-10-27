@@ -1,0 +1,97 @@
+/// Weekly decomposition of revenue by channel, Layer R (contributions_weekly.csv), long format.
+table ContributionsWeekly
+	lineageTag: feb107b8-a62d-5950-b9b1-7c4092004f2c
+
+	/// Revenue attributed to the channel in the week, posterior median, in the dataset's money units. For Baseline it is the part of revenue attributed to no channel. Medians are summed across channels and weeks, an approximation of the median of the sum.
+	measure 'Weekly contribution, median' = SUM ( ContributionsWeekly[median] )
+		formatString: #,0
+		displayFolder: Contribution
+		lineageTag: 0afe95e1-57a5-5581-9941-ea81a78dc5bf
+
+	/// Lower end (5th percentile) of the 90 percent interval of a channel's weekly contribution. Blank for Baseline, which carries no interval. Meaningful per channel and week only.
+	measure 'Weekly contribution, lo' = SUM ( ContributionsWeekly[lo] )
+		formatString: #,0
+		displayFolder: Contribution
+		lineageTag: 0c492f14-77e8-57e8-80d7-102918fe711d
+
+	/// Upper end (95th percentile) of the 90 percent interval of a channel's weekly contribution. Meaningful per channel and week only.
+	measure 'Weekly contribution, hi' = SUM ( ContributionsWeekly[hi] )
+		formatString: #,0
+		displayFolder: Contribution
+		lineageTag: dd74add9-753f-5f86-90f4-514fece06531
+
+	/// Observed revenue, summed over the weeks in context, in the dataset's money units. The file repeats each week's revenue on every channel row, so the measure takes it once per week (context transition over the week values).
+	measure Revenue =
+			SUMX (
+			    VALUES ( ContributionsWeekly[week] ),
+			    CALCULATE ( MAX ( ContributionsWeekly[revenue] ) )
+			)
+		formatString: #,0
+		displayFolder: Contribution
+		lineageTag: 98aacd9c-e376-5724-a7fb-35694e320e20
+
+	column week
+		dataType: int64
+		isHidden
+		lineageTag: 3f31cc72-c0cf-5520-9a17-11be5afd3e28
+		summarizeBy: none
+		sourceColumn: week
+
+	column week_start
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: 06816cb7-d5ac-5a06-a2e2-a1c1e2682537
+		summarizeBy: none
+		sourceColumn: week_start
+
+	column channel
+		dataType: string
+		isHidden
+		lineageTag: 683ef9e2-57c9-5f19-8a3e-8e01631f838c
+		summarizeBy: none
+		sourceColumn: channel
+
+	column median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 25dabd54-936f-5088-818f-2ed1273309cf
+		summarizeBy: none
+		sourceColumn: median
+
+	column lo
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: bac7a056-2657-56f2-adbf-b620b64e2753
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 86dac5dd-8083-50f6-a0c6-712ffd5d8a35
+		summarizeBy: none
+		sourceColumn: hi
+
+	column revenue
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 331e987e-e8cc-5058-993e-c6de5ea9dc92
+		summarizeBy: none
+		sourceColumn: revenue
+
+	partition ContributionsWeekly = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "contributions_weekly.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"week", Int64.Type}, {"week_start", type date}, {"channel", type text}, {"median", type number}, {"lo", type number}, {"hi", type number}, {"revenue", type number}}, "en-US")
+				in
+				    Typed

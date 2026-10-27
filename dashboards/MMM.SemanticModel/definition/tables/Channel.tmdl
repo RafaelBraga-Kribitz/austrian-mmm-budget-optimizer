@@ -1,0 +1,40 @@
+/// Layer R channels (public demo data) and the Baseline row.
+table Channel
+	lineageTag: 57f41f2e-ea9b-5718-81ba-4a5b257f10bf
+
+	/// Layer R channel name, plus Baseline (the part of revenue the model attributes to no channel).
+	column channel
+		dataType: string
+		lineageTag: 39edc221-32c1-570b-8cf1-08735e03e275
+		summarizeBy: none
+		sourceColumn: channel
+		sortByColumn: channel_order
+
+	/// Order of first appearance in contributions_weekly.csv; Baseline is first so it sits at the bottom of a stacked chart.
+	column channel_order
+		dataType: int64
+		isHidden
+		lineageTag: 5b40d973-d1a1-5113-bb3f-586989bfe39f
+		summarizeBy: none
+		sourceColumn: channel_order
+
+	column is_media
+		dataType: boolean
+		isHidden
+		lineageTag: 8cfa0360-5ca0-518c-bd04-3cc015becbf9
+		summarizeBy: none
+		sourceColumn: is_media
+
+	partition Channel = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "contributions_weekly.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Channels = Table.Distinct(Table.SelectColumns(Promoted, {"channel"})),
+				    Indexed = Table.AddIndexColumn(Channels, "channel_order", 0, 1, Int64.Type),
+				    Flagged = Table.AddColumn(Indexed, "is_media", each [channel] <> "Baseline", type logical),
+				    Typed = Table.TransformColumnTypes(Flagged, {{"channel", type text}}, "en-US")
+				in
+				    Typed

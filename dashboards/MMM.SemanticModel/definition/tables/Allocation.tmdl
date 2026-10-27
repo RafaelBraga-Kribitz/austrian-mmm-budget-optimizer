@@ -1,0 +1,257 @@
+/// Current and recommended weekly spend per channel and scenario (recommendation_allocation.csv).
+table Allocation
+	lineageTag: 039fb70a-30ae-5989-a690-9301b94c305b
+
+	/// Current average weekly spend, in the dataset's money units (not euros). Returns blank unless exactly one scenario is selected, because every scenario repeats the current spend.
+	measure 'Current weekly spend' = IF ( HASONEVALUE ( Gain[scenario] ), SUM ( Allocation[current_spend] ) )
+		formatString: #,0
+		displayFolder: Spend
+		lineageTag: af2b4d07-227a-5df8-9e65-c82f9e009f49
+
+	/// Weekly spend the optimiser recommends in the selected scenario, in the dataset's money units. Blank unless exactly one scenario is selected.
+	measure 'Recommended weekly spend' = IF ( HASONEVALUE ( Gain[scenario] ), SUM ( Allocation[recommended_spend] ) )
+		formatString: #,0
+		displayFolder: Spend
+		lineageTag: 2f581b37-c077-54ac-be23-cd217e468ed6
+
+	/// Recommended over current weekly spend minus one. Equals delta_pct divided by 100 in reallocation_table.csv and the change column of the README decision table.
+	measure 'Change in spend %' = DIVIDE ( [Recommended weekly spend] - [Current weekly spend], [Current weekly spend] )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Spend
+		lineageTag: d630ec3f-9095-589b-8393-e6956181e3a3
+
+	/// Channel share of the scenario's current total weekly spend.
+	measure 'Share of budget, current' = IF ( HASONEVALUE ( Gain[scenario] ), SUM ( Allocation[share_current] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Spend
+		lineageTag: 15e67c54-d846-5e54-abb7-8ce8e0318af6
+
+	/// Channel share of the scenario's recommended total weekly spend.
+	measure 'Share of budget, recommended' = IF ( HASONEVALUE ( Gain[scenario] ), SUM ( Allocation[share_recommended] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Spend
+		lineageTag: e61390d7-596e-539d-820e-8421e6648762
+
+	/// Revenue from one more unit of spend at the current weekly spend, posterior median. Defined per channel; blank on totals because marginal returns do not add.
+	measure 'Marginal ROAS at current, median' = SELECTEDVALUE ( Allocation[marginal_roas_current_median] )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: e7f7b8c4-3292-56a3-a2e5-d3bfe5b0857f
+
+	/// Lower end (5th percentile) of the 90 percent interval of marginal ROAS at current spend. The breakeven gate compares this value with breakeven ROAS.
+	measure 'Marginal ROAS at current, lo' = SELECTEDVALUE ( Allocation[marginal_roas_current_lo] )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: 864d5f9d-5b97-5ee3-8114-48ebbaf5a70a
+
+	/// Upper end (95th percentile) of the 90 percent interval of marginal ROAS at current spend.
+	measure 'Marginal ROAS at current, hi' = SELECTEDVALUE ( Allocation[marginal_roas_current_hi] )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: 22086b44-3a2d-5361-910a-691d4837614d
+
+	/// Marginal ROAS at the recommended spend of the selected scenario, posterior median.
+	measure 'Marginal ROAS at recommended, median' = IF ( HASONEVALUE ( Gain[scenario] ), SELECTEDVALUE ( Allocation[marginal_roas_recommended_median] ) )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: ec377abc-e288-51f6-8ec9-9b11e2238188
+
+	/// Lower end (5th percentile) of the 90 percent interval of marginal ROAS at the recommended spend.
+	measure 'Marginal ROAS at recommended, lo' = IF ( HASONEVALUE ( Gain[scenario] ), SELECTEDVALUE ( Allocation[marginal_roas_recommended_lo] ) )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: 405fb894-4ade-58d3-99f6-1cf15a4a15a6
+
+	/// Upper end (95th percentile) of the 90 percent interval of marginal ROAS at the recommended spend.
+	measure 'Marginal ROAS at recommended, hi' = IF ( HASONEVALUE ( Gain[scenario] ), SELECTEDVALUE ( Allocation[marginal_roas_recommended_hi] ) )
+		formatString: 0.00
+		displayFolder: Marginal ROAS
+		lineageTag: 9c207490-752c-5e1d-834d-dfe3941117b6
+
+	/// Weekly media contribution at the recommended spend, posterior median, in the dataset's money units. Medians are summed on totals, which is an approximation of the median of the total.
+	measure 'Contribution at recommended, median' = IF ( HASONEVALUE ( Gain[scenario] ), SUM ( Allocation[contribution_recommended_median] ) )
+		formatString: #,0
+		displayFolder: Contribution
+		lineageTag: 7aaddd74-c69f-5e06-b2d8-a71b6ad45dc2
+
+	/// "Held by rule" when the breakeven gate held the channel at current spend in the selected scenario (held_by_rule in reallocation_table.csv).
+	measure 'Held by rule' = IF ( HASONEVALUE ( Channel[channel] ) && HASONEVALUE ( Gain[scenario] ), SELECTEDVALUE ( Allocation[held_label] ) )
+		displayFolder: Decision rule
+		lineageTag: 769b1934-3076-5364-bfd2-71324fc467ce
+
+	column scenario
+		dataType: string
+		isHidden
+		lineageTag: c30df97c-5d56-5369-ac9d-93b910038f9b
+		summarizeBy: none
+		sourceColumn: scenario
+
+	column channel
+		dataType: string
+		isHidden
+		lineageTag: 8cecbb39-3b4a-5348-87e0-e2e573b9827e
+		summarizeBy: none
+		sourceColumn: channel
+
+	column current_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: a78bfe28-4cce-5843-91a8-80b132f64873
+		summarizeBy: none
+		sourceColumn: current_spend
+
+	column recommended_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 4f281479-baed-5d32-9e8a-16830e5b373a
+		summarizeBy: none
+		sourceColumn: recommended_spend
+
+	column delta
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: e4e825c5-2744-5fff-865d-4cd9b5ad7fd2
+		summarizeBy: none
+		sourceColumn: delta
+
+	column delta_pct
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: cb8b4979-3608-573a-8ee6-382962ebd436
+		summarizeBy: none
+		sourceColumn: delta_pct
+
+	column share_current
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: e9032059-a003-5871-bd45-f54da523fa16
+		summarizeBy: none
+		sourceColumn: share_current
+
+	column share_recommended
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 9f2217a6-6ac3-5126-a075-5423d00d378c
+		summarizeBy: none
+		sourceColumn: share_recommended
+
+	column marginal_roas_current_median
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 5e790e5e-ffde-57db-b9b2-b7a7e0853b12
+		summarizeBy: none
+		sourceColumn: marginal_roas_current_median
+
+	column marginal_roas_current_lo
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 1caa3f4f-34ed-505c-afc9-1c4feece9ec5
+		summarizeBy: none
+		sourceColumn: marginal_roas_current_lo
+
+	column marginal_roas_current_hi
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 34101509-16a7-51aa-91f1-2319b29e3050
+		summarizeBy: none
+		sourceColumn: marginal_roas_current_hi
+
+	column marginal_roas_recommended_median
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 1e5cfdc1-eadb-5b7f-9381-3b4a30b489d5
+		summarizeBy: none
+		sourceColumn: marginal_roas_recommended_median
+
+	column marginal_roas_recommended_lo
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 17b1da4c-83e3-5f25-ac97-cdca448e6a5d
+		summarizeBy: none
+		sourceColumn: marginal_roas_recommended_lo
+
+	column marginal_roas_recommended_hi
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: 5a041e45-cc4d-5f30-a1f4-d53f4bd4a336
+		summarizeBy: none
+		sourceColumn: marginal_roas_recommended_hi
+
+	column contribution_current_median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 4374265e-1519-5ba2-a360-d004c7128bbf
+		summarizeBy: none
+		sourceColumn: contribution_current_median
+
+	column contribution_recommended_median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 0358ace9-7895-559e-8c34-c3bdd3f7da13
+		summarizeBy: none
+		sourceColumn: contribution_recommended_median
+
+	column contribution_recommended_lo
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 0285a0f2-a551-5edb-91da-86cdb6355b17
+		summarizeBy: none
+		sourceColumn: contribution_recommended_lo
+
+	column contribution_recommended_hi
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: c60e287c-bd93-5b50-a933-cf5dd0f487e1
+		summarizeBy: none
+		sourceColumn: contribution_recommended_hi
+
+	column per_draw_share_median
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: cb550712-af3b-5ea2-bd7d-e4809d405320
+		summarizeBy: none
+		sourceColumn: per_draw_share_median
+
+	column held_by_rule
+		dataType: boolean
+		isHidden
+		lineageTag: 33a5a856-171e-5fdc-b052-cf2d416ba0db
+		summarizeBy: none
+		sourceColumn: held_by_rule
+
+	/// "Held by rule" where held_by_rule is true: the breakeven gate kept the channel at current spend. Empty otherwise.
+	column held_label
+		dataType: string
+		lineageTag: 51788da9-7b9e-5ede-8b8e-1baddec4af25
+		summarizeBy: none
+		sourceColumn: held_label
+
+	partition Allocation = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "recommendation_allocation.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"scenario", type text}, {"channel", type text}, {"current_spend", type number}, {"recommended_spend", type number}, {"delta", type number}, {"delta_pct", type number}, {"share_current", type number}, {"share_recommended", type number}, {"marginal_roas_current_median", type number}, {"marginal_roas_current_lo", type number}, {"marginal_roas_current_hi", type number}, {"marginal_roas_recommended_median", type number}, {"marginal_roas_recommended_lo", type number}, {"marginal_roas_recommended_hi", type number}, {"contribution_current_median", type number}, {"contribution_recommended_median", type number}, {"contribution_recommended_lo", type number}, {"contribution_recommended_hi", type number}, {"per_draw_share_median", type number}, {"held_by_rule", type logical}}, "en-US"),
+				    Labelled = Table.AddColumn(Typed, "held_label", each if [held_by_rule] then "Held by rule" else "", type text)
+				in
+				    Labelled

@@ -1,0 +1,82 @@
+/// Holdout error and interval coverage against two baselines, both layers (holdout_metrics.csv).
+table Holdout
+	lineageTag: fc9de22d-b9d5-54d8-83df-28a2013acaf2
+
+	/// Mean absolute percentage error on the holdout weeks, for one model and layer.
+	measure 'Holdout MAPE' = SELECTEDVALUE ( Holdout[mape] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Holdout
+		lineageTag: fe47b398-8326-5108-a324-d58ab1fc3187
+
+	/// Share of holdout weeks inside the model's 90 percent interval; nominal is 90 percent by construction.
+	measure 'Holdout coverage' = SELECTEDVALUE ( Holdout[coverage_90] )
+		formatString: 0%
+		displayFolder: Holdout
+		lineageTag: e2e1d104-42cd-5c6a-bc59-90b220d45db4
+
+	column layer
+		dataType: string
+		isHidden
+		lineageTag: becd58d0-af27-5502-b04e-8c943a732a69
+		summarizeBy: none
+		sourceColumn: layer
+
+	column model
+		dataType: string
+		lineageTag: 1fc2f096-5852-5ab7-aba3-2777b9b8b91c
+		summarizeBy: none
+		sourceColumn: model
+
+	column mape
+		dataType: double
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: cc3151f7-5f5e-5182-8a0b-8dda169e337b
+		summarizeBy: none
+		sourceColumn: mape
+
+	column coverage_90
+		dataType: double
+		formatString: 0%
+		lineageTag: 0439033c-7ceb-54dc-ade1-e250dec98383
+		summarizeBy: none
+		sourceColumn: coverage_90
+
+	column interval_width_mean
+		dataType: double
+		formatString: #,0
+		lineageTag: 5c1136ad-8238-5d12-be46-9e5c7529335d
+		summarizeBy: none
+		sourceColumn: interval_width_mean
+
+	column n_test
+		dataType: int64
+		formatString: 0
+		lineageTag: 309d0791-7c2a-5f15-b95e-1b3ea8317bf3
+		summarizeBy: none
+		sourceColumn: n_test
+
+	column train_weeks
+		dataType: int64
+		formatString: 0
+		lineageTag: 6df41142-0862-5cf7-824d-850ed1c39810
+		summarizeBy: none
+		sourceColumn: train_weeks
+
+	column layer_label
+		dataType: string
+		lineageTag: 10a9618b-a833-5362-b988-aead244165b8
+		summarizeBy: none
+		sourceColumn: layer_label
+
+	partition Holdout = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "holdout_metrics.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"layer", type text}, {"model", type text}, {"mape", type number}, {"coverage_90", type number}, {"interval_width_mean", type number}, {"n_test", Int64.Type}, {"train_weeks", Int64.Type}}, "en-US"),
+				    LayerLabel = Table.AddColumn(Typed, "layer_label", each if [layer] = "layer_p" then "Layer P (synthetic)" else if [layer] = "layer_r" then "Layer R (public demo)" else [layer], type text)
+				in
+				    LayerLabel
