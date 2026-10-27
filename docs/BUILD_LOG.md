@@ -444,3 +444,35 @@ sampler deviations, passes a chart parameter and removes an unused method.
 Conclusion: the published decision (same budget, out of Out-of-home into TV and
 Facebook, median gain 15.1 percent, 10th percentile 8.8 percent) stands on the current
 code. `pytest -m "not slow"`: 60 passed; README gate PASS_WITH_EXCELLENCE.
+
+---
+
+### 2026-10-27 — Dashboard built: Power BI Project and static HTML twin (ADR-010)
+
+The four pages of `docs/dashboard_handoff.md` now exist in two renderings on the same
+ten CSV files in `reports/exports/`; no number was typed by hand and no pipeline output
+changed.
+
+- **Power BI Project** in `dashboards/`: `MMM.pbip`, `MMM.SemanticModel/` (TMDL: twelve
+  tables, six single-direction relationships, a marked `Calendar`, one `ExportsPath`
+  parameter, every measure with description, display folder and format string) and
+  `MMM.Report/` (PBIR: report 3.0.0, page 2.0.0, visual container 2.4.0; custom theme
+  from the Braga tokens). Gates: `scripts/validate_pbip.py` against a local copy of the
+  Microsoft schemas, 62 files, 0 errors; `tests/test_dashboard_pbip.py` (every visual
+  field exists in the model, relationships, all ten exports loaded through the
+  parameter, pages and German subtitles equal the handoff, alt text and tab order,
+  theme registered). Not opened in Power BI Desktop: that step and the Power BI
+  screenshots stay with Rafael (`dashboards/README.md`).
+- **HTML twin** `dashboards/html/index.html` from `scripts/build_dashboard_html.py`:
+  one offline file, inline SVG charts, a data table under each chart, light and dark.
+  `tests/test_dashboard_html.py` checks that the build is deterministic and equal to the
+  committed file, that the headline cards equal the CSV values, and that the page loads
+  nothing from the network. Screenshots: `docs/assets/dashboard_html_p1..p4.png`.
+- Spec notes: the gain caption is copied verbatim although the two extra-budget
+  scenarios move channels by more than fifty percent (the increase is added on top of
+  the bound, LIMITATIONS.md section 5); both renderings add that sentence after the
+  caption. The stacked decomposition draws observed revenue over the stack in the HTML
+  twin, so the weekly residual is visible.
+
+Evidence: `uv run ruff check .` all checks passed; `uv run pytest -m "not slow"` 80
+passed; README gate PASS_WITH_EXCELLENCE.

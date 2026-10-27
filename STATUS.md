@@ -1,6 +1,6 @@
 # STATUS
 
-Updated 2026-09-30. Working branch: main. This file holds the current state and the
+Updated 2026-10-27. Working branch: main. This file holds the current state and the
 decisions only. The session logs up to 2026-09-16 (overnight build, morning brief,
 audit fixes, polish, inventory and pull request triage) are in `docs/BUILD_LOG.md`,
 section "Session logs moved from STATUS.md on 2026-09-30".
@@ -12,8 +12,15 @@ section "Session logs moved from STATUS.md on 2026-09-30".
   ADR-007), Layer D (budget optimiser on the Layer R posterior), the rendered README
   and German summary, the executed notebook, tests and CI. Merge commits `0be8cbc`
   (pull request 46) and `8e77086` (pull request 47).
-- **Governance.** Live records are ADR-000, ADR-007, ADR-008 and ADR-009 in
-  `docs/adr/`. ADR-009 lists the spec sections that were never built. The planning
+- **Governance.** Live records are ADR-000, ADR-007, ADR-008, ADR-009 and ADR-010 in
+  `docs/adr/`. ADR-009 lists the spec sections that were never built; ADR-010 supersedes
+  its dashboard row.
+- **Dashboard.** Built 2026-10-27 (ADR-010, D-34): a Power BI Project in `dashboards/`
+  (`MMM.pbip`, TMDL model, PBIR report) on the CSV feed in `reports/exports/`, and a
+  static HTML twin `dashboards/html/index.html` from `scripts/build_dashboard_html.py`.
+  `tests/test_dashboard_pbip.py` and `tests/test_dashboard_html.py` guard both;
+  `scripts/validate_pbip.py` checks the JSON against the Microsoft schemas. Not yet
+  opened in Power BI Desktop. The planning
   stack (charter, agent playbook, GSD plans) is archived under `docs/archive/`.
 - **Branches.** The D-30 cleanup was done on 2026-09-16. Checked with
   `git ls-remote origin` on 2026-09-30: `main` plus the heads of merged pull requests
@@ -70,7 +77,9 @@ at, from the `attempts` list of its diagnostics file:
 - **Audit 2026-09-30.** All items are closed except item 13: pin the README contract
   repository in `.github/workflows/readme-quality.yml` to a commit SHA (resolution
   table in `docs/AUDIT_2026-09-30.md`).
-- **Human work.** The Power BI build and its screenshots (`docs/dashboard_handoff.md`).
+- **Human work.** Open `dashboards/MMM.pbip` in Power BI Desktop, set `ExportsPath`,
+  refresh, check the cards against the README, save, and commit the Power BI screenshots
+  as `docs/assets/dashboard_p1..p4.png` (checklist in `dashboards/README.md`).
 - **Blocker for real data.** The private agency drop plus written permission is the
   only external blocker for Layer R on real Austrian client data. D-29 says do not wait
   idle: polish the public-demo package. AG-002 still forbids gray-zone processing.
@@ -79,6 +88,12 @@ at, from the `attempts` list of its diagnostics file:
 
 A decision that no longer holds is marked, not deleted. Markers added on 2026-09-30
 are in bold.
+
+### Recorded 2026-10-27
+
+| ID | Choice | What it means |
+|----|--------|----------------|
+| D-34 | Build the dashboard as a PBIP text project plus a static HTML twin | Rafael chose both renderings. The `.pbix` of SPEC-07 RB-406 is replaced by `dashboards/MMM.pbip`; the HTML twin and its screenshots are committed because the CSV feed is the project's published result on public data. ADR-010. |
 
 ### Recorded 2026-09-16
 

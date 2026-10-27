@@ -49,7 +49,7 @@ have arrived anyway. The model in this repository is built to test those claims.
 
 | Audience | Start here |
 |---|---|
-| Recruiter | [Decision](#decision) and the hero chart |
+| Recruiter | [Decision](#decision), the hero chart and the [Dashboard](#dashboard) |
 | Hiring manager | [Decision](#decision), [Method](#method), and [Validation](#validation) |
 | Technical reviewer | [Architecture](#architecture), [Reproduce](#reproduce), and `src/ambo/` |
 | Auditor | [Data](#data), [Validation](#validation), and [Limitations](#limitations) |
@@ -75,6 +75,26 @@ Layer R amounts are not euros. Shares, ROAS ratios and the breakeven test are th
 {{proof_section}}
 
 Holdout MAPE and interval coverage against two baselines are in Results. Sampler gates are written to `diagnostics.json` next to every fit.
+
+## Dashboard
+
+Four pages on the CSV feed in `reports/exports/`, built twice from the same files: a Power BI Project (`dashboards/MMM.pbip`, a TMDL model and a PBIR report kept as text, so a test checks every visual against the model) and a static HTML twin (`dashboards/html/index.html`, one file that works offline). The screenshots below are of the HTML twin. Power BI screenshots follow after the Desktop step described in [dashboards/README.md](dashboards/README.md); the page specification is [docs/dashboard_handoff.md](docs/dashboard_handoff.md).
+
+![HTML twin of the Recommendation page: scenario switch, gain cards, current against recommended spend per channel, marginal ROAS intervals against breakeven](docs/assets/dashboard_html_p1.png)
+
+*Recommendation (Wohin der naechste Euro geht): pick a scenario, read the gain and the verdict of the rule, then see which channels gain budget and which the breakeven gate holds.*
+
+![HTML twin of the Contributions page: weekly stacked decomposition by channel over observed revenue, and a ROAS table with interval bars](docs/assets/dashboard_html_p2.png)
+
+*Contributions (Was jeder Kanal beitraegt): the weekly decomposition with observed revenue on top, and ROAS and revenue share per channel with their intervals.*
+
+![HTML twin of the Response curves page: one saturation curve per channel with its band, current spend and the extrapolated range marked](docs/assets/dashboard_html_p3.png)
+
+*Response curves (Wo die Saettigung beginnt): where each channel sits on its curve today, and where the curve leaves the observed spend range.*
+
+![HTML twin of the Proof page: parameter recovery against truth, attribution gap dumbbell, true against recovered curves, sampler gates and holdout tables](docs/assets/dashboard_html_p4.png)
+
+*Proof (Der Beweis auf bekannter Wahrheit): the same model on the synthetic advertiser, judged against the disclosed truth.*
 
 ## Architecture
 
@@ -111,7 +131,7 @@ This README is rendered from `scripts/readme_template.md` by `scripts/render_rea
 
 The full list, with what each limit means for a client engagement, is in
 [LIMITATIONS.md](LIMITATIONS.md); the decisions behind the build are in
-[docs/adr/](docs/adr/README.md) and the dashboard feed in [docs/dashboard_handoff.md](docs/dashboard_handoff.md).
+[docs/adr/](docs/adr/README.md), the dashboard specification in [docs/dashboard_handoff.md](docs/dashboard_handoff.md) and its build in [dashboards/README.md](dashboards/README.md).
 
 ## What I would do differently with production data
 
@@ -135,8 +155,9 @@ The full list, with what each limit means for a client engagement, is in
 | `src/ambo/` | Model, sampler, optimiser, charts, configs |
 | `data/` | Layer P synthetic advertiser and Layer R public demo file |
 | `reports/` | Layer P, R and D artifacts that the README is rendered from |
-| `scripts/` | README, memo and German summary renderers, notebook builder, dashboard export |
-| `tests/` | Recovery, transforms, optimiser, and the README-numbers gate |
+| `scripts/` | README, memo and German summary renderers, notebook builder, dashboard export, HTML twin builder, PBIP schema check |
+| `dashboards/` | Power BI Project (TMDL model, PBIR report) and the static HTML twin of the dashboard |
+| `tests/` | Recovery, transforms, optimiser, the README-numbers gate, and the dashboard model-report checks |
 | `docs/` | Specs, ADRs, dashboard handoff, build log |
 | `notebooks/` | Walkthrough notebook |
 
