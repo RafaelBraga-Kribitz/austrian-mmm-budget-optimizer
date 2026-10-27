@@ -1,0 +1,125 @@
+/// Layer P true parameters against their posterior (proof_parameter_recovery.csv).
+table ParameterRecovery
+	lineageTag: 38aac273-1ecb-505d-8b62-3cfb9e6cb292
+
+	/// Value of the parameter in the disclosed data-generating process (Layer P truth). Defined per parameter.
+	measure 'True value' = IF ( HASONEVALUE ( ParameterRecovery[parameter] ), SUM ( ParameterRecovery[true] ) )
+		formatString: #,0.00
+		displayFolder: Recovery
+		lineageTag: c88a54d3-bde8-51ba-a253-59e8e6f20c05
+
+	/// Posterior median of the parameter, fitted on the synthetic data.
+	measure 'Posterior median' = IF ( HASONEVALUE ( ParameterRecovery[parameter] ), SUM ( ParameterRecovery[median] ) )
+		formatString: #,0.00
+		displayFolder: Recovery
+		lineageTag: 4d96d337-96ee-5dc1-9f2a-3fd4f0551633
+
+	/// Lower end (5th percentile) of the 90 percent posterior interval.
+	measure 'Posterior lo' = IF ( HASONEVALUE ( ParameterRecovery[parameter] ), SUM ( ParameterRecovery[lo] ) )
+		formatString: #,0.00
+		displayFolder: Recovery
+		lineageTag: d70eee92-9614-568a-b6db-8a3d48d12be9
+
+	/// Upper end (95th percentile) of the 90 percent posterior interval.
+	measure 'Posterior hi' = IF ( HASONEVALUE ( ParameterRecovery[parameter] ), SUM ( ParameterRecovery[hi] ) )
+		formatString: #,0.00
+		displayFolder: Recovery
+		lineageTag: 9b10a61f-0be3-5171-ac2b-d3f1595ac37a
+
+	/// Number of true parameters inside their 90 percent posterior interval. Over all parameters it equals the covered count in the README and in run_info.json.
+	measure 'Parameters covered' =
+			COALESCE (
+			    CALCULATE ( COUNTROWS ( ParameterRecovery ), ParameterRecovery[covered] = TRUE () ),
+			    0
+			)
+		formatString: 0
+		displayFolder: Recovery
+		lineageTag: b5f8c59e-b11c-5948-925e-8844933b9fc9
+
+	/// Number of parameters with a disclosed true value.
+	measure 'Parameters total' = COALESCE ( COUNTROWS ( ParameterRecovery ), 0 )
+		formatString: 0
+		displayFolder: Recovery
+		lineageTag: df63c248-cab5-5264-9588-1250a0731116
+
+	/// Covered parameters as text: covered count, the word of, total count.
+	measure 'Parameters covered label' = [Parameters covered] & " of " & [Parameters total]
+		displayFolder: Recovery
+		lineageTag: 4735d7e2-880e-5a44-8713-f2efe45ceeda
+
+	column family
+		dataType: string
+		lineageTag: 4ebc5340-1892-5771-b8ce-4b17bc0fec24
+		summarizeBy: none
+		sourceColumn: family
+
+	column parameter
+		dataType: string
+		lineageTag: 10059f41-811c-5445-8bf2-9e643e35d62a
+		summarizeBy: none
+		sourceColumn: parameter
+
+	column channel
+		dataType: string
+		isHidden
+		lineageTag: 33b569e9-aa4c-514a-ba38-9111c146c8fa
+		summarizeBy: none
+		sourceColumn: channel
+
+	/// Unit of the parameter; compare true and estimated values only within one unit.
+	column unit
+		dataType: string
+		lineageTag: 2a778746-fc93-5072-bb98-1ffb04733b86
+		summarizeBy: none
+		sourceColumn: unit
+
+	column true
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 195a65a9-2cc2-56ca-bda8-16fc22366fba
+		summarizeBy: none
+		sourceColumn: true
+
+	column median
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: ce4e852f-9ffe-56dd-94c7-b857674a37f6
+		summarizeBy: none
+		sourceColumn: median
+
+	column lo
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: 65a9d422-76e6-56fc-81fd-32d5d0db3386
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		isHidden
+		formatString: #,0.00
+		lineageTag: a9e370d5-7ea3-5ad0-a58d-5ed597eaa71e
+		summarizeBy: none
+		sourceColumn: hi
+
+	column covered
+		dataType: boolean
+		isHidden
+		lineageTag: 4944a377-9424-52f0-aef1-8b72f916b4f3
+		summarizeBy: none
+		sourceColumn: covered
+
+	partition ParameterRecovery = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "proof_parameter_recovery.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"family", type text}, {"parameter", type text}, {"channel", type text}, {"unit", type text}, {"true", type number}, {"median", type number}, {"lo", type number}, {"hi", type number}, {"covered", type logical}}, "en-US")
+				in
+				    Typed

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json",
+  "pageOrder": [
+    "p1_recommendation",
+    "p2_contributions",
+    "p3_response_curves",
+    "p4_proof"
+  ],
+  "activePageName": "p1_recommendation"
+}

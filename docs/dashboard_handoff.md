@@ -1,7 +1,10 @@
 # Dashboard handoff
 
-The dashboard is built by hand in Power BI (or any BI tool) on top of the CSV feed
-under `reports/exports/`, written by `uv run python scripts/export_dashboard.py`
+This is the specification of the dashboard: pages, subtitles, visuals, column notes and
+captions. The build is in [dashboards/](../dashboards/README.md): a Power BI Project
+(`dashboards/MMM.pbip`, TMDL model and PBIR report) and a static HTML twin
+(`dashboards/html/index.html`), both on the CSV feed under `reports/exports/`
+(ADR-010). The feed is written by `uv run python scripts/export_dashboard.py`
 after every pipeline run. No page reads the model; every page reads a file. Money is in
 the dataset's units until real client data replaces the public demo file.
 
@@ -47,6 +50,10 @@ the dataset's units until real client data replaces the public demo file.
 1. `uv run python -m ambo.run layer_p`, `layer_r`, `layer_d` (or reuse the committed
    artifacts under `reports/`).
 2. `uv run python scripts/export_dashboard.py`.
-3. Point the BI tool at `reports/exports/` and refresh.
-4. Screenshots and the `.pbix` file are not committed yet. The dashboard itself is
-   still to be built (STATUS, open items).
+3. `uv run python scripts/build_dashboard_html.py` rebuilds the HTML twin.
+4. In Power BI Desktop, open `dashboards/MMM.pbip`, point the `ExportsPath` parameter at
+   `reports/exports/` and refresh; the full checklist is in
+   [dashboards/README.md](../dashboards/README.md).
+5. Power BI screenshots are not committed yet: the project has not been opened in
+   Desktop (STATUS, open items). The HTML twin's screenshots are
+   `docs/assets/dashboard_html_p1.png` to `dashboard_html_p4.png`.

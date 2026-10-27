@@ -107,3 +107,8 @@ ADR-008 and STATUS.
   takes the next free number instead.
 - Building any item in section 1 later is a new ADR that supersedes the matching row
   here.
+
+Note (2026-10-27): the dashboard part of the SPEC-07 sections 2 and 4 row is superseded
+by ADR-010. The dashboard now exists as a PBIP text project in `dashboards/` with a
+static HTML twin; the `dashboards/` row of section 2 reads accordingly. The executive
+charts and `reports/EXEC_SUMMARY.md` remain not built.

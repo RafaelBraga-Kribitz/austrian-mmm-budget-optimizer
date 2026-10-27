@@ -1,0 +1,48 @@
+/// Date table, marked, spanning the weeks of the decomposition.
+table Calendar
+	lineageTag: 99bcf648-8f25-5137-ac71-9313d73dfbd5
+	dataCategory: Time
+
+	/// One row per day from the first to the last week of contributions_weekly.csv.
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: 5086e039-2043-5155-ac85-35b0f04af8f9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+	/// Monday of the week, the grain of the weekly decomposition.
+	column 'Week start' = 'Calendar'[Date] - WEEKDAY ( 'Calendar'[Date], 2 ) + 1
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 4dfca485-b2d0-5afe-8cad-d4c63b27bdd4
+		summarizeBy: none
+
+	column Year = YEAR ( 'Calendar'[Date] )
+		dataType: int64
+		formatString: 0
+		lineageTag: b4218a4b-9f3c-5225-a7e3-026734d51f4c
+		summarizeBy: none
+
+	column 'Month key' = YEAR ( 'Calendar'[Date] ) * 100 + MONTH ( 'Calendar'[Date] )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 67e0f9f1-93a2-541e-97fb-ad526a4cf3da
+		summarizeBy: none
+
+	column Month = FORMAT ( 'Calendar'[Date], "mmm yyyy" )
+		dataType: string
+		lineageTag: 44e713c2-546f-5a98-be0f-4d82d1c633a5
+		summarizeBy: none
+		sortByColumn: 'Month key'
+
+	partition Calendar = calculated
+		mode: import
+		source =
+				CALENDAR (
+				    MIN ( ContributionsWeekly[week_start] ),
+				    MAX ( ContributionsWeekly[week_start] ) + 6
+				)

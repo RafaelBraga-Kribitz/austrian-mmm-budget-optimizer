@@ -34,3 +34,7 @@ data/synthetic_tiny/
 dbt/
 docs/EXECUTION_BLUEPRINT/
 data/warehouse/
+
+# Power BI Desktop's per-user settings and data cache of the PBIP project (dashboards/)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf

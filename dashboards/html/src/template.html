@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>MMM Budget Dashboard</title>
+<meta name="description" content="Static HTML twin of the Power BI dashboard of the Austrian MMM and Budget Optimizer: recommendation, contributions, response curves and proof on known truth.">
+<style>
+{{css}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the dashboard</a>
+<header class="masthead">
+<p class="eyebrow">Austrian MMM and Budget Optimizer</p>
+<h1>Where the next unit of media budget works hardest</h1>
+<p class="lede">Four pages on the public demo data (Robyn) and the synthetic advertiser with known truth. Static twin of the Power BI project in <code>dashboards/MMM.pbip</code>; both read the CSV feed in <code>reports/exports/</code>. Last validated {{validated}}.</p>
+<p class="money-note"><span class="tag">Money units</span> {{money_caption}}</p>
+</header>
+<main id="main">
+{{body}}
+</main>
+<footer class="sitefoot">
+<p>Built by <code>scripts/build_dashboard_html.py</code> from <code>reports/exports/*.csv</code>, written by <code>scripts/export_dashboard.py</code> after the Layer P, R and D runs. No number on this page is typed by hand. Charts need JavaScript; every chart has a data table.</p>
+</footer>
+<div class="tip" id="tip" role="status" aria-live="polite" hidden></div>
+<script type="application/json" id="dashboard-data">{{data}}</script>
+<script>
+{{js}}
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # SPEC-07 — Reporting, Dashboard, README (AMBO)
 
-> **Not all of this spec was built.** Executive charts, `reports/NUMERIC_SSOT.md`, `reports/EXEC_SUMMARY.md` and `dashboards/` were not built as specified. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead.
+> **Not all of this spec was built.** Executive charts, `reports/NUMERIC_SSOT.md`, `reports/EXEC_SUMMARY.md` and `dashboards/` were not built as specified. See [ADR-009](../adr/ADR-009_spec-sections-not-built.md) for what exists instead. The dashboard was later built as a PBIP text project with a static HTML twin instead of `dashboards/ambo.pbix`: [ADR-010](../adr/ADR-010_dashboard-pbip-and-html-twin.md), [dashboards/README.md](../../dashboards/README.md).
 
 Requirement IDs: `RB-xxx`.
 

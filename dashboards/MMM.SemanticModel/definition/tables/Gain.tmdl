@@ -1,0 +1,173 @@
+/// Gain of each optimiser scenario (recommendation_gain.csv). Also serves as the scenario dimension.
+table Gain
+	lineageTag: 8f858186-0d58-54e7-a73e-bb9e156d5a00
+
+	/// Median gain of media contribution from the reallocation, as a share of current media contribution, across the posterior draws. One scenario must be selected. Equals gain_pct_of_current_contribution_median in reports/layer_d/decision.json and the README headline for the same-total scenario.
+	measure 'Gain median % of contribution' = DIVIDE ( SELECTEDVALUE ( Gain[gain_pct_of_contribution_median] ), 100 )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Gain
+		lineageTag: 9886dde1-75ab-5509-b212-e9a2221d356b
+
+	/// 10th percentile of the gain as a share of current media contribution: nine in ten posterior draws gain at least this much. The decision rule requires it to be positive. Equals gain_pct_of_current_contribution_p10 in decision.json.
+	measure 'Gain 10th percentile % of contribution' = DIVIDE ( SELECTEDVALUE ( Gain[gain_pct_of_contribution_p10] ), 100 )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Gain
+		lineageTag: bcd3a465-c10b-5802-ba7c-ea0656d5af72
+
+	/// Share of posterior draws in which the reallocation loses media contribution. Equals probability_gain_negative in decision.json.
+	measure 'Probability of a loss' = SELECTEDVALUE ( Gain[probability_gain_negative] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Gain
+		lineageTag: cce4ed3c-e929-5949-9d5d-8bb1c79b9f6b
+
+	/// Median weekly gain in media contribution, in the money units of the public demo dataset. The currency of that file is not named; the amount is not euros.
+	measure 'Gain median (money units)' = SELECTEDVALUE ( Gain[gain_median] )
+		formatString: #,0
+		displayFolder: Gain
+		lineageTag: b9c71c19-2743-5538-98b5-767ee1ad01c3
+
+	/// Total weekly media budget of the selected scenario, in the dataset's money units (not euros).
+	measure 'Total weekly budget (money units)' = SELECTEDVALUE ( Gain[total_weekly_budget] )
+		formatString: #,0
+		displayFolder: Gain
+		lineageTag: d81f9578-98ba-5186-95a8-958e0018bfb4
+
+	/// Breakeven return on ad spend: 1 divided by the assumed contribution margin from the Layer R config. A channel may grow only while the lower bound of its marginal ROAS interval stays above this value.
+	measure 'Breakeven ROAS' = SELECTEDVALUE ( Gain[breakeven_roas] )
+		formatString: 0.00
+		displayFolder: Decision rule
+		lineageTag: 76e00340-386c-51f0-9642-45a4c4ce65e2
+
+	/// Verdict of the decision rule for the selected scenario. Blank when no single scenario is selected (a blank is not read as a hold).
+	measure Verdict =
+			VAR Recommend = SELECTEDVALUE ( Gain[recommend] )
+			RETURN
+			    IF (
+			        ISBLANK ( Recommend ),
+			        BLANK (),
+			        IF ( Recommend, "Recommend the shift", "Hold: the rule is not met" )
+			    )
+		displayFolder: Decision rule
+		lineageTag: 7beb796c-fa36-547d-95a4-03a599a17f71
+
+	/// Channels the breakeven gate held at current spend in the selected scenario, as listed in decision.json.
+	measure 'Channels held by the rule' = SELECTEDVALUE ( Gain[held_channels] )
+		displayFolder: Decision rule
+		lineageTag: 42b46b71-6a7d-5808-9016-b726ae45049e
+
+	/// Scenario key as written by the optimiser.
+	column scenario
+		dataType: string
+		isHidden
+		lineageTag: 5ac464e6-b7a6-597b-9dae-b8cdaf890662
+		summarizeBy: none
+		sourceColumn: scenario
+
+	column total_weekly_budget
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 3f9757f7-fe2f-545e-a5dd-61b8ceaaed51
+		summarizeBy: none
+		sourceColumn: total_weekly_budget
+
+	column gain_median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 43c8af1f-6c4e-5a05-9b7a-edeef2301bdd
+		summarizeBy: none
+		sourceColumn: gain_median
+
+	column gain_p10
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: f0a7fe7d-c46a-58c2-a340-062e6af6fde4
+		summarizeBy: none
+		sourceColumn: gain_p10
+
+	column gain_p90
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: fd94f4ad-36a3-57ea-b251-e412e0da06d3
+		summarizeBy: none
+		sourceColumn: gain_p90
+
+	column gain_pct_of_contribution_median
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: 0227a24c-2efb-5443-b144-b39f52d27d50
+		summarizeBy: none
+		sourceColumn: gain_pct_of_contribution_median
+
+	column gain_pct_of_contribution_p10
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: 65a055bf-d7dc-5514-9698-9950024ab068
+		summarizeBy: none
+		sourceColumn: gain_pct_of_contribution_p10
+
+	column probability_gain_negative
+		dataType: double
+		isHidden
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: a1032dc3-94ce-5d53-b7d1-a655fda28b8e
+		summarizeBy: none
+		sourceColumn: probability_gain_negative
+
+	column recommend
+		dataType: boolean
+		isHidden
+		lineageTag: 3f8f9604-8f76-5f03-b5d4-137bbb6a1d5d
+		summarizeBy: none
+		sourceColumn: recommend
+
+	column held_channels
+		dataType: string
+		isHidden
+		lineageTag: 40bd4b2f-47fb-5cf1-a735-373beb18067f
+		summarizeBy: none
+		sourceColumn: held_channels
+
+	column breakeven_roas
+		dataType: double
+		isHidden
+		formatString: 0.00
+		lineageTag: af00c4d2-c370-5945-bf22-fd29fe360b7f
+		summarizeBy: none
+		sourceColumn: breakeven_roas
+
+	/// Scenario name for slicers: same total budget, budget plus 25 percent, or the yearly extra budget from the config spread over 52 weeks.
+	column scenario_label
+		dataType: string
+		lineageTag: e85f701f-5292-5abd-a325-ee32b90d68da
+		summarizeBy: none
+		sourceColumn: scenario_label
+		sortByColumn: scenario_order
+
+	column scenario_order
+		dataType: int64
+		isHidden
+		lineageTag: f1404f9e-dd22-5d1c-afb8-511e92118305
+		summarizeBy: none
+		sourceColumn: scenario_order
+
+	partition Gain = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "recommendation_gain.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"scenario", type text}, {"total_weekly_budget", type number}, {"gain_median", type number}, {"gain_p10", type number}, {"gain_p90", type number}, {"gain_pct_of_contribution_median", type number}, {"gain_pct_of_contribution_p10", type number}, {"probability_gain_negative", type number}, {"recommend", type logical}, {"held_channels", type text}, {"breakeven_roas", type number}}, "en-US"),
+				    Names = [same_total = "Same total budget", plus_25_percent = "Budget plus 25 percent", plus_extra_budget = "Plus the yearly extra budget"],
+				    Order = [same_total = 1, plus_25_percent = 2, plus_extra_budget = 3],
+				    Labelled = Table.AddColumn(Typed, "scenario_label", each Record.FieldOrDefault(Names, [scenario], [scenario]), type text),
+				    Ordered = Table.AddColumn(Labelled, "scenario_order", each Record.FieldOrDefault(Order, [scenario], 99), Int64.Type)
+				in
+				    Ordered

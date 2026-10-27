@@ -1,0 +1,139 @@
+{
+  "name": "Braga MMM",
+  "dataColors": [
+    "#2F4BE0",
+    "#966400",
+    "#0A7399",
+    "#C4278F",
+    "#7A4A1E",
+    "#9EA0A5",
+    "#282828",
+    "#5E5E5E",
+    "#949494"
+  ],
+  "background": "#E4E6EA",
+  "foreground": "#26282C",
+  "tableAccent": "#2F4BE0",
+  "good": "#007A66",
+  "bad": "#CC3710",
+  "neutral": "#9EA0A5",
+  "maximum": "#2F4BE0",
+  "center": "#D4D6DA",
+  "minimum": "#D0DEFF",
+  "textClasses": {
+    "callout": {
+      "fontSize": 24,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#26282C"
+    },
+    "title": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#26282C"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#26282C"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI",
+      "color": "#5A5C61"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "title": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#26282C"
+              }
+            },
+            "fontSize": 11,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ],
+        "valueAxis": [
+          {
+            "gridlineColor": {
+              "solid": {
+                "color": "#C2C4CA"
+              }
+            },
+            "gridlineStyle": "solid",
+            "labelColor": {
+              "solid": {
+                "color": "#5A5C61"
+              }
+            }
+          }
+        ],
+        "categoryAxis": [
+          {
+            "labelColor": {
+              "solid": {
+                "color": "#5A5C61"
+              }
+            }
+          }
+        ],
+        "visualHeader": [
+          {
+            "background": {
+              "solid": {
+                "color": "#E4E6EA"
+              }
+            },
+            "foreground": {
+              "solid": {
+                "color": "#26282C"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#E4E6EA"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#E4E6EA"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

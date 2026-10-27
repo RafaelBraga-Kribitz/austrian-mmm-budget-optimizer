@@ -1,0 +1,111 @@
+/// Sampler diagnostics of the last attempt of each fit (proof_sampler_gates.csv).
+table SamplerGates
+	lineageTag: 9adc0fed-d679-59be-b6bf-5c4fd315dd27
+
+	/// Fits whose last recorded attempt passed every gate in diagnostics.json: R-hat, effective sample size and divergences (pass_all).
+	measure 'Fits passing all gates' =
+			COALESCE (
+			    CALCULATE ( COUNTROWS ( SamplerGates ), SamplerGates[pass_all] = TRUE () ),
+			    0
+			)
+		formatString: 0
+		displayFolder: Sampler
+		lineageTag: adf8d2b9-ef1e-5815-917e-edda2488812e
+
+	/// Fits recorded: full and holdout, Layer P and Layer R.
+	measure 'Fits total' = COALESCE ( COUNTROWS ( SamplerGates ), 0 )
+		formatString: 0
+		displayFolder: Sampler
+		lineageTag: 0cfa5c19-db4c-5e8c-8948-df57cc058896
+
+	/// Fits passing all gates as text: passing count, the word of, total count.
+	measure 'Fits passing label' = [Fits passing all gates] & " of " & [Fits total]
+		displayFolder: Sampler
+		lineageTag: 6b1809cc-f405-5fd8-b9e6-ea3c1ebec1b3
+
+	column layer
+		dataType: string
+		isHidden
+		lineageTag: e4604739-1beb-5534-b8c6-f7cccf8d4dd2
+		summarizeBy: none
+		sourceColumn: layer
+
+	column fit
+		dataType: string
+		lineageTag: 73b58a38-a41d-5ef7-b487-b2c61f40f5dd
+		summarizeBy: none
+		sourceColumn: fit
+
+	column max_rhat
+		dataType: double
+		formatString: 0.000
+		lineageTag: 828f1045-2c85-5eb5-a573-ca1ed26a1444
+		summarizeBy: none
+		sourceColumn: max_rhat
+
+	column min_ess_bulk
+		dataType: double
+		formatString: #,0
+		lineageTag: b12f4169-8a13-51ec-8461-4283f815191b
+		summarizeBy: none
+		sourceColumn: min_ess_bulk
+
+	column min_ess_tail
+		dataType: double
+		formatString: #,0
+		lineageTag: 4ccf9050-4976-5d6e-b48a-a0d70c55227d
+		summarizeBy: none
+		sourceColumn: min_ess_tail
+
+	column divergences
+		dataType: int64
+		formatString: 0
+		lineageTag: 73a351e8-0108-5ef1-a5e5-3144d5d0ad63
+		summarizeBy: none
+		sourceColumn: divergences
+
+	column attempts
+		dataType: int64
+		formatString: 0
+		lineageTag: 52ff7950-d80d-5de9-8f40-3368fbeb48a1
+		summarizeBy: none
+		sourceColumn: attempts
+
+	column final_target_accept
+		dataType: double
+		formatString: 0.00
+		lineageTag: 8a6fcd69-6c9f-5e2c-99f0-5158cf14aa71
+		summarizeBy: none
+		sourceColumn: final_target_accept
+
+	column final_draws
+		dataType: int64
+		formatString: #,0
+		lineageTag: d3e4745b-3ee9-5f38-bbfd-634e973b2bff
+		summarizeBy: none
+		sourceColumn: final_draws
+
+	column pass_all
+		dataType: boolean
+		lineageTag: 97b51ca9-e6b1-56f2-b852-143b5555e1b6
+		summarizeBy: none
+		sourceColumn: pass_all
+
+	column layer_label
+		dataType: string
+		lineageTag: 36642f82-85b7-559a-815f-a4ded73cee15
+		summarizeBy: none
+		sourceColumn: layer_label
+
+	partition SamplerGates = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "proof_sampler_gates.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"layer", type text}, {"fit", type text}, {"max_rhat", type number}, {"min_ess_bulk", type number}, {"min_ess_tail", type number}, {"divergences", Int64.Type}, {"attempts", Int64.Type}, {"final_target_accept", type number}, {"final_draws", Int64.Type}, {"pass_all", type logical}}, "en-US"),
+				    LayerLabel = Table.AddColumn(Typed, "layer_label", each if [layer] = "layer_p" then "Layer P (synthetic)" else if [layer] = "layer_r" then "Layer R (public demo)" else [layer], type text)
+				in
+				    LayerLabel

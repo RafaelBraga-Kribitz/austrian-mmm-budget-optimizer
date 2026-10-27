@@ -1,0 +1,109 @@
+/// Layer P true response curves against the recovered bands (proof_response_curves.csv).
+table ProofResponseCurves
+	lineageTag: b76f7e0b-4a30-5dea-a8ca-81023ef6dd6c
+
+	/// Weekly contribution of the true response curve of the synthetic advertiser at the grid spend. One channel must be selected.
+	measure 'True curve' = IF ( HASONEVALUE ( ProofResponseCurves[channel] ), SUM ( ProofResponseCurves[true] ) )
+		formatString: #,0
+		displayFolder: Recovery
+		lineageTag: a5f5d343-ab48-57e0-8f91-822b5fa17ac6
+
+	/// Posterior median of the recovered response curve.
+	measure 'Recovered curve, median' = IF ( HASONEVALUE ( ProofResponseCurves[channel] ), SUM ( ProofResponseCurves[median] ) )
+		formatString: #,0
+		displayFolder: Recovery
+		lineageTag: 52fe7863-7d3d-5637-95bd-07b25df6ed4c
+
+	/// Lower end (5th percentile) of the 90 percent band.
+	measure 'Recovered curve, lo' = IF ( HASONEVALUE ( ProofResponseCurves[channel] ), SUM ( ProofResponseCurves[lo] ) )
+		formatString: #,0
+		displayFolder: Recovery
+		lineageTag: c5c2740c-c9cd-59c6-8807-a9dccfa22a90
+
+	/// Upper end (95th percentile) of the 90 percent band.
+	measure 'Recovered curve, hi' = IF ( HASONEVALUE ( ProofResponseCurves[channel] ), SUM ( ProofResponseCurves[hi] ) )
+		formatString: #,0
+		displayFolder: Recovery
+		lineageTag: 601f7157-7a37-539e-9dfe-24c9d8f0e0b6
+
+	/// Layer P channel (synthetic advertiser).
+	column channel
+		dataType: string
+		lineageTag: 5d996663-d19b-5f5b-bd93-d28d32ccf1d8
+		summarizeBy: none
+		sourceColumn: channel
+
+	/// Weekly spend on the curve grid, synthetic money units.
+	column spend
+		dataType: double
+		formatString: #,0
+		lineageTag: 87c01d09-bfcb-520e-9e54-d16703c3ef31
+		summarizeBy: none
+		sourceColumn: spend
+
+	column median
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 1a8e600d-5bdc-5f82-a609-a1db60e5f4f0
+		summarizeBy: none
+		sourceColumn: median
+
+	column lo
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 9f6ca14e-48bf-5fa3-bee2-3cb80fcb33d2
+		summarizeBy: none
+		sourceColumn: lo
+
+	column hi
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: ecddc3ce-e7d7-5e78-bca6-6b8e23ff6898
+		summarizeBy: none
+		sourceColumn: hi
+
+	column current_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 982f7675-452d-547e-a5ab-3f6f2b7e5563
+		summarizeBy: none
+		sourceColumn: current_spend
+
+	column observed_max_spend
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 4cf01c13-9fce-5185-bec0-591412171daa
+		summarizeBy: none
+		sourceColumn: observed_max_spend
+
+	column true
+		dataType: double
+		isHidden
+		formatString: #,0
+		lineageTag: 681b35f0-1c42-59d2-a2b0-e56a6ec79c4b
+		summarizeBy: none
+		sourceColumn: true
+
+	column inside
+		dataType: boolean
+		isHidden
+		lineageTag: ffc42590-293a-5c02-ab5f-a9d467bee643
+		summarizeBy: none
+		sourceColumn: inside
+
+	partition ProofResponseCurves = m
+		mode: import
+		source =
+				let
+				    Folder = if Text.EndsWith(ExportsPath, "\") then ExportsPath else ExportsPath & "\",
+				    Source = Csv.Document(File.Contents(Folder & "proof_response_curves.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    EmptyAsNull = Table.TransformColumns(Promoted, {}, each if _ = "" then null else _),
+				    Typed = Table.TransformColumnTypes(EmptyAsNull, {{"channel", type text}, {"spend", type number}, {"median", type number}, {"lo", type number}, {"hi", type number}, {"current_spend", type number}, {"observed_max_spend", type number}, {"true", type number}, {"inside", type logical}}, "en-US")
+				in
+				    Typed

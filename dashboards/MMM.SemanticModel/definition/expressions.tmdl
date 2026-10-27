@@ -1,0 +1,6 @@
+/// Folder that holds the dashboard feed written by scripts/export_dashboard.py, i.e. <repository>\reports\exports\. Change this one value to re-point every table.
+expression ExportsPath = "C:\repos\austrian-mmm-budget-optimizer\reports\exports\" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]
+	lineageTag: cbf3b98a-ae06-56ab-b1e7-44ce1afc5885
+
+	annotation PBI_ResultType = Text
+

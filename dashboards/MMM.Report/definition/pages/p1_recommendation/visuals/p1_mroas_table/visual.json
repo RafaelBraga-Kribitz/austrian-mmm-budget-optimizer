@@ -1,0 +1,387 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "p1_mroas_table",
+  "position": {
+    "x": 24,
+    "y": 480,
+    "z": 12000,
+    "height": 132,
+    "width": 1232,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Channel"
+                    }
+                  },
+                  "Property": "channel"
+                }
+              },
+              "queryRef": "Channel.channel",
+              "nativeQueryRef": "channel",
+              "displayName": "Channel"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Current weekly spend"
+                }
+              },
+              "queryRef": "Allocation.Current weekly spend",
+              "nativeQueryRef": "Current weekly spend",
+              "displayName": "Current"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Recommended weekly spend"
+                }
+              },
+              "queryRef": "Allocation.Recommended weekly spend",
+              "nativeQueryRef": "Recommended weekly spend",
+              "displayName": "Recommended"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Change in spend %"
+                }
+              },
+              "queryRef": "Allocation.Change in spend %",
+              "nativeQueryRef": "Change in spend %",
+              "displayName": "Change"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at current, median"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at current, median",
+              "nativeQueryRef": "Marginal ROAS at current, median",
+              "displayName": "mROAS now"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at current, lo"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at current, lo",
+              "nativeQueryRef": "Marginal ROAS at current, lo",
+              "displayName": "lo"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at current, hi"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at current, hi",
+              "nativeQueryRef": "Marginal ROAS at current, hi",
+              "displayName": "hi"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at recommended, median"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at recommended, median",
+              "nativeQueryRef": "Marginal ROAS at recommended, median",
+              "displayName": "mROAS rec."
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at recommended, lo"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at recommended, lo",
+              "nativeQueryRef": "Marginal ROAS at recommended, lo",
+              "displayName": "lo "
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Marginal ROAS at recommended, hi"
+                }
+              },
+              "queryRef": "Allocation.Marginal ROAS at recommended, hi",
+              "nativeQueryRef": "Marginal ROAS at recommended, hi",
+              "displayName": "hi "
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Allocation"
+                    }
+                  },
+                  "Property": "Held by rule"
+                }
+              },
+              "queryRef": "Allocation.Held by rule",
+              "nativeQueryRef": "Held by rule",
+              "displayName": "Rule"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#DCDEE2'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "gridHorizontal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridHorizontalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#C2C4CA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Table that summarises, per channel, current and recommended weekly spend, the change, and marginal ROAS with its 90 percent interval.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Marginal ROAS per channel, median and 90 percent interval'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

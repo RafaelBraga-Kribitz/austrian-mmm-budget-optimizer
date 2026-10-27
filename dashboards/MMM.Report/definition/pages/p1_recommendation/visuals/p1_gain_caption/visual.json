@@ -1,0 +1,103 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "p1_gain_caption",
+  "position": {
+    "x": 640,
+    "y": 280,
+    "z": 9000,
+    "height": 64,
+    "width": 616,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "In-sample counterfactual under the fitted model; assumes response curves hold and competitors do not react. No channel moves more than fifty percent from its current spend.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "10pt",
+                      "color": "#5A5C61"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "In the two extra-budget scenarios the budget increase is added on top of that bound (LIMITATIONS.md, section 5).",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "10pt",
+                      "color": "#5A5C61"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'In-sample counterfactual under the fitted model; assumes response curves hold and competitors do not react. No channel moves more than fifty percen...'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

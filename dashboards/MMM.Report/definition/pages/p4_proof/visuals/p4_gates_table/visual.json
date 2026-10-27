@@ -1,0 +1,327 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "p4_gates_table",
+  "position": {
+    "x": 432,
+    "y": 424,
+    "z": 11000,
+    "height": 232,
+    "width": 392,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "layer_label"
+                }
+              },
+              "queryRef": "SamplerGates.layer_label",
+              "nativeQueryRef": "layer_label",
+              "displayName": "Layer"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "fit"
+                }
+              },
+              "queryRef": "SamplerGates.fit",
+              "nativeQueryRef": "fit",
+              "displayName": "Fit"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "max_rhat"
+                }
+              },
+              "queryRef": "SamplerGates.max_rhat",
+              "nativeQueryRef": "max_rhat",
+              "displayName": "Max R-hat"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "min_ess_bulk"
+                }
+              },
+              "queryRef": "SamplerGates.min_ess_bulk",
+              "nativeQueryRef": "min_ess_bulk",
+              "displayName": "Min ESS bulk"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "divergences"
+                }
+              },
+              "queryRef": "SamplerGates.divergences",
+              "nativeQueryRef": "divergences",
+              "displayName": "Divergences"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "attempts"
+                }
+              },
+              "queryRef": "SamplerGates.attempts",
+              "nativeQueryRef": "attempts",
+              "displayName": "Attempts"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SamplerGates"
+                    }
+                  },
+                  "Property": "pass_all"
+                }
+              },
+              "queryRef": "SamplerGates.pass_all",
+              "nativeQueryRef": "pass_all",
+              "displayName": "Pass"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#DCDEE2'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "gridHorizontal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridHorizontalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#C2C4CA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Table that summarises the sampler diagnostics per layer and fit: maximum R-hat, minimum effective sample size, divergences, attempts and pass flag.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Sampler gates, last recorded attempt per fit'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

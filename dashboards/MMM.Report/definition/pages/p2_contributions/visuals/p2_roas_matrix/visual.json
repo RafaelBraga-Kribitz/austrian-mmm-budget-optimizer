@@ -1,0 +1,346 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "p2_roas_matrix",
+  "position": {
+    "x": 760,
+    "y": 172,
+    "z": 5000,
+    "height": 480,
+    "width": 496,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Channel"
+                    }
+                  },
+                  "Property": "channel"
+                }
+              },
+              "queryRef": "Channel.channel",
+              "nativeQueryRef": "channel",
+              "displayName": "Channel"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "ROAS, median"
+                }
+              },
+              "queryRef": "RoasSummary.ROAS, median",
+              "nativeQueryRef": "ROAS, median",
+              "displayName": "ROAS"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "ROAS, lo"
+                }
+              },
+              "queryRef": "RoasSummary.ROAS, lo",
+              "nativeQueryRef": "ROAS, lo",
+              "displayName": "lo"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "ROAS, hi"
+                }
+              },
+              "queryRef": "RoasSummary.ROAS, hi",
+              "nativeQueryRef": "ROAS, hi",
+              "displayName": "hi"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "Revenue share, median"
+                }
+              },
+              "queryRef": "RoasSummary.Revenue share, median",
+              "nativeQueryRef": "Revenue share, median",
+              "displayName": "Share"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "Revenue share, lo"
+                }
+              },
+              "queryRef": "RoasSummary.Revenue share, lo",
+              "nativeQueryRef": "Revenue share, lo",
+              "displayName": "lo "
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "Revenue share, hi"
+                }
+              },
+              "queryRef": "RoasSummary.Revenue share, hi",
+              "nativeQueryRef": "Revenue share, hi",
+              "displayName": "hi "
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "RoasSummary"
+                    }
+                  },
+                  "Property": "Total spend"
+                }
+              },
+              "queryRef": "RoasSummary.Total spend",
+              "nativeQueryRef": "Total spend",
+              "displayName": "Spend"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#DCDEE2'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#E4E6EA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "gridHorizontal": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "gridHorizontalColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#C2C4CA'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Matrix that summarises ROAS and revenue share per channel with the lower and upper ends of their 90 percent intervals, and total spend.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'ROAS and revenue share per channel, 90 percent intervals'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#26282C'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
