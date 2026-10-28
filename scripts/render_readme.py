@@ -163,6 +163,7 @@ def decision_facts(dd: dict) -> dict:
         "capped": capped,
         "gain_median": v("a_gain_median", num(same["gain_pct_of_current_contribution_median"], 1)),
         "gain_p10": v("a_gain_p10", num(same["gain_pct_of_current_contribution_p10"], 1)),
+        "gain_p10_raw": float(same["gain_pct_of_current_contribution_p10"]),
         "p_neg": v("a_p_neg", pct(same["probability_gain_negative"])),
         "draws": v("a_draws", dec["posterior_draws_used"]),
     }
@@ -178,7 +179,7 @@ def _up_phrase(ups: list[tuple[str, str]]) -> str:
 def answer_text(f: dict) -> str:
     """The answer in the top box: one short paragraph, read from the recommendation."""
     if not f["recommend"]:
-        return "no budget shift passes the decision rule. Units are not euros."
+        return "hold the current allocation. No budget shift passes the decision rule. Units are not euros."
     move = []
     if f["downs"]:
         move.append(
@@ -193,9 +194,10 @@ def answer_text(f: dict) -> str:
 
 
 def decision_lead(f: dict) -> str:
-    """The recommendation and the channels held by the rule, in two short paragraphs."""
-    verb = "Recommendation" if f["recommend"] else "No shift recommended"
-    head = f"**{verb} (public demo data, same total budget):**"
+    """The recommendation, or the rejection of a candidate, in short paragraphs."""
+    if not f["recommend"]:
+        return _rejected_lead(f)
+    head = "**Recommendation (public demo data, same total budget):**"
     sentences = []
     if f["downs"] or f["ups"]:
         move = "move weekly budget"
@@ -235,6 +237,54 @@ def decision_lead(f: dict) -> str:
                 f"channel's move: {f['cap']} percent of its current spend."
             )
         paragraphs.append(hold)
+    return "\n\n".join(paragraphs)
+
+
+def _rejected_lead(f: dict) -> str:
+    """The decision rule rejected the candidate: hold the current allocation, show the candidate."""
+    head = (
+        "**No shift recommended (public demo data, same total budget):** hold the current "
+        "allocation. The decision rule rejects the best candidate that the optimiser found."
+    )
+    paragraphs = [head]
+    if f["downs"] or f["ups"]:
+        cand = ["Rejected candidate, not advice: the candidate shifted weekly budget"]
+        if f["downs"]:
+            cand.append("out of " + and_join([nm(c) for c, _, _ in f["downs"]]))
+        if f["ups"]:
+            cand.append(("and " if f["downs"] else "") + "into " + and_join(
+                [nm(c) for c, _ in f["ups"]]
+            ))
+        sentences = [" ".join(cand) + "."]
+        for c, d, mr in f["downs"]:
+            sentences.append(
+                f"{c} would return {mr} per extra unit of spend, below the breakeven return "
+                f"of {f['breakeven']}, and would lose {_unsigned(d)} percent of its spend."
+            )
+        ups = f["ups"]
+        if ups:
+            deltas = {d for _, d in ups}
+            if len(deltas) == 1:
+                each = " each" if len(ups) > 1 else ""
+                sentences.append(
+                    f"{and_join([nm(c) for c, _ in ups])} would{each} gain "
+                    f"{_unsigned(ups[0][1])} percent."
+                )
+            else:
+                sentences.extend(f"{nm(c)} would gain {_unsigned(d)} percent." for c, d in ups)
+        if f["gain_p10_raw"] <= 0:
+            sentences.append(
+                f"The 10th percentile of the candidate's gain is {f['gain_p10']} percent, which "
+                "is not above zero. The rule rejects the candidate."
+            )
+        else:
+            sentences.append("The rule rejects the candidate.")
+        paragraphs.append(" ".join(sentences))
+    if f["holds"]:
+        paragraphs.append(
+            f"The rule would hold {and_join(f['holds'])} at current spend. The lower end of "
+            "their return interval falls below the breakeven return on ad spend (ROAS)."
+        )
     return "\n\n".join(paragraphs)
 
 
@@ -597,10 +647,13 @@ def verdict_sentence(m: pd.DataFrame, key: str) -> str:
 
 def decision_table(dd: dict) -> str:
     same = dd["table"][dd["table"]["scenario"] == "same_total"]
+    recommended = bool(dd["decision"]["same_total"]["recommend"])
+    spend = "Recommended weekly spend" if recommended else "Rejected candidate weekly spend"
+    after = "after the shift" if recommended else "at the rejected candidate spend"
     rows = [
-        "| Channel | Current weekly spend | Recommended weekly spend | Change | Return on the "
+        f"| Channel | Current weekly spend | {spend} | Change | Return on the "
         "next unit of spend, today (90 percent interval) | Return on the next unit of spend, "
-        "after the shift (90 percent interval) | Media contribution after the shift "
+        f"{after} (90 percent interval) | Media contribution {after} "
         "(90 percent interval) |",
         "|---|---|---|---|---|---|---|",
     ]
@@ -672,15 +725,25 @@ def decision_blocks(dd: dict, run_date: date) -> dict:
         spread = f"None of the {f['draws']} posterior draws shows a loss."
     else:
         spread = f"{f['p_neg']} percent of the {f['draws']} posterior draws show a loss."
+    caption_head = (
+        "Gain from moving the same budget" if s["recommend"]
+        else "Gain from the rejected candidate allocation, not advice"
+    )
     gain_caption = (
-        f"*Gain from moving the same budget, one bar per posterior draw. {spread} The blue "
+        f"*{caption_head}, one bar per posterior draw. {spread} The blue "
         f"line marks the 10th percentile ({f['gain_p10']} percent). The dashed line marks the "
         f"median ({f['gain_median']} percent). Units are not euros.*"
     )
     return {
         "decision_lead": decision_lead(f),
         "decision_table": decision_table(dd),
-        "decision_verdict": "Recommend the shift." if s["recommend"] else "Hold: the rule is not met.",
+        "decision_verdict": (
+            "Recommend the shift." if s["recommend"]
+            else "Hold the current allocation: the rule is not met."
+        ),
+        "gain_label": (
+            "Gain from the reallocation" if s["recommend"] else "Gain from the rejected candidate"
+        ),
         "gate_paragraph": gate_paragraph,
         "extra_budget_paragraph": extra_paragraph,
         "gain_caption": gain_caption,
@@ -688,19 +751,62 @@ def decision_blocks(dd: dict, run_date: date) -> dict:
     }
 
 
+def validation_sentence(p: dict, r: dict) -> str:
+    """What the README may say about validation and demonstration, given the evidence that exists."""
+    if p and r:
+        return ("The model is validated on made-up data with a known truth and demonstrated on "
+                "public data, pending a client swap-in.")
+    if p:
+        return ("The model is validated on made-up data with a known truth, pending a client "
+                "swap-in.")
+    if r:
+        return ("The plan is to validate the model on made-up data with a known truth. It is "
+                "demonstrated on public data, pending a client swap-in.")
+    return ("The plan is to validate the model on made-up data with a known truth and to "
+            "demonstrate it on public data, pending a client swap-in.")
+
+
 def limitations(p: dict, r: dict) -> str:
+    if r:
+        data = (
+            "- The public demo data is Robyn's simulated weekly dataset. It has five named "
+            "channels and revenue in money units whose currency its authors do not name. Shares, "
+            "ROAS ratios and the breakeven test are meaningful. The amounts are not euros. No "
+            "Austrian client data was used. A real-data swap-in is planned."
+        )
+    else:
+        data = (
+            "- The plan is to use Robyn's simulated weekly dataset as public demo data. Its "
+            "currency is not named, so its amounts would not be euros. No Austrian client data "
+            "was used. A real-data swap-in is planned."
+        )
+    if p:
+        form = (
+            "- The model assumes one form: carry-over that decays geometrically (adstock), a "
+            "Hill saturation curve and an additive baseline. [How it works](#how-it-works) "
+            "defines these terms. The test on made-up data shows that the sampler recovers this "
+            "form. It does not show that reality has this form."
+        )
+        tradeoff = (
+            "- Effect size and half-saturation point trade off against each other. So the model "
+            "recovers individual point parameters less well than curves and shares. The "
+            "Validation section states the direction of that bias."
+        )
+    else:
+        form = (
+            "- The model assumes one form: carry-over that decays geometrically (adstock), a "
+            "Hill saturation curve and an additive baseline. [How it works](#how-it-works) "
+            "defines these terms. The planned test on made-up data would check whether the "
+            "sampler finds this form. It would not show that reality has this form."
+        )
+        tradeoff = (
+            "- Effect size and half-saturation point trade off against each other. So the model "
+            "would find individual point parameters less well than curves and shares."
+        )
     items = [
-        "- The public demo data is Robyn's simulated weekly dataset. It has five named channels "
-        "and revenue in money units whose currency its authors do not name. Shares, ROAS "
-        "ratios and the breakeven test are meaningful. The amounts are not euros. No Austrian "
-        "client data was used. A real-data swap-in is planned.",
-        "- The model assumes one form: carry-over that decays geometrically (adstock), a Hill "
-        "saturation curve and an additive baseline. [How it works](#how-it-works) defines "
-        "these terms. The test on made-up data shows that the sampler recovers this form. It "
-        "does not show that reality has this form.",
-        "- Effect size and half-saturation point trade off against each other. So the model "
-        "recovers individual point parameters less well than curves and shares. The "
-        "Validation section states the direction of that bias.",
+        data,
+        form,
+        tradeoff,
         "- Weekly national data cannot separate channels whose spend moves together. The "
         "intervals widen accordingly. The optimiser stays inside the bounds that the config "
         "sets.",
@@ -732,9 +838,10 @@ def status_line(p: dict, r: dict, dd: dict, run_date: date) -> str:
     if dd:
         steps.append("the budget shift recommendation (budget optimiser and decision rule)")
     when = v("status_date", run_date.isoformat())
+    stamp = "Last validated" if p else "Last rendered"
     return (
         f"Built steps: {and_join(steps, oxford=True) if steps else 'none yet'}. Everything in "
-        f"this README regenerates from the three run commands above. Last validated: {when}."
+        f"this README regenerates from the three run commands above. {stamp}: {when}."
     )
 
 
@@ -778,12 +885,23 @@ def apply_conditions(template: str, flags: dict[str, bool]) -> str:
 
 def render(run_date: date) -> str:
     VALUES.clear()
-    p, r, dd = layer_p_values(), layer_r_values(), layer_d_values()
+    p, r = layer_p_values(), layer_r_values()
+    # the budget shift recommendation reads the posterior of the public-demo fit
+    dd = layer_d_values() if r else {}
     chart, alt = headline_values(p, r)
     template = (ROOT / "scripts" / "readme_template.md").read_text(encoding="utf-8")
     # A passage that reports a result appears only when the artifacts for that result exist.
     template = apply_conditions(
-        template, {"p": bool(p), "r": bool(r), "dd": bool(dd), "p_or_r": bool(p or r)}
+        template,
+        {
+            "p": bool(p),
+            "r": bool(r),
+            "dd": bool(dd),
+            "rec": bool(dd) and bool(dd["decision"]["same_total"]["recommend"]),
+            "p_or_r": bool(p or r),
+            "p_and_r": bool(p and r),
+            "all": bool(p and r and dd),
+        },
     )
     fills = {
         "headline_chart": chart,
@@ -795,6 +913,7 @@ def render(run_date: date) -> str:
         "proof_section": proof_section(p),
         "holdout_section": holdout_section(p, r),
         "limitations": limitations(p, r),
+        "validation_sentence": validation_sentence(p, r),
         "status_line": status_line(p, r, dd, run_date),
     }
     if dd:

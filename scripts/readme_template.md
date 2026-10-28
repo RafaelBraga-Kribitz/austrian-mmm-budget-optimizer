@@ -1,6 +1,10 @@
 # Austrian MMM and Budget Optimizer
 
+{{#if p_and_r}}
 ![Austrian MMM and Budget Optimizer: Bayesian marketing-mix model validated on known truth, demonstrated on public data, with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
+{{#else}}
+![Austrian MMM and Budget Optimizer: Bayesian marketing-mix model with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
+{{#endif}}
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-5A5C61?labelColor=26282C)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-5A5C61?labelColor=26282C)](pyproject.toml)
@@ -42,7 +46,7 @@ The model answers three questions. Which channels contributed incrementally? How
 
 Incremental revenue is revenue that would not have arrived without the channel's spend. Three steps build the answer:
 
-1. The test on made-up data with a known answer checks that the model recovers a truth it was handed.
+1. The test on made-up data with a known answer asks whether the model can find a truth it was handed.
 2. The test on public demo data fits the model on a public file.
 3. The budget shift recommendation turns the fit into a decision under a breakeven rule.
 
@@ -64,14 +68,17 @@ Incremental revenue is revenue that would not have arrived without the channel's
 **How far off was the platform report? Does the model recover the truth?** Not available yet: the test on made-up data has not run.
 
 {{#endif}}
-{{#if dd}}
+{{#if rec}}
 **What does a reallocation gain?** On the public demo data, with the same total budget, the median gain is {{a_gain_median}} percent of current media contribution. The recommendation is in the Decision section. Units are not euros.
+
+{{#elif dd}}
+**What does a reallocation gain?** On the public demo data, the best candidate with the same total budget gains a median {{a_gain_median}} percent of current media contribution. The decision rule rejects it, so the answer is to hold the current allocation. Units are not euros.
 
 {{#else}}
 **What does a reallocation gain?** Not available yet: the budget shift recommendation has not run.
 
 {{#endif}}
-The word "Austrian" names the setting the model is built for, not the data behind it. The setting has the Austrian public-holiday calendar as a control, weekly grain, and euro and contribution-margin logic for an Austrian advertiser. The model is validated on made-up data with a known truth and demonstrated on public data, pending a client swap-in. No Austrian client data was used.
+The word "Austrian" names the setting the model is built for, not the data behind it. The setting has the Austrian public-holiday calendar as a control, weekly grain, and euro and contribution-margin logic for an Austrian advertiser. {{validation_sentence}} No Austrian client data was used.
 
 ## Start here
 
@@ -87,7 +94,11 @@ The word "Austrian" names the setting the model is built for, not the data behin
 {{#if dd}}
 {{decision_lead}}
 
+{{#if rec}}
 The expected gain is a median {{a_gain_median}} percent of current media contribution. The 10th percentile is {{a_gain_p10}} percent. The probability of a loss is {{a_p_neg}} percent across {{a_draws}} posterior draws. Units are not euros, so the recommendation is stated in percent.
+{{#else}}
+The candidate gains a median {{a_gain_median}} percent of current media contribution. The 10th percentile is {{a_gain_p10}} percent. The probability of a loss is {{a_p_neg}} percent across {{a_draws}} posterior draws. Units are not euros. These numbers describe a rejected candidate, not advice.
+{{#endif}}
 
 A posterior draw is one plausible set of model values that fits the data. In nine of ten draws, the gain is at least the 10th percentile.
 
@@ -95,9 +106,13 @@ Return on ad spend (ROAS) is revenue per unit of spend. Marginal ROAS is the rev
 
 {{decision_table}}
 
+{{#if rec}}
 All amounts in the table are in the demo file's money units. Units are not euros.
+{{#else}}
+The table shows the rejected candidate allocation, not advice. All amounts are in the demo file's money units. Units are not euros.
+{{#endif}}
 
-Gain from the reallocation: median {{d_gain_med2}} percent of current media contribution, 10th percentile {{d_gain_p10_2}} percent, probability of a loss {{d_p_neg}} percent. Units are not euros. {{decision_verdict}}
+{{gain_label}}: median {{d_gain_med2}} percent of current media contribution, 10th percentile {{d_gain_p10_2}} percent, probability of a loss {{d_p_neg}} percent. Units are not euros. {{decision_verdict}}
 
 Decision rule: shift budget toward a channel only while the lower bound of its marginal ROAS 90 percent interval stays above the breakeven ROAS. Also require that the 10th percentile of the reallocation gain is positive.
 
@@ -107,10 +122,12 @@ Decision rule: shift budget toward a channel only while the lower bound of its m
 
 {{gain_caption}}
 
+{{#if rec}}
 Reconsider this recommendation if the real contribution margin is lower than the assumed one. Breakeven ROAS is 1 divided by the margin, so a lower margin raises the bar that every channel must clear. It can close the gate on a channel that the rule now lets grow.
 
 Reconsider it also if a lift test measures an incremental effect outside the model's interval for that channel. A lift test is a geo experiment or a channel holdout.
 
+{{#endif}}
 {{#else}}
 Not available yet: the budget shift recommendation has not run.
 
@@ -127,6 +144,7 @@ Not available yet: the budget shift recommendation has not run.
 The Results section shows holdout MAPE and interval coverage against two baselines. The code writes the sampler checks to `diagnostics.json` next to every fit.
 {{#endif}}
 
+{{#if all}}
 ## Dashboard
 
 Four pages show the CSV feed in `reports/exports/`. The dashboard is built twice from the same files. The first build is a Power BI Project (`dashboards/MMM.pbip`): a model and a report kept as text files (TMDL and PBIR), so a test checks every visual against the model. The second build is a static HTML twin (`dashboards/html/index.html`): one file that works offline.
@@ -149,6 +167,7 @@ The screenshots below show the HTML twin. Power BI screenshots follow after the 
 
 *Proof page, the test on known truth. It shows the same model on the made-up advertiser, judged against the disclosed truth.*
 
+{{#endif}}
 ## Data
 
 Weekly spend per channel and revenue. No Austrian client data was used.

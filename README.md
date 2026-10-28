@@ -29,7 +29,7 @@ The model answers three questions. Which channels contributed incrementally? How
 
 Incremental revenue is revenue that would not have arrived without the channel's spend. Three steps build the answer:
 
-1. The test on made-up data with a known answer checks that the model recovers a truth it was handed.
+1. The test on made-up data with a known answer asks whether the model can find a truth it was handed.
 2. The test on public demo data fits the model on a public file.
 3. The budget shift recommendation turns the fit into a decision under a breakeven rule.
 
