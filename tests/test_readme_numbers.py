@@ -148,3 +148,101 @@ def test_readme_has_no_forbidden_words_or_dashes(readme):
     assert not hits, hits
     assert "—" not in readme, "em dash in README"
     assert not re.search(r"[\U0001F300-\U0001FAFF☀-➿]", readme), "emoji in README"
+
+
+PARTIAL_STATES = {
+    "no_budget_shift_recommendation": ["layer_d/decision.json"],
+    "no_budget_shift_folder": ["layer_d"],
+    "no_made_up_data_diagnostics": ["layer_p/diagnostics.json"],
+    "no_made_up_data_folder": ["layer_p"],
+    "no_public_demo_data_folder": ["layer_r"],
+    "made_up_data_only": ["layer_r", "layer_d"],
+    "public_demo_data_only": ["layer_p", "layer_d"],
+    "nothing_ran": ["layer_p", "layer_r", "layer_d"],
+}
+
+# States in which a test has no evidence. The budget shift recommendation reads the posterior of
+# the public-demo fit, so it counts as absent whenever the public-demo test is absent.
+NO_MADE_UP_DATA = {"no_made_up_data_diagnostics", "no_made_up_data_folder", "public_demo_data_only",
+                   "nothing_ran"}
+NO_PUBLIC_DEMO_DATA = {"no_public_demo_data_folder", "made_up_data_only", "nothing_ran"}
+NO_BUDGET_SHIFT = {"no_budget_shift_recommendation", "no_budget_shift_folder", "made_up_data_only",
+                   "public_demo_data_only", "no_public_demo_data_folder", "nothing_ran"}
+
+
+def _render_with(tmp_path, monkeypatch, remove=(), edit_decision=None) -> str:
+    import json
+    import shutil
+
+    reports = tmp_path / "reports"
+    shutil.copytree(REPORTS, reports)
+    for rel in remove:
+        target = reports / rel
+        shutil.rmtree(target) if target.is_dir() else target.unlink()
+    if edit_decision is not None:
+        path = reports / "layer_d" / "decision.json"
+        decision = json.loads(path.read_text(encoding="utf-8"))
+        edit_decision(decision)
+        path.write_text(json.dumps(decision), encoding="utf-8")
+    render_readme = _load("render_readme")
+    monkeypatch.setattr(render_readme, "REPORTS", reports)
+    return render_readme.render(render_readme.last_date())
+
+
+@pytest.mark.parametrize("state", sorted(PARTIAL_STATES))
+def test_render_survives_missing_artifacts(state, tmp_path, monkeypatch):
+    """A test that has not run leaves its passages out; no placeholder stays unresolved."""
+    text = _render_with(tmp_path, monkeypatch, remove=PARTIAL_STATES[state])
+    left = re.findall(r"\{\{[#\w -]+\}\}", text)
+    assert not left, f"unresolved placeholder or condition marker: {left}"
+    assert text.startswith("# Austrian MMM and Budget Optimizer")
+    # no claim of a result that does not exist
+    if state in NO_BUDGET_SHIFT:
+        assert "**Recommendation (" not in text
+        assert "**No shift recommended (" not in text
+        assert "What does a reallocation gain?** Not available yet" in text
+        assert "Reconsider this recommendation" not in text
+    if state in NO_MADE_UP_DATA:
+        assert "credits Paid Search with" not in text
+        assert "Not available yet: the test on made-up data has not run" in text
+        claims = re.findall(r"\b(?:validated|recovers|recovered)\b", text, re.I)
+        assert not claims, f"completion or recovery claim without the made-up-data test: {claims}"
+        assert "The plan is to" in text
+    if state in NO_PUBLIC_DEMO_DATA:
+        assert "Which channels contributed?** Not available yet" in text
+        assert "Share of revenue (percent)" not in text
+        assert "demonstrated on public data" not in text
+        assert "### Test on public demo data" not in text
+        assert "The public demo data is Robyn's" not in text
+    if NO_MADE_UP_DATA & {state} or NO_PUBLIC_DEMO_DATA & {state} or state in NO_BUDGET_SHIFT:
+        assert "## Dashboard" not in text, "dashboard screenshots show results that do not exist"
+
+
+def test_rejected_candidate_says_hold(tmp_path, monkeypatch):
+    """The decision rule can reject a candidate that still has allocation changes."""
+
+    def reject(decision):
+        same = decision["same_total"]
+        same["recommend"] = False
+        same["gain_pct_of_current_contribution_p10"] = -1.5
+
+    text = _render_with(tmp_path, monkeypatch, edit_decision=reject)
+    left = re.findall(r"\{\{[#\w -]+\}\}", text)
+    assert not left, left
+    lower = text.lower()
+    assert "hold the current allocation" in lower
+    assert "rejected candidate" in lower
+    # the candidate keeps its allocation changes, labelled as not advice
+    assert "not advice" in lower
+    assert "-20 percent" in text
+    # no instruction to move budget, no recommendation, no advice to reconsider it
+    assert not re.search(r"\bmove weekly budget\b", text, re.I)
+    assert "**Recommendation (" not in text
+    assert "Recommend the shift" not in text
+    assert "Reconsider this recommendation" not in text
+    assert "The expected gain is" not in text
+    assert "Facebook each gain" not in text and "stops at the cap" not in text
+    # the top box agrees with the Decision section
+    answer = next(line for line in text.splitlines() if line.startswith("- **Answer:**"))
+    assert "hold the current allocation" in answer.lower()
+    assert "move" not in answer.lower()
