@@ -11,14 +11,27 @@
 
 - **Who decides:** the head of marketing or the CFO.
 - **What they choose:** where to move the next euro of media budget.
+{{#if dd}}
 - **Answer:** {{answer_text}}
+{{#else}}
+- **Answer:** not available yet, because the budget shift recommendation has not run.
+{{#endif}}
+{{#if r}}
 - **Main caveat:** the numbers come from a public demo file, not Austrian client data, and the demo amounts are not euros.
 - **Chart:** the share of revenue each channel drives, below.
+{{#elif p}}
+- **Main caveat:** the numbers come from made-up data, not from Austrian client data.
+- **Chart:** how well the model recovers known response curves, below.
+{{#else}}
+- **Main caveat:** no results exist yet.
+{{#endif}}
 
+{{#if p_or_r}}
 ![{{headline_alt}}]({{headline_chart}})
 
 {{headline_caption}}
 
+{{#endif}}
 ## What it does
 
 A marketing mix model (MMM) splits weekly revenue into a baseline and the part that each marketing channel caused. This repository builds one for a single advertiser.
@@ -33,16 +46,31 @@ Incremental revenue is revenue that would not have arrived without the channel's
 2. The test on public demo data fits the model on a public file.
 3. The budget shift recommendation turns the fit into a decision under a breakeven rule.
 
+{{#if r}}
 **Which channels contributed?** On the public demo data, the share of revenue that each channel drives is:
 
 {{share_table}}
 
+{{#else}}
+**Which channels contributed?** Not available yet: the test on public demo data has not run.
+
+{{#endif}}
+{{#if p}}
 **How far off was the platform report?** On made-up data with a known truth, the platform report credits Paid Search with {{p_search_over}} percent more revenue than it really adds. It gives the offline channels nothing.
 
 **Does the model recover the truth?** On that made-up data, the estimated response curves cover the true curves on {{p_curve_cov}} percent of the observed spend range. A response curve shows the revenue that a channel adds at each weekly spend level. {{p_covered}} of {{p_total}} true parameters fall inside their 90 percent intervals.
 
+{{#else}}
+**How far off was the platform report? Does the model recover the truth?** Not available yet: the test on made-up data has not run.
+
+{{#endif}}
+{{#if dd}}
 **What does a reallocation gain?** On the public demo data, with the same total budget, the median gain is {{a_gain_median}} percent of current media contribution. The recommendation is in the Decision section. Units are not euros.
 
+{{#else}}
+**What does a reallocation gain?** Not available yet: the budget shift recommendation has not run.
+
+{{#endif}}
 The word "Austrian" names the setting the model is built for, not the data behind it. The setting has the Austrian public-holiday calendar as a control, weekly grain, and euro and contribution-margin logic for an Austrian advertiser. The model is validated on made-up data with a known truth and demonstrated on public data, pending a client swap-in. No Austrian client data was used.
 
 ## Start here
@@ -56,6 +84,7 @@ The word "Austrian" names the setting the model is built for, not the data behin
 
 ## Decision
 
+{{#if dd}}
 {{decision_lead}}
 
 The expected gain is a median {{a_gain_median}} percent of current media contribution. The 10th percentile is {{a_gain_p10}} percent. The probability of a loss is {{a_p_neg}} percent across {{a_draws}} posterior draws. Units are not euros, so the recommendation is stated in percent.
@@ -82,6 +111,10 @@ Reconsider this recommendation if the real contribution margin is lower than the
 
 Reconsider it also if a lift test measures an incremental effect outside the model's interval for that channel. A lift test is a geo experiment or a channel holdout.
 
+{{#else}}
+Not available yet: the budget shift recommendation has not run.
+
+{{#endif}}
 ## Results
 
 {{holdout_section}}
@@ -89,8 +122,10 @@ Reconsider it also if a lift test measures an incremental effect outside the mod
 ## Validation
 
 {{proof_section}}
+{{#if p}}
 
 The Results section shows holdout MAPE and interval coverage against two baselines. The code writes the sampler checks to `diagnostics.json` next to every fit.
+{{#endif}}
 
 ## Dashboard
 
@@ -119,8 +154,10 @@ The screenshots below show the HTML twin. Power BI screenshots follow after the 
 Weekly spend per channel and revenue. No Austrian client data was used.
 
 {{data_table}}
+{{#if r}}
 
 The amounts in the public demo data are not euros. Shares, ROAS ratios and the breakeven test stay meaningful. The amounts do not. A real-data swap-in is planned.
+{{#endif}}
 
 ## Known limits
 

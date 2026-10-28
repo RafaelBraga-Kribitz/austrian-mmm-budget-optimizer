@@ -148,3 +148,44 @@ def test_readme_has_no_forbidden_words_or_dashes(readme):
     assert not hits, hits
     assert "—" not in readme, "em dash in README"
     assert not re.search(r"[\U0001F300-\U0001FAFF☀-➿]", readme), "emoji in README"
+
+
+PARTIAL_STATES = {
+    "no_budget_shift_recommendation": ["layer_d/decision.json"],
+    "no_budget_shift_folder": ["layer_d"],
+    "no_made_up_data_diagnostics": ["layer_p/diagnostics.json"],
+    "no_made_up_data_folder": ["layer_p"],
+    "no_public_demo_data_folder": ["layer_r"],
+    "made_up_data_only": ["layer_r", "layer_d"],
+    "public_demo_data_only": ["layer_p", "layer_d"],
+    "nothing_ran": ["layer_p", "layer_r", "layer_d"],
+}
+
+
+@pytest.mark.parametrize("state", sorted(PARTIAL_STATES))
+def test_render_survives_missing_artifacts(state, tmp_path, monkeypatch):
+    """A test that has not run leaves its passages out; no placeholder stays unresolved."""
+    import shutil
+
+    reports = tmp_path / "reports"
+    shutil.copytree(REPORTS, reports)
+    for rel in PARTIAL_STATES[state]:
+        target = reports / rel
+        shutil.rmtree(target) if target.is_dir() else target.unlink()
+    render_readme = _load("render_readme")
+    monkeypatch.setattr(render_readme, "REPORTS", reports)
+    text = render_readme.render(render_readme.last_date())
+    left = re.findall(r"\{\{[#\w -]+\}\}", text)
+    assert not left, f"unresolved placeholder or condition marker: {left}"
+    assert text.startswith("# Austrian MMM and Budget Optimizer")
+    # no claim of a result that does not exist
+    if state in {"no_budget_shift_recommendation", "no_budget_shift_folder", "made_up_data_only",
+                 "public_demo_data_only", "nothing_ran"}:
+        assert "**Recommendation (public demo data" not in text
+        assert "What does a reallocation gain?** Not available yet" in text
+    if state in {"no_made_up_data_diagnostics", "no_made_up_data_folder",
+                 "public_demo_data_only", "nothing_ran"}:
+        assert "credits Paid Search with" not in text
+        assert "Not available yet: the test on made-up data has not run" in text
+    if state in {"no_public_demo_data_folder", "made_up_data_only", "nothing_ran"}:
+        assert "Which channels contributed?** Not available yet" in text

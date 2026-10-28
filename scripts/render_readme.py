@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -58,9 +58,15 @@ def read_json(path: Path) -> dict:
         return json.load(fh)
 
 
+def _has(folder: Path, *names: str) -> bool:
+    """A test counts as run only when every artifact the README reads from it exists."""
+    return all((folder / name).exists() for name in names)
+
+
 def layer_p_values() -> dict:
     d = REPORTS / "layer_p"
-    if not (d / "run_info.json").exists():
+    if not _has(d, "run_info.json", "diagnostics.json", "attribution_gap.csv", "holdout_metrics.csv",
+                "parameter_recovery.csv", "contribution_recovery.csv", "response_curve_metrics.csv"):
         return {}
     gap = pd.read_csv(d / "attribution_gap.csv")
     return {
@@ -77,7 +83,8 @@ def layer_p_values() -> dict:
 
 def layer_r_values() -> dict:
     d = REPORTS / "layer_r"
-    if not (d / "run_info.json").exists():
+    if not _has(d, "run_info.json", "diagnostics.json", "channel_contributions.csv",
+                "holdout_metrics.csv"):
         return {}
     return {
         "info": read_json(d / "run_info.json"),
@@ -89,7 +96,7 @@ def layer_r_values() -> dict:
 
 def layer_d_values() -> dict:
     d = REPORTS / "layer_d"
-    if not (d / "decision.json").exists():
+    if not _has(d, "decision.json", "reallocation_table.csv"):
         return {}
     return {
         "decision": read_json(d / "decision.json"),
@@ -305,7 +312,28 @@ def _fit_phrase(diag: dict, key: str) -> tuple[str, str, str]:
 
 
 def method_bullets(p: dict, r: dict) -> str:
-    diag = p["diag"] if p else (r["diag"] if r else {})
+    """Definitions of the modelling terms; sampler lines appear only when a fit has run."""
+    bullets = [
+        "- **Adstock:** geometric carry-over per channel. This week's spend keeps working in "
+        "the following weeks, with a decay rate that the model estimates.",
+        "- **Saturation:** a Hill curve per channel on the carried-over spend. It has a "
+        "half-saturation point and a slope, so returns diminish as spend grows.",
+        "- **Seasonality and controls:** a linear trend, two yearly Fourier pairs (sine and "
+        "cosine terms for the yearly pattern) and one control. The control is a "
+        "public-holiday week indicator on the made-up data and competitor sales on the "
+        "public demo data.",
+        "- **Priors:** a prior is the assumption that the model holds before it sees the "
+        "data. The priors here are weakly informative and identical across channels, on "
+        "scaled data. So the estimates come from the data, not from a prior that knows the "
+        "answer. The model docstring gives each prior and its reasoning.",
+    ]
+    rhat_bullet = (
+        "- **R-hat:** a check that compares the sampler chains with each other. A value "
+        "near 1 means the chains agree."
+    )
+    if not (p or r):
+        return "\n".join(bullets + [rhat_bullet])
+    diag = p["diag"] if p else r["diag"]
     fit = diag.get("fit", {})
     thresholds = diag.get("thresholds", {})
     sampler = v("m_sampler", fit.get("sampler", ""))
@@ -322,7 +350,8 @@ def method_bullets(p: dict, r: dict) -> str:
         fits.append(("public demo data", *_fit_phrase(r["diag"], "r")))
     if len({f[1:] for f in fits}) == 1:
         _, ta, draws, when = fits[0]
-        ran = f"Both reported fits ran at target acceptance {ta} with {draws} draws per chain, {when}."
+        ran = (f"{'Both reported fits' if len(fits) > 1 else 'The reported fit'} ran at target "
+               f"acceptance {ta} with {draws} draws per chain, {when}.")
     else:
         ran = "The reported fits ran: " + "; ".join(
             f"{label} at target acceptance {ta} with {draws} draws per chain, {when}"
@@ -340,25 +369,13 @@ def method_bullets(p: dict, r: dict) -> str:
         weeks = v("m_weeks_r", r["info"]["weeks"])
         splits.append(f"the first {train} of {weeks} weeks on the public demo data")
     return "\n".join(
-        [
-            "- **Adstock:** geometric carry-over per channel. This week's spend keeps working in "
-            "the following weeks, with a decay rate that the model estimates.",
-            "- **Saturation:** a Hill curve per channel on the carried-over spend. It has a "
-            "half-saturation point and a slope, so returns diminish as spend grows.",
-            "- **Seasonality and controls:** a linear trend, two yearly Fourier pairs (sine and "
-            "cosine terms for the yearly pattern) and one control. The control is a "
-            "public-holiday week indicator on the made-up data and competitor sales on the "
-            "public demo data.",
-            "- **Priors:** a prior is the assumption that the model holds before it sees the "
-            "data. The priors here are weakly informative and identical across channels, on "
-            "scaled data. So the estimates come from the data, not from a prior that knows the "
-            "answer. The model docstring gives each prior and its reasoning.",
+        bullets
+        + [
             f"- **Sampler:** the No-U-Turn Sampler (NUTS, run through {sampler}) with {chains} "
             f"chains and {tune} tuning draws. It starts at target acceptance {first_ta} with "
             f"{first_draws} draws per chain. When a gate fails, a recorded ladder raises the "
             f"target acceptance and then the draws. {ran}",
-            "- **R-hat:** a check that compares the sampler chains with each other. A value "
-            "near 1 means the chains agree.",
+            rhat_bullet,
             f"- **Diagnostics:** R-hat below {rhat}, effective sample size above {ess} and zero "
             f"divergences. The code writes them to `diagnostics.json` next to every fit.",
             f"- **Holdout protocol:** fit on {' and on '.join(splits)}. Forecast the rest with "
@@ -721,11 +738,53 @@ def status_line(p: dict, r: dict, dd: dict, run_date: date) -> str:
     )
 
 
+_IF_RE = re.compile(r"^\{\{#(if|elif|else|endif)(?: ([a-z_]+))?\}\}$")
+
+
+def apply_conditions(template: str, flags: dict[str, bool]) -> str:
+    """Keep or drop template passages by test state.
+
+    A marker sits alone on its line: {{#if name}}, {{#elif name}}, {{#else}}, {{#endif}}.
+    Passages may nest. The marker lines never reach the README.
+    """
+    out: list[str] = []
+    stack: list[dict] = []
+    for line in template.split("\n"):
+        m = _IF_RE.match(line.strip())
+        if not m:
+            if all(level["active"] for level in stack):
+                out.append(line)
+            continue
+        kind, name = m.groups()
+        if name is not None and name not in flags:
+            raise ValueError(f"readme_template.md uses an unknown condition: {name}")
+        if kind == "if":
+            stack.append({"taken": flags[name], "active": flags[name]})
+        elif not stack:
+            raise ValueError(f"readme_template.md has {{{{#{kind}}}}} without {{{{#if}}}}")
+        elif kind == "elif":
+            top = stack[-1]
+            top["active"] = not top["taken"] and flags[name]
+            top["taken"] = top["taken"] or flags[name]
+        elif kind == "else":
+            top = stack[-1]
+            top["active"], top["taken"] = not top["taken"], True
+        else:
+            stack.pop()
+    if stack:
+        raise ValueError("readme_template.md has an {{#if}} without {{#endif}}")
+    return "\n".join(out)
+
+
 def render(run_date: date) -> str:
     VALUES.clear()
     p, r, dd = layer_p_values(), layer_r_values(), layer_d_values()
     chart, alt = headline_values(p, r)
     template = (ROOT / "scripts" / "readme_template.md").read_text(encoding="utf-8")
+    # A passage that reports a result appears only when the artifacts for that result exist.
+    template = apply_conditions(
+        template, {"p": bool(p), "r": bool(r), "dd": bool(dd), "p_or_r": bool(p or r)}
+    )
     fills = {
         "headline_chart": chart,
         "headline_alt": alt,
@@ -740,13 +799,6 @@ def render(run_date: date) -> str:
     }
     if dd:
         fills.update(decision_blocks(dd, run_date))
-    else:
-        due = v("d_due", (run_date + timedelta(days=7)).isoformat())
-        fills.update({
-            "decision_lead": f"The budget shift recommendation: first results by {due}.",
-            "decision_table": "", "decision_verdict": "", "gate_paragraph": "",
-            "extra_budget_paragraph": "", "gain_caption": "", "answer_text": "not available yet.",
-        })
     text = template
     for key, value in fills.items():
         text = text.replace("{{" + key + "}}", value)
