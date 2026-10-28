@@ -65,8 +65,16 @@ def _has(folder: Path, *names: str) -> bool:
 
 def layer_p_values() -> dict:
     d = REPORTS / "layer_p"
-    if not _has(d, "run_info.json", "diagnostics.json", "attribution_gap.csv", "holdout_metrics.csv",
-                "parameter_recovery.csv", "contribution_recovery.csv", "response_curve_metrics.csv"):
+    if not _has(
+        d,
+        "run_info.json",
+        "diagnostics.json",
+        "attribution_gap.csv",
+        "holdout_metrics.csv",
+        "parameter_recovery.csv",
+        "contribution_recovery.csv",
+        "response_curve_metrics.csv",
+    ):
         return {}
     gap = pd.read_csv(d / "attribution_gap.csv")
     return {
@@ -179,7 +187,10 @@ def _up_phrase(ups: list[tuple[str, str]]) -> str:
 def answer_text(f: dict) -> str:
     """The answer in the top box: one short paragraph, read from the recommendation."""
     if not f["recommend"]:
-        return "hold the current allocation. No budget shift passes the decision rule. Units are not euros."
+        return (
+            "hold the current allocation. No budget shift passes the decision rule. "
+            "Units are not euros."
+        )
     move = []
     if f["downs"]:
         move.append(
@@ -220,7 +231,8 @@ def decision_lead(f: dict) -> str:
             each = " each" if len(ups) > 1 else ""
             verb_up = "gain" if len(ups) > 1 else "gains"
             sentences.append(
-                f"{and_join([nm(c) for c, _ in ups])}{each} {verb_up} {_unsigned(ups[0][1])} percent."
+                f"{and_join([nm(c) for c, _ in ups])}{each} {verb_up} "
+                f"{_unsigned(ups[0][1])} percent."
             )
         else:
             sentences.extend(f"{nm(c)} gains {_unsigned(d)} percent." for c, d in ups)
@@ -509,7 +521,8 @@ def proof_section(p: dict) -> str:
     over = gap[gap["gap_pp"] > 0].sort_values("gap_pp", ascending=False)
     under = gap[gap["platform_share"] == 0].sort_values("gap_pp")
     over_bits = and_join([
-        f"{row['channel']} by " + _unsigned(v("pg_over_" + row["channel"], signed(row["gap_pp"], 1)))
+        f"{row['channel']} by "
+        + _unsigned(v("pg_over_" + row["channel"], signed(row["gap_pp"], 1)))
         for _, row in over.iterrows()
     ])
     under_bits = and_join(
@@ -752,7 +765,7 @@ def decision_blocks(dd: dict, run_date: date) -> dict:
 
 
 def validation_sentence(p: dict, r: dict) -> str:
-    """What the README may say about validation and demonstration, given the evidence that exists."""
+    """What the README may say about validation and demonstration, given the evidence."""
     if p and r:
         return ("The model is validated on made-up data with a known truth and demonstrated on "
                 "public data, pending a client swap-in.")
@@ -924,7 +937,9 @@ def render(run_date: date) -> str:
     # numbers: every other placeholder is a value recorded in reports/readme_values.json
     missing = sorted(set(re.findall(r"\{\{([^{}]+)\}\}", text)) - VALUES.keys())
     if missing:
-        raise ValueError(f"readme_template.md has placeholders the renderer does not fill: {missing}")
+        raise ValueError(
+            f"readme_template.md has placeholders the renderer does not fill: {missing}"
+        )
     return re.sub(r"\{\{([^{}]+)\}\}", lambda m: VALUES[m.group(1)], text)
 
 
