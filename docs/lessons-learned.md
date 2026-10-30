@@ -6,12 +6,12 @@ Evaluation: [economic-evaluation.md](economic-evaluation.md).
 
 | Item | Expected (evaluation) | Actual | Evidence |
 |---|---|---|---|
-| Effort | 36 h central (18 to 54 h); charter budget 14 days | 36 h by the commit-day convention; session-span check 17 h; no time log | cost basis v1.1, hours table; `PROJECT_CHARTER.md` §5 |
-| Total cost | €3,175 central, with 3 years of maintenance and 12 h data intake | €1,944 build to date; maintenance and intake not incurred | same |
+| Effort | 220 h central (110 to 330 h), owner scope estimate; charter budget 14 days | Unmeasured: no time log. Commit days × 4 h gives 36 h; the session-span check gives 17 h | cost basis v1.2, hours table; `PROJECT_CHARTER.md` §5 |
+| Total cost | €14,256 central, with maintenance in years 2 and 3 | Unmeasured; maintenance and data intake not incurred | same |
 | Technical performance | A posterior that tells a profitable move from an adverse one | Known-truth test and public demo fit done. On demo data the same-budget shift gains a median 15.1 % of media contribution (10th percentile 8.8 %); no draw of 500 loses. Demo units are not euros | `reports/layer_d/decision.json` |
-| Adoption | Inside f = 0.35 | None: no client data has been processed | `docs/adr/ADR-009_spec-sections-not-built.md` |
+| Adoption | Inside the scenario probabilities | None: no client data has been processed | `docs/adr/ADR-009_spec-sections-not-built.md` |
 | Operational outcome | Budget moved by an advertiser | Unmeasured | none |
-| Attributable value | €6.9k gross expected over 3 years | Unmeasured | none |
+| Attributable value | €12.3k gross expected over 3 years | Unmeasured | none |
 
 ## Lessons
 
