@@ -51,6 +51,10 @@ Incremental revenue is revenue that would not have arrived without the channel's
 
 The word "Austrian" names the setting the model is built for, not the data behind it. The setting has the Austrian public-holiday calendar as a control, weekly grain, and euro and contribution-margin logic for an Austrian advertiser. The model is validated on made-up data with a known truth and demonstrated on public data, pending a client swap-in. No Austrian client data was used.
 
+## Why this project exists
+
+Platform dashboards over-credit their own channels, so an advertiser cannot see where the next euro of media should go. This project was meant to tell a head of marketing how to split the same budget. The pre-build evaluation expected about seven thousand euros of decision value over three yearly splits, against a central cost of about three thousand two hundred euros. That is about twice the cost, so it fails the four-times financial hurdle, and the recommendation was to defer. Observed result: Not yet measured; no advertiser data has arrived. Details: [economic evaluation](docs/economic-evaluation.md).
+
 ## Start here
 
 | Audience | Start here |
