@@ -53,7 +53,7 @@ The word "Austrian" names the setting the model is built for, not the data behin
 
 ## Why this project exists
 
-Platform dashboards over-credit their own channels, so an advertiser cannot see where the next euro of media should go. This project was meant to tell a head of marketing how to split the same budget. The pre-build evaluation expected about twelve thousand euros of decision value over three yearly splits, against a central cost of about fourteen thousand euros. That is below the cost, so it fails the four-times financial hurdle, and the recommendation was to defer. Observed result: Not yet measured; no advertiser data has arrived. Details: [economic evaluation](docs/economic-evaluation.md).
+Platform dashboards over-credit their own channels, so an advertiser cannot see where the next euro of media should go. This project was meant to tell the head of marketing at a large Austrian advertiser how to split the same budget, with the model built in-house. The pre-build evaluation expected about eighty thousand euros of decision value over three yearly splits, against a central cost of about fourteen thousand euros. That is almost six times the cost, so it passes the four-times financial hurdle, conditional on its assumptions. Observed result: Not yet measured. Details: [economic evaluation](docs/economic-evaluation.md).
 
 ## Start here
 
