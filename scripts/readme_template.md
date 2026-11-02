@@ -6,9 +6,9 @@
 ![Austrian MMM and Budget Optimizer: Bayesian marketing-mix model with a breakeven-gated budget reallocation rule.](docs/assets/hero.png)
 {{#endif}}
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-5A5C61?labelColor=26282C)](LICENSE)
+[![Licence: MIT](https://img.shields.io/badge/license-MIT-5A5C61?labelColor=26282C)](LICENSE)
 [![Python](https://img.shields.io/badge/python-uv-5A5C61?labelColor=26282C)](pyproject.toml)
-[![CI](https://img.shields.io/github/check-runs/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/main?label=CI&color=5A5C61&labelColor=26282C)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions)
+[![CI](https://img.shields.io/github/check-runs/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/main?label=CI&colour=5A5C61&labelColor=26282C)](https://github.com/RafaelBraga-Kribitz/austrian-mmm-budget-optimizer/actions)
 [![Status: Complete](https://img.shields.io/badge/status-Complete-5A5C61?labelColor=26282C)](#status)
 
 **Status:** Complete
@@ -269,7 +269,7 @@ Folder names, run commands and chart footers use short names. This README uses t
 
 {{status_line}}
 
-## License
+## Licence
 
 MIT License. See [LICENSE](LICENSE).
 
