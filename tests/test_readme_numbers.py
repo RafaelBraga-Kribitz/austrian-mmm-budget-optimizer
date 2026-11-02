@@ -195,7 +195,11 @@ def test_render_survives_missing_artifacts(state, tmp_path, monkeypatch):
     text = _render_with(tmp_path, monkeypatch, remove=PARTIAL_STATES[state])
     left = re.findall(r"\{\{[#\w -]+\}\}", text)
     assert not left, f"unresolved placeholder or condition marker: {left}"
-    assert text.startswith("# Austrian MMM and Budget Optimizer")
+    assert text.splitlines()[:3] == [
+        "[🇧🇷 PT-BR](README.pt-BR.md) · [🇬🇧 EN-UK](README.md) · [🇦🇹 DE-AT](README.de-AT.md)",
+        "",
+        "# Austrian MMM and Budget Optimizer",
+    ]
     # no claim of a result that does not exist
     if state in NO_BUDGET_SHIFT:
         assert "**Recommendation (" not in text
