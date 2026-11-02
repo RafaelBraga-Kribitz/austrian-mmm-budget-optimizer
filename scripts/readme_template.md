@@ -1,3 +1,5 @@
+[🇧🇷 PT-BR](README.pt-BR.md) · [🇬🇧 EN-UK](README.md) · [🇦🇹 DE-AT](README.de-AT.md)
+
 # Austrian MMM and Budget Optimizer
 
 {{#if p_and_r}}
