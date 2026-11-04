@@ -1,0 +1,61 @@
+{
+  "breakeven_roas": 2.5,
+  "contribution_margin": 0.4,
+  "decision_rule": "Shift budget toward a channel only while the lower bound of its marginal ROAS 90 percent interval stays above the breakeven ROAS, and only if the 10th percentile of the reallocation gain is positive.",
+  "elapsed_seconds": 3.6,
+  "extra_budget_per_year": 200000.0,
+  "extra_budget_scenario": "plus_extra_budget",
+  "plus_25_percent": {
+    "breakeven_roas": 2.5,
+    "gain_median": 65745.70508763159,
+    "gain_p10": 43721.421190744826,
+    "gain_p90": 89593.32716379802,
+    "gain_pct_of_current_contribution_median": 14.30805293959513,
+    "gain_pct_of_current_contribution_p10": 7.0389615024842564,
+    "held_channels": [
+      "Print",
+      "Facebook",
+      "Search",
+      "Out-of-home"
+    ],
+    "probability_gain_negative": 0.0,
+    "recommend": true,
+    "scenario": "plus_25_percent",
+    "total_budget": 87314.29394419413
+  },
+  "plus_extra_budget": {
+    "breakeven_roas": 2.5,
+    "gain_median": 47850.20975396552,
+    "gain_p10": 30706.346242499993,
+    "gain_p90": 65723.35362853577,
+    "gain_pct_of_current_contribution_median": 10.226536537177056,
+    "gain_pct_of_current_contribution_p10": 4.9805348887720005,
+    "held_channels": [
+      "Print",
+      "Facebook",
+      "Search"
+    ],
+    "probability_gain_negative": 0.0,
+    "recommend": true,
+    "scenario": "plus_extra_budget",
+    "total_budget": 73697.58900150914
+  },
+  "posterior_draws_used": 500,
+  "same_total": {
+    "breakeven_roas": 2.5,
+    "gain_median": 41104.60228887838,
+    "gain_p10": 24405.596813025517,
+    "gain_p90": 57270.6778416329,
+    "gain_pct_of_current_contribution_median": 8.678790981690934,
+    "gain_pct_of_current_contribution_p10": 3.9779292196359157,
+    "held_channels": [
+      "Print",
+      "Facebook",
+      "Search"
+    ],
+    "probability_gain_negative": 0.0,
+    "recommend": true,
+    "scenario": "same_total",
+    "total_budget": 69851.4351553553
+  }
+}
