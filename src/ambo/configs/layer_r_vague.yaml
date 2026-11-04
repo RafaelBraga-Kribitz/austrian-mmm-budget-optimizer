@@ -1,0 +1,85 @@
+# Layer R with deliberately vague priors: how much of the answer is the data?
+#
+# This file is layer_r.yaml with one block changed. Every prior is widened until it
+# says almost nothing, so that comparing the two fits answers a question the headline
+# result cannot answer on its own: which conclusions come from the data, and which
+# come from the priors that were placed on it.
+#
+# Where the two fits agree, the data is doing the work and the number can be reported
+# as a finding. Where they disagree, the prior is doing the work, and the number is a
+# judgement wearing a posterior's clothes. Both outcomes are worth knowing and only
+# one of them is usually published.
+#
+# The widened priors are not better. They are worse, on purpose: a uniform carry-over
+# prior allows an effect that never fades, which is not a media effect anyone has
+# measured. The point is not to prefer this fit but to measure the distance between
+# the two.
+
+layer: layer_r_vague
+title: "Layer R, public demo data, deliberately vague priors"
+output_dir: reports/layer_r_vague
+data_dir: data/layer_r
+
+source:
+  file: dt_simulated_weekly.csv
+  date_column: DATE
+  revenue_column: revenue
+  spend_columns: {tv_S: "TV", ooh_S: "Out-of-home", print_S: "Print", facebook_S: "Facebook", search_S: "Search"}
+  control_column: competitor_sales_B
+  control_scale: mean       # divided by its mean, so the coefficient reads per average level
+
+channels: ["TV", "Out-of-home", "Print", "Facebook", "Search"]
+control:
+  name: "Competitor sales (index)"
+  column: competitor_sales
+
+model:
+  adstock_length: 13
+  fourier_order: 2
+  fourier_period: 52.18
+
+# Each line below is the widened twin of the one in layer_r.yaml.
+priors:
+  decay: {dist: beta, a: 1.0, b: 1.0}              # uniform on 0 to 1, no view at all
+  half_saturation: {dist: gamma, shape: 1.0, rate: 0.3}  # mean 3.3 channel-weeks, very long tail
+  slope: {dist: lognormal, mu: 0.0, sigma: 1.0}    # twice the spread, allows near-step curves
+  effect: {dist: halfnormal, sigma: 1.0}           # a channel may carry all of an average week
+  intercept: {dist: normal, mu: 1.0, sigma: 2.0}
+  trend: {dist: normal, mu: 0.0, sigma: 1.0}
+  seasonality: {dist: normal, mu: 0.0, sigma: 1.0}
+  control: {dist: normal, mu: 0.0, sigma: 1.0}
+  noise: {dist: halfnormal, sigma: 0.5}
+
+sampling:
+  sampler: nutpie
+  chains: 2
+  tune: 1000
+  draws: 1000
+  target_accept: 0.9
+  seed: 42
+  max_minutes: 20
+
+diagnostics:
+  rhat_max: 1.01
+  ess_min: 400
+  divergences_max: 0
+
+holdout:
+  train_weeks: 182        # 208 weeks in the file; the last 26 are held out
+  ridge_alphas: [0.1, 1.0, 10.0, 100.0]
+
+response_curves:
+  grid_points: 41
+  max_multiple_of_observed: 1.5   # curves stop at 1.5x the largest observed weekly spend
+
+# Layer D reads these. The contribution margin turns revenue into gross profit;
+# breakeven ROAS is 1 / margin: a channel only pays back if one unit of spend
+# returns more than that in revenue. The margin is an assumption, stated here so
+# it can be changed in one place. Money units are the dataset's.
+decision:
+  contribution_margin: 0.40
+  bound_share: 0.50             # each channel may move at most 50 percent of its current spend
+  scenarios: {same_total: 1.0, plus_25_percent: 1.25}
+  extra_budget_per_year: 200000 # the "next 200k" question, spread over 52 weeks
+  posterior_draws: 500
+  per_draw_optimisations: 200
