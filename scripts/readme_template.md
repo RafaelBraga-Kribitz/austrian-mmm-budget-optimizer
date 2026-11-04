@@ -133,6 +133,8 @@ Reconsider this recommendation if the real contribution margin is lower than the
 
 Reconsider it also if a lift test measures an incremental effect outside the model's interval for that channel. A lift test is a geo experiment or a channel holdout.
 
+**Prior sensitivity.** The recommendation stays TV and Facebook, with a caveat. Under vague priors in the published-fit setup, the rule holds Facebook at current spend (lower bound 0.11, breakeven 2.50) and funds TV (lower bound 4.27). The median gain then falls to 8.7 percent. An exact rerun under the reported priors gives 14.7 percent, not 15.1 percent, because the sampler did not reproduce the draw set exactly. See [the prior sensitivity report](reports/PRIOR_SENSITIVITY_PUBLISHED_FIT_2026-11-04.md).
+
 {{#endif}}
 {{#else}}
 Not available yet: the budget shift recommendation has not run.

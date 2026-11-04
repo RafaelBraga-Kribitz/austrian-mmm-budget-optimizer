@@ -59,7 +59,6 @@ uv run python -m ambo.run layer_r --out reports/rerun/layer_r_reported
 uv run python -m ambo.run layer_d --data reports/rerun/layer_r_reported --out reports/rerun/layer_d_reported
 uv run python -m ambo.run layer_r --config src/ambo/configs/layer_r_vague.yaml
 uv run python -m ambo.run layer_d --config src/ambo/configs/layer_r_vague.yaml --data reports/layer_r_vague --out reports/layer_d_vague
-uv run python scripts/prior_sensitivity_table.py
 ```
 
 Sampler: nutpie, 2 chains, tune 1000, draws 1000, target_accept 0.9, seed 42, with the
@@ -186,9 +185,11 @@ fit. This is a fit-to-fit comparison, with the Monte Carlo spread noted above.
 - `reports/layer_r_vague/`, `reports/layer_d_vague/`: vague-prior fit and optimiser run.
 - `reports/rerun/layer_r_reported/`, `reports/rerun/layer_d_reported/`: reported-prior rerun.
 - `reports/rerun/layer_d_committed_fit/`: Layer D on the committed draws (reproduction check).
-- `src/ambo/configs/layer_r_vague.yaml`, `scripts/prior_sensitivity_table.py`.
+- `src/ambo/configs/layer_r_vague.yaml`.
 
 ## Run times
 
 Reported-prior rerun 542 s (fit and holdout, all ladder attempts). Vague-prior run
 904 s. The two ran in parallel on 16 cores. Layer D took 4 s each.
+
+The comparison tables in this page were assembled from the run folders above by a helper script. That script is not committed to this repository.
